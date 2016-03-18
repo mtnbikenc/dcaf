@@ -1,0 +1,11 @@
+bind_ip = {{ mongodb_bind_host }},127.0.0.1
+port = {{ mongodb_port }}
+fork=true
+quiet = false
+pidfilepath = /var/run/mongodb/mongod.pid
+logpath = /var/log/mongodb/mongodb.log
+dbpath =/var/lib/mongodb
+journal = true
+logappend = true
+replSet =ceilometer
+nohttpinterface = true

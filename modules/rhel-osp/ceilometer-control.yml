@@ -1,0 +1,49 @@
+---
+- name: gather info
+  hosts: mongodb
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: ceilometer-control
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: ceilometer-control
+  tags: cinder
+
+- name: install ceilometer-control rules
+  hosts:
+    - ceilometer-control
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: iptable rules for ceilometer-control
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 5
+      with_items:
+        - { port: 8777, protocol: tcp, comment: "ceilometer incoming" }
+        - { port: 26379, protocol: tcp, comment: "redis incoming" }
+        - { port: 4952, protocol: udp, comment: "ceilometer" }
+      tags:
+        -  iptables
+        -  cinder
+
+- name: install mongodb
+  hosts: ceilometer-control
+  roles:
+    - { role: mongodb, when: "ceilometer_db == 'mongodb'" }
+
+
+- name: install ceilometer-control
+  hosts: ceilometer-control
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - ceilometer-control
+  tags: ceilometer
+
+

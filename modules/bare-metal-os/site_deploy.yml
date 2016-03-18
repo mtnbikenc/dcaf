@@ -1,0 +1,211 @@
+---
+
+- name: Configure Hanlon with RHEL image, model and policies
+  hosts: auto-deploy-node
+  max_fail_percentage: 0
+  gather_facts: False
+
+  tasks:
+    - include_vars: vars/hanlon.yml
+
+    - name: Add a RHEL image to Hanlon
+      hanlon_image:
+        base_url: "{{ hanlon_base_url }}"
+        type: os
+        path: "{{ hnl_rhel_path }}"
+        name: "{{ hnl_rhel_name }}"
+        version: "{{ hnl_rhel_version }}"
+        state: present
+      register: rhel_image
+
+    - name: Add a RHEL Model to Hanlon
+      hanlon_model:
+        base_url: "{{ hanlon_base_url }}"
+        template: redhat_7
+        label: "{{ hnl_rhel_label }}"
+        image_uuid: "{{ rhel_image.uuid }}"
+        hostname_prefix: "{{ hnl_rhel_hostname_prefix }}"
+        domainname: "{{ hnl_rhel_domainname }}"
+        root_password: "{{ hnl_rhel_password }}"
+        partition_scheme: "{{ hnl_rhel_partition_scheme }}"
+        state: present
+      register: rhel_model
+
+    - name: Create policy for node using SMBIOS UUID
+      hanlon_policy:
+        base_url: "{{ hanlon_base_url }}"
+        policy_template: linux_deploy
+        label: "{{ hostvars[item].inventory_hostname }}"
+        model_uuid: "{{ rhel_model.uuid }}"
+        tags: "{{ hostvars[item].smbios_uuid }}"
+        enabled: true
+        state: present
+      with_items: "{{ groups['deploy'] }}"
+
+# This starts the install for all nodes in the 'deploy' group but will start them a set at a time based on the
+# 'serial' setting below.  The reboot of nodes is being throttled to limit the number of nodes checking in to Hanlon
+# and booting at the same time. The reboots are spaced out by waiting for the first set of nodes to check in and
+# start the OS install before starting the next set.
+- name: Initiate Node Installs
+  hosts: deploy
+  max_fail_percentage: 0
+  gather_facts: False
+  serial: 10
+
+  tasks:
+    - include_vars: vars/hanlon.yml
+
+    # The active model is being polled for the node based on SMBIOS UUID in order to conditionally run tasks below.
+    - name: Check status of node active model
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+      register: active_model
+
+    # Reboot the node when the active_model label does not match the model added above
+    # The IPMI command fails in some instances, therefore the task will retry the default number of times.
+    - name: Initiate reboot of node
+      local_action:
+        module: hanlon_node
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+        username: "{{ ipmi_username }}"
+        password: "{{ ipmi_password }}"
+        power_state: "reset"
+        ipmi_options: '{"driver": "lan20"}'
+      register: node_reboot
+      until: node_reboot.changed | default(false)
+      when: active_model.model_label != "{{ hnl_rhel_label }}"
+
+    # If the node was rebooted, remove the current active model
+    - name: Remove current Active Model for node
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+        state: absent
+      when: node_reboot.changed
+
+    # If the node was rebooted, wait for the node to start OS install before continuing. After this task is completed, a
+    # new set of installs will be started if there are more than the 'serial' quantity defined above.
+    - name: Wait for nodes to start installation
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+      register: active_model
+      until: not(active_model.current_state is none)
+      retries: 20
+      delay: 30
+      when: node_reboot.changed
+
+- name: Confirm node install complete
+  hosts: deploy
+  max_fail_percentage: 0
+  gather_facts: False
+
+  tasks:
+    - include_vars: vars/hanlon.yml
+
+    # At this point all nodes should be in the install process or completed.  This waits for installs to complete by
+    # checking each active model for 'complete' and will retry for 30 minutes.
+    - name: Wait for nodes to complete installation
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+      register: active_model
+      until: not(active_model.current_state is none) and (active_model.current_state | search("complete"))
+      retries: 60
+      delay: 30
+
+    # With all nodes complete, the ansible_ssh_host var needs to be set appropriately to access the systems for further
+    # configuration. The active_model.node_ip is updated later in this script if the IP of the node was changed, so the
+    # IP will be valid on an initial build using DHCP or if this playbook was run later a second time.
+    - name: Set correct IP Address to run tasks
+      set_fact:
+        ansible_ssh_host: "{{ active_model.node_ip }}"
+
+- name: Post-install Configuration
+  hosts: deploy
+  max_fail_percentage: 0
+  gather_facts: True
+
+  vars:
+    ansible_ssh_pass: "{{ site_password }}"
+
+  roles:
+    - { role: partition, when: partition_additional_disks }
+
+  tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Retrieve deployment node public key
+      shell: cat /root/.ssh/id_rsa.pub
+      register: pub_key
+      delegate_to: auto-deploy-node
+      changed_when: False
+
+    - name: Add deployment node SSH key to node authorized users
+      authorized_key:
+        user: root
+        key: "{{ pub_key.stdout }}"
+
+    - name: Reconfigure node with static IP address
+      template:
+        src: templates/ifcfg_default.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-{{ansible_default_ipv4.interface}}
+      register: ip_config
+
+    - name: Restart Networking
+      shell: sleep 2 && nmcli connection reload && systemctl restart network
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: ip_config.changed
+
+    - name: Wait for IP reconfig
+      local_action:
+        module: wait_for
+        host: "{{ pxe_ip_address }}"
+        port: 22
+        state: started
+      when: ip_config.changed
+
+    - include_vars: vars/hanlon.yml
+
+    # If the IP address has changed, update the Hanlon active model with the new IP address after the node has been
+    # confirmed to be back on the network.
+    - name: Update Active Model with new IP address
+      local_action:
+        module: uri
+        url: "{{hanlon_base_url}}policy/callback/{{active_model.uuid}}/postinstall/send_ips/{{pxe_ip_address}}"
+      when: ip_config.changed
+
+    # Up to this point the ansible_ssh_host var could be either a DHCP IP or the PXE IP.  After the reconfig above, we
+    # need to ensure the PXE IP is used for the next task.
+    - name: Set facts for the next task
+      set_fact:
+        ansible_ssh_host: "{{ pxe_ip_address }}"
+      when: ip_config.changed
+
+    - name: Disable Network Manager
+      service:
+        name: NetworkManager
+        state: stopped
+        enabled: no
+
+#- name: Create network bonds
+#  hosts: deploy
+#  max_fail_percentage: 0
+#  gather_facts: True
+#
+#  vars:
+#    ansible_ssh_pass: "{{ site_password }}"
+#
+#  roles:
+#    - { role: bonds, device: "{{ bond_device }}", when: configure_network_bond }
+#    - { role: iface, device: "{{ vlan_interface }}", when: configure_vlan_interfaces }

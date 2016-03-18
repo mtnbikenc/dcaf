@@ -1,0 +1,55 @@
+- name: base RHEL configuration
+  hosts: sql
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: sql
+  tags: galera
+
+- name: install firewall rules
+  hosts:
+    - sql
+  max_fail_percentage: 0
+  tasks:
+    - name: add firewall rules for galera/rsync
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 2 
+      with_items:
+        - { port: 4444, protocol: tcp, comment: "mariadb sql incomming 4444" }
+        - { port: 4567, protocol: tcp, comment: "mariadb sql incomming 4567" }
+        - { port: 4568, protocol: tcp, comment: "mariadb sql incomming 4568" }
+        - { port: 9300, protocol: tcp, comment: "mariadb sql incomming 9300" }
+        - { port: 9200, protocol: tcp, comment: "mariadb sql incomming 9200" }
+        - { port: 873, protocol: tcp, comment: "rsync replication traffic" }
+      tags:
+        - iptables
+        - galera
+
+- name: install firewall rules
+  hosts:
+    - sql
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: add firewall rules for galera/rsync
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 1
+      with_items:
+        - { port: 3306, protocol: tcp, comment: "mariadb sql incomming 3306" }
+      tags:
+        - iptables
+        - galera
+
+- name: install mariadb
+  hosts: sql
+  max_fail_percentage: 0
+  roles:
+    - galera
+  tags: galera

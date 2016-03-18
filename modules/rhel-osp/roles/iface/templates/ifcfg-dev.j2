@@ -1,0 +1,7 @@
+DEVICE={{ device }}
+{% for k,v in params|dictsort %}
+  {{ k | upper }}={{ v }}
+{% endfor %}
+{% if mtu is defined %}
+  MTU={{mtu}}
+{% endif %}

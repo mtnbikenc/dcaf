@@ -1,0 +1,158 @@
+---
+#- name: turn off network manager
+#  hosts: haproxy
+#  tasks:
+#    - name: turn off NM
+#      service:
+#        name: NetworkManager
+#        state: stopped
+#        enabled: no
+#    - name: turn on network service
+#      service:
+#        name: network
+#        state: started
+#        enabled: yes
+
+
+- name: haproxy Interface Configruation
+  hosts: haproxy
+  max_fail_percentage: 0
+  roles:
+    - role: iface
+      device: "eth1"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ control_if.ipaddr }}"
+        netmask: "{{ control_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+
+- name: controller Interface Configruation
+  hosts: controller
+  max_fail_percentage: 0
+  roles:
+    - role: iface
+      device: "eth1"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ control_if.ipaddr }}"
+        netmask: "{{ control_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+
+- name: neutron network node Interface Configruation
+  hosts: neutron-network-node
+  max_fail_percentage: 0
+  roles:
+    - role: iface
+      device: "eth1"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ control_if.ipaddr }}"
+        netmask: "{{ control_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+    - role: iface
+      device: "eth2"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ datanet_if.ipaddr }}"
+        netmask: "{{ datanet_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+
+
+
+- name: swift-storage node Interface Configruation
+  hosts: swift-storage
+  max_fail_percentage: 0
+  roles:
+    - role: iface
+      device: "eth1"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ control_if.ipaddr }}"
+        netmask: "{{ control_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+    - role: iface
+      device: "eth2"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ swift_rsync_if.ipaddr }}"
+        netmask: "{{ swift_rsync_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+
+- name: scaleio node Interface Configruation
+  hosts: scaleio-mgmt
+  max_fail_percentage: 0
+  roles:
+    - role: iface
+      device: "eth1"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{  control_if.ipaddr }}"
+        netmask: "{{ control_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+    - role: iface
+      device: "eth2"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ scaleio_if.ipaddr }}"
+        netmask: "{{ scaleio_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+
+- name: compute node Interface Configruation
+  hosts: compute 
+  max_fail_percentage: 0
+  roles:
+    - role: iface
+      device: "eth1"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{  control_if.ipaddr }}"
+        netmask: "{{ control_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+    - role: iface
+      device: "eth2"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ datanet_if.ipaddr }}"
+        netmask: "{{ datanet_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+    - role: iface
+      device: "eth3"
+      params:
+        type: Ethernet
+        bootproto: static
+        ipaddr: "{{ scaleio_if.ipaddr }}"
+        netmask: "{{ scaleio_if.netmask }}"
+        onboot: '"yes"'
+        peerdns: '"no"'
+        nm_controlled: '"no"'
+

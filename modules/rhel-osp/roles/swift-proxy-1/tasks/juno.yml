@@ -1,0 +1,74 @@
+---
+- name: install swift packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-swift-proxy
+    - openstack-swift
+    - openstack-utils
+    - python-swiftclient
+    - openstack-swift-container
+  tags: swift
+
+- name: configure the proxy-server.conf file
+  ini_file:
+    dest: /etc/swift/proxy-server.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "bind_ip", value: "{{internal_ipaddr}}"}
+    - { section: "filter:authtoken", option: "auth_uri", value: "{{ keystone_public_protocol  }}://{{ vip_keystone_pub }}:{{ keystone_public_port  }}/"}
+    - { section: "filter:authtoken", option: "identity_uri", value: "{{ keystone_public_protocol  }}://{{ vip_keystone_pub }}:{{ keystone_public_port  }}/"}
+    - { section: "app:proxy-server", option: "node_timeout", value: "30"}
+    - { section: "filter:authtoken", option: "cache", value: "swift.cache"}
+    - { section: "filter:authtoken", option: "include_service_catalog", value: False}
+    - { section: "filter:authtoken", option: "delay_auth_decision", value: "True" }
+    - { section: "filter:authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "filter:authtoken", option: "admin_user", value: "swift"}
+    - { section: "filter:authtoken", option: "admin_password", value: "{{ swift_pass }}"}
+    - { section: "filter:cache", option: "memcache_servers", value: "{{ swift_memcached_servers}}"}
+  tags: swift
+
+- name: remove auth_host auth_port and auth_protocol from proxy-server.conf
+  lineinfile:
+    dest: /etc/swift/proxy-server.conf
+    backup: yes
+    state: absent
+    regexp: "{{item}}"
+  with_items:
+    - "auth_host"
+    - "auth_port"
+    - "auth_protocol"
+  tags: swift
+
+- name: configure the object-expirer.conf file
+  ini_file:
+    dest: /etc/swift/object-expirer.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "object-expirer", option: "concurrency", value: "100"}
+    - { section: "filter:cache", option: "memcache_servers", value: "{{ swift_memcached_servers }}"}
+  tags: swift
+
+- name: create swift.conf
+  template:
+    src: swift.conf.j2
+    dest: /etc/swift/swift.conf
+  tags: swift
+
+#todo check for rings
+
+- name: create the rings
+  command: swift-ring-builder {{ item }} create {{ part_power }} {{replica_count  }} {{min_part_hours  }}
+  with_items:
+    - "/etc/swift/object.builder"
+    - "/etc/swift/account.builder"
+    - "/etc/swift/container.builder"
+  tags: swift
+  run_once: true

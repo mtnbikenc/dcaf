@@ -1,0 +1,185 @@
+---
+- name: install ceilometer packages
+  yum: 
+    pkg: '{{ item }}'
+    state: present
+  with_items:
+    - openstack-ceilometer-common
+    - python-ceilometer
+    - python-ceilometerclient
+    - openstack-ceilometer-api
+    - openstack-ceilometer-central
+    - openstack-ceilometer-collector
+    - openstack-ceilometer-alarm
+  tags: ceilometer
+
+- name: Update ceilometer config file
+  ini_file:
+    dest: /etc/ceilometer/ceilometer.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "memcached_servers", value: "{{ ceilometer_memcached_servers }}"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "keystone_authtoken", option: "auth_host", value: "{{ keystone_admin_vip  }}"}
+    - { section: "keystone_authtoken", option: "auth_port", value: "{{ keystone_admin_port  }}"}
+    - { section: "keystone_authtoken", option: "auth_protocol", value: "{{ keystone_admin_protocol  }}"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "ceilometer"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ ceilometer_pass }}"}
+    - { section: "publisher", option: "metering_secret", value: "{{ ceilometer_metering_secret }}"}
+    - { section: "service_credentials", option: "os_auth_url", value: "{{ keystone_admin_protocol }}://{{ keystone_admin_vip }}:{{ keystone_admin_port }}/v2.0" }
+    - { section: "service_credentials", option: "os_username", value: "ceilometer"}
+    - { section: "service_credentials", option: "os_password", value: "{{ ceilometer_pass }}"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "database", option: "time_to_live", value: "{{ ceilometer_time_to_live | default(432000) }}"}
+    - { section: "api", option: "host", value: "{{ ceilometer_bind_host }}"}
+  tags: ceilometer
+
+- name: Update ceilometer config file for mongodb
+  ini_file:
+    dest: /etc/ceilometer/ceilometer.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "database", option: "connection", value: "mongodb://{{ mongodb_servers }}/ceilometer?replicaSet=ceilometer"}
+  when: ceilometer_db == 'mongodb'
+
+- name: create databases
+  mysql_db:
+    name: ceilometer
+    state: present
+  run_once: true
+  when: ceilometer_db == 'mariadb'
+  tags:
+    - mysql
+    - ceilometer
+
+- name: create keystone database users
+  mysql_user:
+    name: "{{ item.name }}"
+    host: "%"
+    password: "{{ item.password }}"
+    priv: "{{ item.db }}.*:{{ item.priv }} "
+    state: present
+  with_items:
+    - { name: ceilometer, password: "{{ ceilometer_db_pass }}", db: '*', priv: 'ALL,GRANT' }
+  run_once: true
+  when: ceilometer_db == 'mariadb'
+  tags:
+    - mysql
+    - ceilometer
+
+
+- name: Update ceilometer config file for mysql
+  ini_file:
+    dest: /etc/ceilometer/ceilometer.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "database", option: "connection", value: "mysql://ceilometer:{{ ceilometer_db_pass }}@{{ lb_db_vip }}/ceilometer"}
+  when: ceilometer_db == 'mariadb'
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker] disable ceilometer services"
+#  service:
+#    name: "{{ item }}"
+#    enabled: no
+#  with_items:
+#    - openstack-ceilometer-central
+#    - openstack-ceilometer-collector
+#    - openstack-ceilometer-api
+#    - openstack-ceilometer-alarm-evaluator
+#    - openstack-ceilometer-alarm-notifier
+#  tags: ceilometer
+#  when: use_pacemaker
+
+- name: "enable ceilometer services"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  with_items:
+    - openstack-ceilometer-central
+    - openstack-ceilometer-collector
+    - openstack-ceilometer-api
+    - openstack-ceilometer-alarm-evaluator
+    - openstack-ceilometer-alarm-notifier
+    - openstack-ceilometer-notification
+  tags: ceilometer
+  when: not use_pacemaker
+
+# commenting out PCS tasks
+#- name: "[pacemaker] disable ceilometer notification service"
+#  service:
+#    name: openstack-ceilometer-notification
+#    enabled: no
+#  tags: ceilometer
+#  when: use_pacemaker
+#
+#- name: create pacemaker resource for ceilometer-central
+#  pcs_resource: command=create name=ceilometer-central type=systemd:openstack-ceilometer-central
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  when: use_pacemaker
+#  tags: ceilometer
+#
+#- name: "[pacemaker] create pacemaker resources for ceilometer control services"
+#  pcs_resource: command=create name=ceilometer-{{ item }} type=systemd:openstack-ceilometer-{{ item }} clone=yes interleave=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  with_items:
+#    - collector
+#    - api
+#    - alarm-evaluator
+#    - alarm-notifier
+#    - notification
+#  when: use_pacemaker
+#  tags: ceilometer
+#
+#- name: "[pacemaker] create ceilometer-delay resource"
+#  pcs_resource: command=create name=ceilometer-delay type=Delay clone=yes interleave=yes
+#  args:
+#    options:
+#      startdelay: 10
+#  run_once: true
+#  tags: ceilometer
+#  when: use_pacemaker
+#
+#- name: "[pacemaker] create pacemaker constraints for ceilometer"
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-ceilometer-central-ceilometer-collector-clone-mandatory, cmd: "order start ceilometer-central then ceilometer-collector-clone" }
+#    - { id: order-ceilometer-collector-clone-ceilometer-api-clone-mandatory, cmd: "order start ceilometer-collector-clone then ceilometer-api-clone" }
+#    - { id: colocation-ceilometer-api-clone-ceilometer-collector-clone, cmd: "colocation add ceilometer-api-clone with ceilometer-collector-clone" }
+#    - { id: order-ceilometer-api-clone-ceilometer-delay-clone-mandatory, cmd: "order start ceilometer-api-clone then ceilometer-delay-clone" }
+#    - { id: colocation-ceilometer-delay-clone-ceilometer-api-clone, cmd: "colocation add ceilometer-delay-clone with ceilometer-api-clone" }
+#    - { id: order-ceilometer-delay-clone-ceilometer-alarm-evaluator-clone-mandatory, cmd: "order start ceilometer-delay-clone then ceilometer-alarm-evaluator-clone" }
+#    - { id: colocation-ceilometer-alarm-evaluator-clone-ceilometer-delay-clone, cmd: "colocation add ceilometer-alarm-evaluator-clone with ceilometer-delay-clone" }
+#    - { id: order-ceilometer-alarm-evaluator-clone-ceilometer-alarm-notifier-clone-mandatory, cmd: "order start ceilometer-alarm-evaluator-clone then ceilometer-alarm-notifier-clone" }
+#    - { id: colocation-ceilometer-alarm-notifier-clone-ceilometer-alarm-evaluator-clone, cmd: "colocation add ceilometer-alarm-notifier-clone with ceilometer-alarm-evaluator-clone" }
+#    - { id: order-ceilometer-alarm-notifier-clone-ceilometer-notification-clone-mandatory, cmd: "order start ceilometer-alarm-notifier-clone then ceilometer-notification-clone" }
+#    - { id: colocation-ceilometer-notification-clone-ceilometer-alarm-notifier-clone, cmd: "colocation add ceilometer-notification-clone with ceilometer-alarm-notifier-clone" }
+#    - { id: order-mongodb-clone-ceilometer-central-mandatory, cmd: "order start mongodb-clone then ceilometer-central" }
+#    - { id: order-keystone-clone-ceilometer-central-mandatory, cmd: "order start keystone-clone then ceilometer-central" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  tags: ceilometer
+#  when: use_pacemaker
+

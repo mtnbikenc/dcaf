@@ -1,0 +1,39 @@
+---
+- name: install firewall rules
+  hosts:
+    - mongodb
+  max_fail_percentage: 0
+  tasks:  
+    - name: insert iptable rules for mongodb
+      iptables:
+        port: "{{item.port}}"
+        protocol: tcp
+        comment: "{{item.comment}}"
+        position: 2
+      with_items:
+        - { port: 27017, comment: "incoming mongodb"}
+        - { port: 6379, comment: "redis replication for mongodb"}
+
+- name: install firewall rules
+  hosts:
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: insert iptable rules for mongodb
+      iptables:
+        port: "{{item.port}}"
+        protocol: tcp
+        comment: "{{item.comment}}"
+        position: 2
+      with_items:
+        - { port: 27017, comment: "incoming mongodb"}
+      tags:
+        - mongodb
+        - iptables
+
+- name: install mongodb
+  hosts: mongodb
+  max_fail_percentage: 0
+  roles:
+    - mongodb
+  tags: mongodb

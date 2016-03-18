@@ -1,0 +1,6 @@
+---
+- name: get repo file
+  get_url:
+    url: "{{repo_url}}"
+    dest: /etc/yum.repos.d/offline.repo
+    force: yes

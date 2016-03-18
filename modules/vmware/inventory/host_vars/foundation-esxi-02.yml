@@ -1,0 +1,8 @@
+---
+hostname: cscesxtmp002
+mgmt_ip_address: 172.17.17.16
+vmotion_ip_address: 172.17.18.16
+vsan_ip_address: 172.17.19.16
+pxe_ip_address: 172.17.16.16
+oob_ip_address: 172.30.0.78
+smbios_uuid: 4C4C4544-0047-5710-8032-B9C04F443432

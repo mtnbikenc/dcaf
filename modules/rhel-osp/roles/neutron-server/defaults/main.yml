@@ -1,0 +1,6 @@
+---
+# Admin options:
+# use_pacemaker: Boolean operator to decide if pacemaker is in use for HA service control
+# use_pacemaker: false
+use_pacemaker: false
+

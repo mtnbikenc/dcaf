@@ -1,0 +1,196 @@
+---
+- name: install keystone components
+  yum:
+    pkg: "{{item}}"
+    state: present
+  with_items:
+    - openstack-keystone
+    - openstack-utils
+    - httpd
+  tags: keystone
+
+- name: configure the keystone.conf file
+  ini_file:
+    dest: /etc/keystone/keystone.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "admin_token", value: "{{keystone_admin_token}}"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true"}
+    - { section: "DEFAULT", option: "admin_endpoint", value: "http://{{ keystone_vip }}:{{ keystone_admin_port}}"}
+    - { section: "DEFAULT", option: "public_endpoint", value: "http://{{ keystone_public_vip }}:{{ keystone_public_port}}"}
+    - { section: "DEFAULT", option: "admin_bind_host", value: "{{ control_ipaddr }}"}
+    - { section: "DEFAULT", option: "public_bind_host", value: "{{ control_ipaddr }}"}
+    - { section: "database", option: "connection", value: "mysql://keystone:{{keystone_db_pass}}@{{lb_db_vip}}/keystone"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "memcache", option: "servers", value: "{{keystone_memcached_servers}}"}
+    - { section: "token", option: "driver", value: "keystone.token.persistence.backends.sql.Token" }
+
+  tags: keystone
+
+- name: check for tables
+  command: mysql -e "select count(*) from information_schema.tables where table_schema='keystone'" -sN
+  run_once: true
+  register: mysql_result
+  tags: keystone
+
+- name: populate keystone database
+  command: su keystone -s /bin/sh -c "keystone-manage -v -d db_sync"
+  when: mysql_result.stdout|int == 0
+  tags: keystone
+  run_once: true
+
+- name: set cron job to flush tokens
+  cron:
+    name: "keystone-manage token_flush"
+    job: "keystone keystone-manage token_flush >>/var/log/keystone/keystone-tokenflush.log 2>&1"
+    minute: 1
+
+# Pacemaker operations
+# commenting out pacemaker tasks
+#- name: create pacemaker resources for keystone
+#  pcs_resource: command=create name=keystone type=systemd:openstack-keystone clone=yes interleave=yes
+#  run_once: true
+#  tags: keystone
+#  when: use_pacemaker
+#
+#- name: create pcs constraints for keystone
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-haproxy-clone-keystone-clone, cmd: "order start haproxy-clone then keystone-clone" }
+#    - { id: order-galera-master-keystone-clone, cmd: "order start galera-master then keystone-clone" }
+#    - { id: order-rabbitmq-clone-keystone-clone, cmd: "order start rabbitmq-clone then keystone-clone" }
+#    - { id: order-memcached-clone-keystone-clone, cmd: "order start memcached-clone then keystone-clone" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  tags: keystone
+#  when: use_pacemaker
+#
+#- name: check if keystone is running
+#  shell: pcs status xml | xmllint --xpath '//crm_mon/resources/clone[contains(@id, "keystone-clone")]/resource[contains(@active, "true")]' -
+#  register: pcs_status_xml
+#  until: "'empty' not in pcs_status_xml.stderr"
+#  retries: 12
+#  delay: 30
+#  run_once: true
+#  ignore_errors: true
+#  when: use_pacemaker
+
+- name: start keystone if not using pacemaker
+  service:
+    name: openstack-keystone 
+    enabled: yes
+    state: restarted
+  when: not use_pacemaker
+  tags: keystone
+
+- name: check keystone
+  command: curl {{keystone_admin_protocol}}://{{keystone_admin_vip}}:{{keystone_admin_port}}/{{keystone_default_api_verison}}
+  register: keystone_output
+  failed_when: '"stable" not in keystone_output.stdout'
+  until: '"stable" in keystone_output.stdout'
+  retries: 12
+  delay: 30
+  run_once: true
+  when: not use_pacemaker
+  tags: keystone
+
+- name: create tenants
+  keystone_user:
+    token: "{{ keystone_admin_token }}"
+    endpoint: "{{ keystone_adminurl }}"
+    tenant: "{{item.name}}"
+    tenant_description: "{{item.description}}"
+  with_items:
+    - { name: admin, description: "admin tenant"}
+    - { name: services, description: "services tenant"}
+  run_once: true
+  tags: keystone
+
+- name: create users
+  keystone_user:
+    token: "{{ keystone_admin_token }}"
+    endpoint: "{{ keystone_adminurl }}"
+    user: "{{item.user}}"
+    tenant: "{{item.tenant}}"
+    password: "{{item.password }}"
+  run_once: true
+  with_items:
+    - { user: admin, tenant: admin, password: "{{admin_pass}}" }
+    - { user: glance, tenant: services, password: "{{glance_pass}}" }
+    - { user: neutron, tenant: services, password: "{{neutron_pass}}" }
+    - { user: nova, tenant: services, password: "{{nova_pass}}" }
+    - { user: cinder, tenant: services, password: "{{cinder_pass}}" }
+    - { user: ceilometer, tenant: services, password: "{{ceilometer_pass}}" }
+    - { user: swift, tenant: services, password: "{{swift_pass}}" }
+    - { user: heat, tenant: services, password: "{{heat_pass}}" }
+  tags: keystone
+
+- name: create and apply roles
+  keystone_user:
+    token: "{{ keystone_admin_token }}"
+    endpoint: "{{ keystone_adminurl }}"
+    user: "{{item.user}}"
+    tenant: "{{item.tenant}}"
+    role: "{{item.role}}"
+  with_items:
+    - { user: admin, tenant: admin, role: "admin" }
+    - { user: admin, tenant: admin, role: "heat_stack_owner" }
+    - { user: admin, tenant: admin, role: "heat_stack_user" }
+    - { user: glance, tenant: services, role: "admin" }
+    - { user: glance, tenant: services, role: "SwiftOperator" }
+    - { user: neutron, tenant: services, role: "admin" }
+    - { user: nova, tenant: services, role: "admin" }
+    - { user: cinder, tenant: services, role: "admin" }
+    - { user: ceilometer, tenant: services, role: "admin" }
+    - { user: ceilometer, tenant: admin, role: "ResellerAdmin" }
+    - { user: swift, tenant: services, role: "admin" }
+    - { user: heat, tenant: services, role: "admin" }
+  run_once: true
+  tags: keystone
+
+- name: create services
+  shell: keystone --os-token {{ keystone_admin_token }} --os-endpoint {{ keystone_adminurl }} service-get {{item.service}} || keystone --os-token {{ keystone_admin_token }} --os-endpoint {{ keystone_adminurl }} service-create --name {{item.service}}  --type {{item.type}}  --description "{{item.desc}}"
+  with_items:
+    -  {service: "keystone", type: "identity", desc: "Keystone Identity Service" }
+    -  {service: "glance", type: "image", desc: "Glance Image Service" }
+    -  {service: "cinder", type: "volume", desc: "cinder Volume Service" }
+    -  {service: "swift", type: "object-store", desc: "Swift storage Service" }
+    -  {service: "compute", type: "compute", desc: "OpenStack Compute Service" }
+    -  {service: "neutron", type: "network", desc: "OpenStack Networking Service" }
+    -  {service: "heat", type: "orchestration", desc: "OpenStack Orchestration Service" }
+    -  {service: "heat-cfn", type: "cloudformation", desc: "OpenStack cloudformation Service" }
+    -  {service: "ceilometer", type: "metering", desc: "OpenStack Telemetry Service" }
+  run_once: true
+  tags: keystone
+
+- name: create endpoints
+  shell: openstack --os-token {{ keystone_admin_token }} --os-url {{ keystone_adminurl }} endpoint show {{item.service}} || keystone --os-token {{ keystone_admin_token }} --os-endpoint {{ keystone_adminurl }} endpoint-create --service {{item.service}} --publicurl "{{item.public_url}}" --adminurl "{{item.admin_url}}" --internalurl "{{item.internal_url}}"
+  with_items:
+    - { service: "keystone", type: "identity", public_url: "http://{{ keystone_public_vip }}:5000/v2.0", admin_url: "http://{{ keystone_admin_vip }}:35357/v2.0", internal_url: "http://{{ keystone_private_vip }}:5000/v2.0" }
+    - { service: "glance", type: "image", public_url: "http://{{ glance_public_vip }}:9292", admin_url: "http://{{ glance_admin_vip }}:9292", internal_url: "http://{{ glance_private_vip }}:9292" }
+    - { service: "cinder", type: "volume", public_url: 'http://{{ cinder_public_vip }}:8776/v1/\$(tenant_id)s', admin_url: 'http://{{ cinder_admin_vip }}:8776/v1/\$(tenant_id)s', internal_url: 'http://{{ cinder_private_vip }}:8776/v1/\$(tenant_id)s' }
+    - { service: "neutron", type: "network", public_url: "http://{{ neutron_public_vip }}:9696", admin_url: "http://{{ neutron_admin_vip }}:9696", internal_url: "http://{{ neutron_private_vip }}:9696" }
+    - { service: "compute", type: "compute", public_url: 'http://{{ nova_public_vip }}:8774/v2/\$(tenant_id)s', admin_url: 'http://{{ nova_admin_vip }}:8774/v2/\$(tenant_id)s', internal_url: 'http://{{ nova_private_vip }}:8774/v2/\$(tenant_id)s' }
+    - { service: "heat", type: "orchestration", public_url: "http://{{ heat_public_vip }}:8004/v1/%(tenant_id)s", admin_url: "http://{{ heat_admin_vip }}:8004/v1/%(tenant_id)s", internal_url: "http://{{ heat_private_vip }}:8004/v1/%(tenant_id)s" }
+    - { service: "heat-cfn", type: "cloudformation", public_url: "http://{{ heat_public_vip }}:8000/v1", admin_url: "http://{{ heat_admin_vip }}:8000/v1", internal_url: "http://{{ heat_private_vip }}:8000/v1" }
+    - { service: "ceilometer", type: "metering", public_url:  "http://{{ ceilometer_public_vip }}:8777", admin_url: "http://{{ ceilometer_admin_vip }}:8777", internal_url: "http://{{ ceilometer_private_vip }}:8777" }
+    - { service: "swift", type: "object-store", public_url: "http://{{ swift_public_vip }}:8080/v1/AUTH_%(tenant_id)s", admin_url: "http://{{ swift_admin_vip }}:8080", internal_url: "http://{{swift_private_vip }}:8080/v1/AUTH_%(tenant_id)s" }
+  run_once: true
+  tags: keystone
+
+- name: deploy the keystonerc_admin file
+  template: 
+    src: kilo_keystonerc_admin.j2
+    dest: /root/keystonerc_admin
+    mode: 0750 
+    owner: root 
+    group: root
+  tags: keystone
+

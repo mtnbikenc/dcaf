@@ -1,0 +1,43 @@
+---
+# This role will partition any additional disks that were not partitioned by the kickstart that are specified in the
+# host_vars/host.yml. The role is invoked by setting the partition_additional_disks variable to 'true' in the
+# group_vars/all.yml.
+
+- name: Label disks prior to creating partition
+  command: parted -s /dev/{{ disk }} mklabel gpt
+  with_items: "{{ additional_disks }}"
+  when: "{{ ansible_devices[disk].partitions|length }} == 0 and {{ ansible_devices[disk].removable}} != 1"
+  register: labeled
+  tags: part
+
+- name: Create primary partition on available disk
+  command: parted -s /dev/{{ disk }} unit mib mkpart primary {{ fstype }} 1 100%
+  when: labeled.changed
+  tags: part
+
+- name: Format the new partition with xfs
+  filesystem:
+    dev: /dev/{{ disk }}1
+    force: yes
+    fstype: "{{ fstype }}"
+  when: labeled.changed
+  tags: part
+
+- name: Create new mount point
+  file:
+    path: "{{ mount }}"
+    state: directory
+  when: labeled.changed
+  tags: part
+
+- name: Mount the new partition
+  mount:
+    state: mounted
+    passno: 0
+    dump: 0
+    src: /dev/{{ disk }}1
+    name: "{{ mount }}"
+    fstype: "{{ fstype }}"
+    opts: "{{ mount_opts }}"
+  when: labeled.changed
+  tags: part

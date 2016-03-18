@@ -1,0 +1,12 @@
+---
+- include: mariadb_cluster.yml
+- include: rabbitmq.yml
+- include: keystone.yml
+- include: glance.yml
+- include: cinder.yml
+- include: nova-control.yml
+- include: heat.yml
+- include: ceilometer-control.yml
+- include: horizon.yml
+- include: neutron-server.yml
+

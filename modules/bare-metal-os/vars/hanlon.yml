@@ -1,0 +1,16 @@
+---
+hanlon_base_url: http://{{ auto_deploy_node }}:8026/hanlon/api/v1/
+hnl_rhel_path: /home/hanlon/image/rhel-server-7.2-x86_64-dvd-hnl.iso
+hnl_rhel_name: RHEL_7_2
+hnl_rhel_version: 7.2
+hnl_rhel_label: RHEL_7_2_model
+hnl_rhel_hostname_prefix: rhel
+hnl_rhel_domainname: localdomain
+hnl_rhel_password: "{{ site_password }}"
+hnl_rhel_partition_scheme: |
+  part /boot --ondisk=sda --size=512  --fstype=ext3
+  part swap  --ondisk=sda --size=4096 --fstype=swap
+  part pv.01 --ondisk=sda --size=1 --grow
+  volgroup vg_root pv.01
+  logvol / --vgname=vg_root --size=32768 --name=lv_root --fstype=xfs --grow
+  ignoredisk --only-use=sda

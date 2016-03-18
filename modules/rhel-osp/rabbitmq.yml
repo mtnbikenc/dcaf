@@ -1,0 +1,37 @@
+---
+- name: base RHEL configuration
+  hosts: rabbitmq_cluster
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: rabbitmq_cluster
+  tags: rabbitmq
+
+- name: install rabbit mq rules
+  hosts:
+    - rabbitmq_cluster
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: insert iptable rules for rabbitmq
+      iptables:
+        port: "{{item.port}}"
+        position: 2
+        protocol: tcp
+        comment: "{{item.comment}}"
+      with_items:
+        - { port: 9100, comment: "ampq clustering" }
+        - { port: 5672, comment: "amqp traffic / rabbitmq" }
+        - { port: 25672, comment: "epmd cluster" }
+        - { port: 4369, comment: "epmd cluster" }
+      tags:
+        - rabbitmq
+        - iptables
+
+- name: install rabbitmq
+  hosts: rabbitmq_cluster
+  max_fail_percentage: 0
+  roles:
+    - rabbitmq
+  tags: rabbitmq

@@ -1,0 +1,6 @@
+rs.initiate()
+sleep(13000)
+{% for host in groups['mongodb'][1:]  %}
+rs.add("{{ hostvars[host]['ansible_hostname'] }}:{{ mongodb_port }}")
+{% endfor %}
+printjson(rs.status())

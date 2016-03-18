@@ -1,0 +1,26 @@
+---
+virt: true
+dns_if: eth1
+nova_virt_type: qemu
+
+mgmt_if:
+  device: eth0
+  ipaddr: 192.168.100.54
+  netmask: 255.255.255.0
+  gateway: 192.168.100.1
+  dns1: 8.8.8.8
+
+control_if:
+  device: eth1
+  ipaddr: 192.168.101.54
+  netmask: 255.255.255.0
+
+datanet_if:
+  device: eth2
+  ipaddr: 172.16.23.54
+  netmask: 255.255.255.0
+
+scaleio_if:
+  device: eth3
+  ipaddr: 172.16.26.54
+  netmask: 255.255.255.0

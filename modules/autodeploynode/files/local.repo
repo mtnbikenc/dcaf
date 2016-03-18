@@ -1,0 +1,5 @@
+[local_repo]
+name=local_repo
+baseurl="file:///opt/autodeploy/resources/rpms"
+gpgcheck=0
+enabled=1

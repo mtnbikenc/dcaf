@@ -1,0 +1,17 @@
+---
+# Boolean operator to enable the use of Pacemaker for managing horizon service
+use_pacemaker: false
+
+# enable the load-balancer-as-a-service panel in dashboard
+use_lbaas: false
+
+# enable the firewall-as-a-service panel in dashboard
+use_fwaas: false
+
+# enable the load-balancer-as-a-service panel in dashboard
+use_vpnaas: false
+
+# location of temp dir.
+temporary_dir: /tmp
+
+

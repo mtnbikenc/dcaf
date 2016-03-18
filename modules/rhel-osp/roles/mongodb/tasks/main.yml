@@ -1,0 +1,109 @@
+---
+- name: insert iptable rules for mongodb
+  iptables:
+    port: "{{item.port}}"
+    protocol: tcp
+    comment: "{{item.comment}}"
+    position: 2
+  with_items:
+    - { port: "{{mongodb_port}}", comment: "incoming mongodb"}
+    - { port: 6379, comment: "redis replication for mongodb"}
+  tags: mongodb
+
+- name: install mongodb packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - mongodb
+    - mongodb-server
+  tags: mongodb
+
+- name: start mongodb
+  service:
+    name: mongod
+    state: started
+  tags: mongodb
+
+- name: stop mongodb
+  service:
+    name: mongod
+    state: stopped
+  tags: mongodb
+
+- name: update mongod.conf for small files/bindip/and replset
+  template:
+    src: mongodb.conf.j2
+    dest: /etc/mongodb.conf
+    owner: mongodb
+    group: mongodb
+    mode: 644
+  tags: mongodb
+
+- name: create data directory for mongodb
+  file:
+    path: /var/lib/mongodb
+    state: directory
+    owner: mongodb
+    group: mongodb
+    mode: 0750
+  tags: mongodb
+
+- name: create pid directory for mongodb
+  file:
+    path: /var/run/mongodb/
+    state: directory
+    owner: mongodb
+    group: mongodb
+    mode: 0774
+
+- name: start mongodb
+  service:
+    name: mongod
+    state: started
+    enabled: yes
+  tags: mongodb
+  when: not use_pacemaker
+
+## commenting out pacemaker tasks
+#- name: "[pacemaker] start mongodb"
+#  service:
+#    name: mongod
+#    state: started
+#  tags: mongodb
+#  when: use_pacemaker
+
+- name: load replica set config
+  template: 
+    src: "repset_init.j2"
+    dest: "/tmp/repset_init.js"
+    force: yes
+  tags: mongodb
+
+- name: initialize the replication set
+  command: /usr/bin/mongo --host "{{ mongodb_bind_host }}" --port "{{ mongodb_port }}" /tmp/repset_init.js
+  run_once: true
+  tags: mongodb
+
+- name: pause to allow primary election and sync of replica set
+  pause:
+    seconds: 60
+  tags: mongodb
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker]cleanup pcs resource"
+#  command: pcs resource cleanup
+#  tags: mongodb
+#  run_once: true
+#  when: use_pacemaker
+#
+#- name: "[pacemaker] create pacemaker resources for mongodb"
+#  pcs_resource: command=create name=mongodb type=systemd:mongod clone=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 120s
+#  run_once: true
+#  tags: mongodb
+#  when: use_pacemaker

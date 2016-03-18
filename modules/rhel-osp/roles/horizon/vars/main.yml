@@ -1,0 +1,9 @@
+---
+mgmt_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + mgmt_if ].ipv4.address }}"
+control_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + control_if.device ].ipv4.address }}"
+horizon_bind_host: "{{ control_ipaddr }}"
+dashboard_first_request_url: "http://{{ horizon_bind_host }}/dashboard"
+horizon_memcached_servers: "{% for node in groups['horizon'] %}'{{ hostvars[node]['ansible_'+control_if.device]['ipv4']['address'] }}:{{memcached_port | default(11211) }}'{% if not loop.last %}, {% endif %}{% endfor %}"
+
+keystone_vip: "{{haproxy_vip}}"
+horizon_secret: "{{ lookup('password', credentials_dir + '/credentials/horizon_secret chars=ascii_letters,digits') }}"

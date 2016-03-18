@@ -1,0 +1,24 @@
+---
+# These variables are user-defined and should be changed based on your network requirements.
+
+# The default location of the network interface configuration files
+default_ifcfg_dir: /etc/sysconfig/network-scripts
+
+# The following interface variables are being used as a dictionary by the bond role template ifcfg-dev.j2.
+# The common_cfg vars are common across the bond interfaces.
+common_cfg:
+  bootproto: none
+  onboot: "yes"
+  peerdns: "no"
+  nozeroconf: "yes"
+
+# The bond cfgs below are specific to the role in the bond and should be modified as needed.
+bond_cfg:
+  type: bond
+  userctl: "no"
+  bonding_master: "yes"
+  bonding_opts: "\"miimon=100 mode=802.3ad\""
+
+bond_team_cfg:
+  type: Ethernet
+  slave: "yes"

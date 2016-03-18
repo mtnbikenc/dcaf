@@ -1,0 +1,44 @@
+---
+- name: iptable rules for memcache
+  iptables:
+    port: "{{memcached_port | default(11211)}}"
+    protocol: tcp
+    position: 2
+    comment: "memcache incoming"
+  tags: 
+    - iptables
+    - memcached
+
+- name: install memcached
+  yum:
+    pkg: memcached 
+    state: present
+  tags: memcached
+
+- name: enable the memcached service
+  service: 
+    name: memcached 
+    enabled: yes 
+    state: restarted
+  tags: memcached
+  when: not use_pacemaker
+
+# commenting out pacemaker tasks
+#- name: "disable the memcached service [pacemaker]"
+#  service:
+#    name: memcached
+#    enabled: no
+#  tags: memcached
+#  when: use_pacemaker
+#
+#- name: "create the memcached resources [pacemaker]"
+#  pcs_resource: command=create name=memcached type=systemd:memcached clone=yes
+#  args:
+#    options:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  tags: memcached
+#  when: use_pacemaker

@@ -1,0 +1,33 @@
+---
+
+- name: copy rings to swift nodes
+  copy:
+    dest: "/etc/swift/{{ item }}"
+    src: "{{ temporary_dir }}/{{ item }}"
+    owner: root
+    group: swift
+  with_items:
+    - "object.ring.gz"
+    - "account.ring.gz"
+    - "container.ring.gz"
+  tags: swift
+
+- name: chown etc/swift to root/swift
+  file:
+    state: directory
+    recurse: yes
+    owner: root
+    group: swift
+    path: /etc/swift
+  tags: swift
+
+- name: ensure services are started
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - openstack-swift-container
+    - openstack-swift-account
+    - openstack-swift-object
+  tags: swift

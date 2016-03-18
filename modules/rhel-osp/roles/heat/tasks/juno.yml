@@ -1,0 +1,129 @@
+---
+- name: install heat packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-heat-common
+    - openstack-heat-api
+    - openstack-heat-api-cfn
+    - openstack-heat-api-cloudwatch
+    - openstack-heat-engine
+    - python-heatclient
+    - python-glanceclient
+    - openstack-utils
+    - openstack-selinux
+  tags: heat
+
+- name: Update heat config file
+  ini_file:
+    dest: /etc/heat/heat.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "memcached_servers", value: "{{ heat_memcached_servers }}"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "heat_metadata_server_url", value: "{{ heat_metadata_server_url }}"}
+    - { section: "DEFAULT", option: "heat_waitcondition_server_url", value: "{{ heat_waitcondition_server_url }}"}
+    - { section: "DEFAULT", option: "heat_watch_server_url", value: "{{ heat_watch_server_url }}"}
+    - { section: "DEFAULT", option: "rpc_backend", value: "heat.openstack.common.rpc.impl_kombu"}
+    - { section: "DEFAULT", option: "notification_driver", value: "heat.openstack.common.notifier.rpc_notifier"}
+    - { section: "keystone_authtoken", option: "auth_host", value: "{{ keystone_admin_vip }}"}
+    - { section: "keystone_authtoken", option: "auth_port", value: "{{ keystone_admin_port  }}"}
+    - { section: "keystone_authtoken", option: "auth_protocol", value: "{{ keystone_admin_protocol }}"}
+    - { section: "keystone_authtoken", option: "auth_uri", value: "{{ keystone_admin_protocol }}://{{ keystone_admin_vip }}:{{ keystone_admin_port }}/v2.0"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "heat"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ heat_pass }}"}
+    - { section: "heat_api", option: "bind_host", value: "{{ heat_bind_host }}"}
+    - { section: "heat_api_cfn", option: "bind_host", value: "{{ heat_bind_host }}"}
+    - { section: "heat_api_cloudwatch", option: "bind_host", value: "{{ heat_bind_host }}"}
+    - { section: "database", option: "connection", value: "mysql://heat:{{ heat_db_pass }}@{{ lb_db_vip }}/heat"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "ec2authtoken", option: "auth_uri", value: "{{ keystone_admin_protocol }}://{{ keystone_admin_vip }}:{{ keystone_admin_port }}/v2.0"} 
+  tags: heat
+
+- name: check for tables
+  command: mysql -e "select count(*) from information_schema.tables where table_schema='heat'" -sN
+  run_once: true
+  register: mysql_result
+  tags: heat
+
+- name: run dbsync for heat
+  shell: su -s /bin/sh -c '/usr/bin/heat-manage db_sync' heat
+  when: mysql_result.stdout|int == 0
+  run_once: true
+  tags: heat
+
+- name: "restart and enable heat"
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - openstack-heat-api
+    - openstack-heat-api-cfn
+    - openstack-heat-api-cloudwatch
+    - openstack-heat-engine
+  tags: heat
+  when: not use_pacemaker
+
+## commenting out pacemaker tasks
+#- name: "[pacemaker]restart and disable heat"
+#  service:
+#    name: "{{ item }}"
+#    state: restarted
+#    enabled: no
+#  with_items:
+#    - openstack-heat-api
+#    - openstack-heat-api-cfn
+#    - openstack-heat-api-cloudwatch
+#    - openstack-heat-engine
+#  tags: heat
+#  when: use_pacemaker
+#
+#- name: "[pacemaker]create pacemaker resources for heat"
+#  pcs_resource: command=create name={{ item }} type=systemd:openstack-{{ item }} clone=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  with_items:
+#    - heat-api
+#    - heat-api-cfn
+#    - heat-api-cloudwatch
+#  tags: heat
+#  when: use_pacemaker
+#
+#- name: "[pacemaker]create pacemaker resource for heat-engine"
+#  pcs_resource: command=create name=heat-engine type=systemd:openstack-heat-engine
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  tags: heat
+#  when: use_pacemaker
+#
+#- name: "[pacemaker]create pacemaker constraints for heat"
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-heat-api-clone-heat-api-cfn-clone, cmd: "order start heat-api-clone then heat-api-cfn-clone" }
+#    - { id: colocation-heat-api-cfn-clone-heat-api-clone, cmd: "colocation add heat-api-cfn-clone with heat-api-clone" }
+#    - { id: order-heat-api-cfn-clone-heat-api-cloudwatch-clone-mandatory, cmd: "order start heat-api-cfn-clone then heat-api-cloudwatch-clone" }
+#    - { id: colocation-heat-api-cloudwatch-clone-heat-api-cfn-clone, cmd: "colocation add heat-api-cloudwatch-clone with heat-api-cfn-clone" }
+#    - { id: order-heat-api-cloudwatch-clone-heat-engine-mandatory, cmd: "order start heat-api-cloudwatch-clone then heat-engine" }
+#    - { id: colocation-heat-engine-heat-api-cloudwatch-clone, cmd: "colocation add heat-engine with heat-api-cloudwatch-clone" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  tags: heat
+#  when: use_pacemaker

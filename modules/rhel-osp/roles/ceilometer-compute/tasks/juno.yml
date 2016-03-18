@@ -1,0 +1,46 @@
+---
+- name: install ceilometer packages
+  yum: 
+    pkg: '{{ item }}'
+    state: present
+  with_items:
+    - openstack-ceilometer-common
+    - python-ceilometer
+    - python-ceilometerclient
+    - openstack-ceilometer-compute
+  tags: ceilometer
+
+- name: Update ceilometer config file
+  ini_file:
+    dest: /etc/ceilometer/ceilometer.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "memcached_servers", value: "{{ ceilometer_memcached_servers }}"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "keystone_authtoken", option: "auth_host", value: "{{ keystone_admin_vip  }}"}
+    - { section: "keystone_authtoken", option: "auth_port", value: "{{ keystone_admin_port  }}"}
+    - { section: "keystone_authtoken", option: "auth_protocol", value: "{{ keystone_admin_protocol  }}"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "ceilometer"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ ceilometer_pass }}"}
+    - { section: "publisher", option: "metering_secret", value: "{{ ceilometer_metering_secret }}"}
+    - { section: "service_credentials", option: "os_auth_url", value: "{{ keystone_admin_protocol }}://{{ keystone_admin_vip }}:{{ keystone_admin_port }}/v2.0" }
+    - { section: "service_credentials", option: "os_username", value: "ceilometer"}
+    - { section: "service_credentials", option: "os_password", value: "{{ ceilometer_pass }}"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "database", option: "time_to_live", value: "{{ ceilometer_time_to_live | default(432000) }}"}
+    - { section: "api", option: "host", value: "{{ ceilometer_bind_host }}"}
+  tags: ceilometer
+
+- name: enable ceilometer-compute
+  service:
+    name: openstack-ceilometer-compute
+    enabled: yes
+    state: started
+  tags: ceilometer

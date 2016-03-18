@@ -1,0 +1,47 @@
+---
+- name: gather info
+  hosts: openstack
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: neutron-server
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: openstack
+  tags: neutron-server
+
+- name: install neutron  rules
+  hosts:
+    - haproxy
+    - neutron-server
+  max_fail_percentage: 0
+  tasks:
+    - name: iptable rules for neutron-server
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 2
+      with_items:
+        - { port: 9696, protocol: tcp, comment: "neutron api"}
+      tags:
+        -  iptables
+        -  neutron-server
+
+- name: install neutron-common on server
+  hosts: neutron-server
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - neutron-common
+  tags: neutron-server
+
+- name: install neutron-server
+  hosts: neutron-server
+  max_fail_percentage: 0
+  serial: 1
+  roles:
+    - neutron-server
+  tags: neutron-server

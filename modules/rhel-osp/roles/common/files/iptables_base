@@ -1,0 +1,9 @@
+*filter
+:INPUT ACCEPT [2:104]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [2:204]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p tcp -m multiport --dports 22 -m comment --comment "allow ssh incoming" -j ACCEPT
+COMMIT

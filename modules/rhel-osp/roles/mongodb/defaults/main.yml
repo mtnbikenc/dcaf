@@ -1,0 +1,6 @@
+---
+# port that mongodb listens to.
+mongodb_port: 27017
+
+# Use pacemaker to manage HA of services?
+use_pacemaker: false

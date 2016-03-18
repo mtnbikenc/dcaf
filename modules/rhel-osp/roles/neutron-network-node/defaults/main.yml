@@ -1,0 +1,155 @@
+---
+# use_lbaas: Boolean operator that will enable Load balancer as a service.  The haproxy plugin is used for LBaaS
+use_lbaas: True
+
+# use_fwaas: Boolean operator that will enable Firewall as a service.
+use_fwaas: true
+
+# ====== dhcp agent settings ========
+# neutron_dhcp_agents_per_network: the number of dhcp agents that will be created for each tenant network.  For HA
+# this number should be greater the 3, for a single controller this needs to be set to 1.
+# neutron_dhcp_agents_per_network: 3
+neutron_dhcp_agents_per_network: 3
+
+# Boolean operator for if you want to manually override the mtu provided by dnsmasq
+set_dns_mtu: true
+
+# Override the default dnsmasq settings with this file
+neutron_dnsmasq_config_file: "/etc/neutron/dnsmasq-neutron.conf"
+
+# the mtu value for VMs that the dhcp server will provide.  Does not work with windows VMs.
+neutron_vm_dhcp_mtu: 1400
+
+# dhcp_delete_namespaces, which is false by default, can be set to True if
+# namespaces can be deleted cleanly on the host running the dhcp agent.
+# Do not enable this until you understand the problem with the Linux iproute
+# utility mentioned in https://bugs.launchpad.net/neutron/+bug/1052535 and
+# you are sure that your version of iproute does not suffer from the problem.
+# If True, namespaces will be deleted when a dhcp server is disabled.
+neutron_dhcp_delete_namespaces: false
+
+
+# ============= metadata agent ===============
+# Number of separate worker processes for metadata server. Defaults to
+# half the number of CPU cores
+neutron_metadata_workers: 4
+
+# Number of backlog requests to configure the metadata server socket with
+neutron_metadata_backlog: 4096
+
+# ========= l3 agent =============
+# Indicates that this L3 agent should also handle routers that do not have
+# # an external network gateway configured.  This option should be True only
+# # for a single agent in a Neutron deployment, and may be False for all agents
+# # if all routers must have an external network gateway
+neutron_l3_handle_internal_only_routers: True
+
+# Send this many gratuitous ARPs for HA setup. Set it below or equal to 0
+# # to disable this feature.
+neutron_l3_send_arp_for_ha: True
+
+# router_delete_namespaces, which is false by default, can be set to True if
+# # namespaces can be deleted cleanly on the host running the L3 agent.
+# # Do not enable this until you understand the problem with the Linux iproute
+# # utility mentioned in https://bugs.launchpad.net/neutron/+bug/1052535 and
+# # you are sure that your version of iproute does not suffer from the problem.
+# # If True, namespaces will be deleted when a router is destroyed.
+neutron_l3_router_delete_namespaces: False
+
+# Name of bridge used for external network traffic. This should be set to
+# # empty value for the linux bridge. when this parameter is set, each L3 agent
+# # can be associated with no more than one external network.
+neutron_external_network_bridge: br-ex
+
+# Admin options:
+# use_pacemaker: Boolean operator to decide if pacemaker is in use for HA service control
+# use_pacemaker: false
+use_pacemaker: false
+
+# The RabbitMQ userid. (string value)
+# rabbitmq_user: guest
+rabbitmq_user: guest
+
+# The RabbitMQ password. (string value)
+# rabbitmq_pass: guest
+rabbitmq_pass: guest
+
+# The RabbitMQ broker port where a single node is used.
+# (integer value)
+rabbit_port: 5672
+
+# Auth token options
+keystone_auth_protocol: http
+keystone_auth_port: 35357
+keystone_public_port: 5000
+neutron_auth_strategy: keystone
+
+# Local directory on ansible server that credentials can be found.
+credentials_dir: /var/lib/ansible
+
+
+#  ======== neutron nova interactions ==========
+# Send notification to nova when port status is active.
+# neutron_nova_on_port_status_changes = True
+neutron_notify_nova_on_port_status_changes: true
+
+# Send notifications to nova when port data (fixed_ips/floatingips) change
+# so nova can update it's cache.
+# neutron_notify_nova_on_port_data_changes: true
+neutron_notify_nova_on_port_data_changes: true
+
+# port that nova is listening on
+# nova_osapi_compute_listen_port: 8774
+nova_osapi_compute_listen_port: 8774
+
+# region that nova is in.
+# nova_region_name: regionOne
+nova_region_name: regionOne
+
+
+
+## ======= ML2 Plugin Variables ========##
+# (ListOpt) List of network type driver entrypoints to be loaded from
+# the neutron.ml2.type_drivers namespace.
+neutron_ml2_type_drivers: vxlan,flat,vlan,gre,local
+
+# (ListOpt) Ordered list of networking mechanism driver entrypoints
+# to be loaded from the neutron.ml2.mechanism_drivers namespace.
+neutron_ml2_mechanism_drivers: openvswitch,l2population
+
+# (ListOpt) Ordered list of network_types to allocate as tenant
+# networks. (defined at the top of page)
+#neutron_tunnel_type: vxlan
+
+# Controls if neutron security group is enabled or not.
+# It should be false when you use nova security group.
+# neutron_enable_security_group: True
+neutron_enable_security_group: true
+
+# ======vlans======
+# (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
+# specifying physical_network names usable for VLAN provider and
+# tenant networks, as well as ranges of VLAN tags on each
+# physical_network available for allocation as tenant networks.
+neutron_network_vlan_ranges: "physnet1"
+
+# ====== flat =====
+# (ListOpt) List of physical_network names with which flat networks
+# can be created. Use * to allow flat networks with arbitrary
+# physical_network names.
+neutron_ml2_type_flat: "\"*\""
+
+# ===== vxlan ======
+# (ListOpt) Comma-separated list of <vni_min>:<vni_max> tuples enumerating
+# ranges of VXLAN VNI IDs that are available for tenant network allocation.
+neutron_vxlan_vni_ranges: 10:10000
+
+# (StrOpt) Multicast group for the VXLAN interface. When configured, will
+# enable sending all broadcast traffic to this multicast group. When left
+# unconfigured, will disable multicast VXLAN mode.
+neutron_vxlan_group: 239.1.1.1
+
+# ===== GRE =======
+# (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of
+# GRE tunnel IDs that are available for tenant network allocation
+neutron_gre_tunnel_id_ranges: 1:1000

@@ -1,0 +1,14 @@
+---
+pxe_dhcp_range_start: "{{ [ansible_default_ipv4.network, ansible_default_ipv4.netmask] | join('/') | ipaddr('net') | ipaddr(dhcp_start) | ipaddr('address') }}"
+pxe_dhcp_range_end: "{{ [ansible_default_ipv4.network, ansible_default_ipv4.netmask] | join('/') | ipaddr('net') | ipaddr(dhcp_end) | ipaddr('address') }}"
+
+#options for EFI 32-bit - ipxe-x86.efi or snponly-x86.efi
+ipxe_efi_x86_rom: "ipxe-x86.efi"
+
+#options for EFI 64-bit - ipxe-x64.efi or snponly-x64.efi
+ipxe_efi_x64_rom: "ipxe-x64.efi"
+
+#options for legacy BIOS x86 mode - undionly.kpxe or ipxe.pxe
+ipxe_legacy_rom: "ipxe.pxe"
+
+hanlon_ipxe: "hanlon.ipxe"

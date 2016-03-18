@@ -1,0 +1,5 @@
+---
+public_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + control_if.device ].ipv4.address }}"
+internal_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' +control_if.device ].ipv4.address }}"
+rabbit_node_names: "{{hostvars[groups['rabbitmq_cluster']]['ansible_hostname']}}"
+

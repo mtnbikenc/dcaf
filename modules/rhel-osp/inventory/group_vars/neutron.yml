@@ -1,0 +1,3 @@
+neutron_ovs_bridges:
+  - ovs_bridge: br-ex
+    physical_net: eth3

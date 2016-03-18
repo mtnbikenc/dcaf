@@ -1,0 +1,28 @@
+# dhcpd.conf
+#
+
+include "/etc/dhcp/ipxe-option-space.conf";
+
+default-lease-time 600;
+max-lease-time 7200;
+
+authoritative;
+
+option hanlon_server code 224 = ip-address;
+option hanlon_port code 225 = unsigned integer 16;
+option hanlon_base_uri code 226 = text;
+
+subnet {{ ansible_default_ipv4.network }} netmask {{ ansible_default_ipv4.netmask }} {
+    range                       {{ pxe_dhcp_range_start }} {{ pxe_dhcp_range_end }};
+    option routers              {{ ansible_default_ipv4.gateway }};
+    option subnet-mask          {{ ansible_default_ipv4.netmask }};
+    option domain-name          "{{ domain_name }}";
+    option domain-name-servers  {{ dns1 }};
+    next-server                 {{ ansible_default_ipv4.address }};
+    option tftp-server-name     "{{ ansible_default_ipv4.address }}";
+    option hanlon_server        {{ ansible_default_ipv4.address }};
+    option hanlon_port          8026;
+    option hanlon_base_uri      "/hanlon/api/v1";
+
+    include "/etc/dhcp/ipxe.conf";
+}

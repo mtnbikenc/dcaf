@@ -1,0 +1,63 @@
+---
+- name: install horizon packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - mod_wsgi
+    - httpd
+    - mod_ssl
+    - python-memcached
+    - openstack-dashboard
+  tags: horizon
+
+
+- name: deploy openstack-dashboard local settings
+  template:
+    src: kilo_local_settings.j2
+    dest: /etc/openstack-dashboard/local_settings
+    mode: 0640
+    owner: root
+    group: apache
+  tags: horizon
+
+- name: copy httpd server-status.conf
+  copy:
+    src: server-status.conf
+    dest: /etc/httpd/conf.d/server-status.conf
+    mode: 0644
+  tags: horizon
+
+- name: listen on internal ip address
+  lineinfile:
+    dest: /etc/httpd/conf/httpd.conf
+    regexp: "^Listen "
+    insertafter: "^#Listen "
+    line: "Listen {{ horizon_bind_host }}:80"
+  tags: horizon
+
+- name: configure dashboard vhost
+  template:
+    src: dashboard.conf.j2
+    dest: /etc/httpd/conf.d/dashboard.conf
+    mode: 0644
+    owner: root
+    group: root
+  tags: horizon
+
+- name: restart horizon
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - openstack-nova-novncproxy
+    - httpd
+    - memcached
+  tags: horizon
+
+#- name: "[pacemaker]restart nova-consoleauth"
+#  command: pcs resource restart nova-consoleauth
+#  run_once: true
+#  tags: horizon
+#  when: use_pacemaker
+

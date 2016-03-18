@@ -1,0 +1,28 @@
+---
+# These are development IP addresses and need to be changed
+auto_deploy_node: 172.17.16.10
+domain_name: lordbusiness.local
+dns_servers: 192.168.70.3,192.168.70.4
+dns_server: 192.168.70.3
+ntp_servers: 172.17.16.10
+pxe_subnet_mask: 255.255.255.0
+
+# Hanlon vars
+hanlon_base_url: http://{{ auto_deploy_node }}:8026/hanlon/api/v1/
+esxi_iso_path: /home/hanlon/image/VMware-VMvisor-Installer-201501001-2403361.x86_64.iso
+esxi_image_name: VMware_ESXi
+esxi_version: 5.5
+# ESXi license must be valid or deployment will fail
+# esx_license was moved into all/secrets.yml (expires 9/14/2015)
+#esx_license:
+esxi_username: root
+mgmt_vdc: Test-Lab
+mgmt_cluster: Foundation
+mgmt_vmk: vmk1
+mgmt_subnet_mask: 255.255.255.0
+vmotion_vmk: vmk2
+vmotion_subnet_mask: 255.255.255.0
+vsan_vmk: vmk3
+vsan_subnet_mask: 255.255.255.0
+dvs_vmnic: vmnic5
+vss_vmnic: vmnic4

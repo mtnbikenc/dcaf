@@ -1,0 +1,8 @@
+---
+- name: include roles for juno release swift-storage-1
+  include: juno.yml
+  when: openstack_release == 'juno'
+
+- name: include roles for kilo release swift-storage-1
+  include: kilo.yml
+  when: openstack_release == 'kilo'

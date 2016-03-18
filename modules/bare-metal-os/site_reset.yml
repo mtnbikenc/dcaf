@@ -1,0 +1,60 @@
+---
+
+- name: Rediscover nodes
+  hosts: deploy
+  max_fail_percentage: 0
+  gather_facts: False
+  serial: 10
+
+  tasks:
+    - include_vars: vars/hanlon.yml
+
+    # The IPMI command fails in some instances, therefore the task will retry the default number of times.
+    - name: Initiate reboot of node
+      local_action:
+        module: ipmi_power_ops
+        hostname: "{{ ipmi_ip_address }}"
+        username: "{{ ipmi_username }}"
+        password: "{{ ipmi_password }}"
+        power_state: reset
+      register: node_reboot
+      until: node_reboot.changed | default(false)
+
+    - name: Remove current Active Model for node
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+        state: absent
+
+    - name: Remove the node policy based on SMBIOS UUID
+      local_action:
+        module: hanlon_policy
+        base_url: "{{ hanlon_base_url }}"
+        label: "{{ inventory_hostname }}"
+        state: absent
+
+- name: Complete discovery
+  hosts: deploy
+  max_fail_percentage: 0
+  gather_facts: False
+
+  tasks:
+    - include_vars: vars/hanlon.yml
+
+    - name: Wait for node discovery
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+      register: active_model
+      until: not(active_model.current_state is none)
+      retries: 20
+      delay: 30
+
+    - name: Wait for node power off
+      local_action:
+        module: command ipmitool -I lanplus -H {{ ipmi_ip_address }} -U {{ ipmi_username }} -P {{ ipmi_password }} power status
+      register: power_state
+      until: power_state.stdout.find('off') != -1
+      retries: 60

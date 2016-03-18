@@ -1,0 +1,19 @@
+---
+- name: delete floating IPs excepth for autodeploy node.
+  shell: for i in $(neutron {{os_tenant_auth}} floatingip-list | grep {{float_network}} | grep -v {{ansible_default_ipv4.address}} | gawk -F ' ' '{print $2}' ); do neutron {{os_tenant_auth}} floatingip-delete $i ; done
+
+- name: wait for floating IPs to be deleted
+  shell: neutron {{os_tenant_auth}} floatingip-list | grep {{float_network}}  -c
+  ignore_errors: yes
+  register: floatlist
+  until: "'1' in floatlist.stdout"
+
+- name: delete stack
+  command: heat {{os_tenant_auth}} stack-delete {{heat_stack_name}}
+
+- name: wait for stack to delete
+  command: heat {{os_tenant_auth}} stack-list
+  register: stacklist
+  until: "'{{heat_stack_name}}' not in stacklist.stdout"
+  delay: 10
+  retries: 60

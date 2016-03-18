@@ -1,0 +1,81 @@
+---
+
+- name: Check VMware vCenter Server EULA
+  command: /usr/sbin/vpxd_servicecfg eula read
+  register: read_eula_result
+  changed_when: false
+
+- name: Accept VMware EULA
+  command: /usr/sbin/vpxd_servicecfg eula accept
+  register: set_eula_result
+  when: read_eula_result.stdout.find('VC_EULA_STATUS=1') == -1
+  changed_when: "'VC_CFG_RESULT=0' in set_eula_result.stdout"
+
+- name: Check Inventory Size
+  command: /usr/sbin/vpxd_servicecfg jvm-max-heap read
+  register: read_inventory_result
+  changed_when: false
+
+- name: Set Inventory Size to Small
+  command: /usr/sbin/vpxd_servicecfg jvm-max-heap write 512 3072 1024
+  when: >
+    (read_inventory_result.stdout.find('512') == -1) or
+    (read_inventory_result.stdout.find('3072') == -1) or
+    (read_inventory_result.stdout.find('1024') == -1)
+  register: set_inventory_result
+  changed_when: "'VC_CFG_RESULT=0' in set_inventory_result.stdout"
+
+- name: Check NTP Servers
+  command: /usr/sbin/vpxd_servicecfg timesync read ntp
+  register: read_ntp_result
+  changed_when: false
+
+- name: Configure NTP servers
+  command: /usr/sbin/vpxd_servicecfg timesync write ntp {{ ntp_servers }}
+  when: read_ntp_result.stdout.find( '{{ ntp_servers }}' ) == -1
+  register: set_ntp_result
+  changed_when: "'VC_CFG_RESULT=0' in read_ntp_result.stdout"
+
+- name: Check vCenter Embedded Database
+  command: /usr/sbin/vpxd_servicecfg db read
+  register: read_db_result
+  changed_when: false
+
+- name: Configure vCenter Embedded Database
+  command: /usr/sbin/vpxd_servicecfg db write embedded
+  when: read_db_result.stdout.find('embedded' ) == -1
+  register: set_db_result
+  changed_when: "'VC_CFG_RESULT=0' in set_db_result.stdout"
+
+- name: Check vCenter Server SSO
+  command: /usr/sbin/vpxd_servicecfg sso read
+  register: read_sso_result
+  changed_when: false
+
+- name: Configuring vCenter Server SSO w/custom administrator@vsphere.local password
+  command: /usr/sbin/vpxd_servicecfg sso write embedded '{{ site_passwd }}'
+  when: read_sso_result.stdout.find('embedded') == -1
+  register: set_sso_result
+  changed_when: "'VC_CFG_RESULT=0' in set_sso_result.stdout"
+
+- name: Reboot vCenter Appliance
+  command: shutdown -r now
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: >
+    (set_eula_result.changed) or
+    (set_inventory_result.changed) or
+    (set_ntp_result.changed) or
+    (set_db_result.changed) or
+    (set_sso_result.changed)
+  register: reboot_result
+
+- name: Wait for vCenter Appliance to reboot
+  local_action: >
+    wait_for
+    host={{ ansible_ssh_host }}
+    port=443
+    delay=10
+    timeout=600
+  when: reboot_result.changed

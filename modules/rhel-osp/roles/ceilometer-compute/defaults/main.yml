@@ -1,0 +1,26 @@
+---
+#Enable or disable ceilometer
+use_ceilometer: true
+
+# Database to be used for ceilometer.  Options: [ 'mariadb', 'mongodb'] if monogo is used, mongodb will be installed.
+ceilometer_db: mariadb
+
+#Enable or disable pacemaker
+use_pacemaker: false
+
+#for keystone auth construction
+keystone_admin_protocol: http
+keystone_public_protocol: http
+keystone_admin_port: 35357
+keystone_public_port: 5000
+keystone_default_api_verison: v2.0
+admin_tenant: admin
+admin_user: admin
+
+#Default Rabbitmq info
+rabbitmq_user: guest
+rabbitmq_pass: guest
+rabbit_port: 5672
+
+# location of saved credentials on the Autodeploy node.
+credentials_dir: /var/lib/ansible

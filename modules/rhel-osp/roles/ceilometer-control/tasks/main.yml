@@ -1,0 +1,10 @@
+---
+- name: install & configure ceilometer-control juno
+  include: juno.yml
+  when: (openstack_release == 'juno') and use_ceilometer
+  tags: ceilometer
+
+- name: install & configure ceilometer-control kilo
+  include: kilo.yml
+  when: (openstack_release == 'kilo') and use_ceilometer
+  tags: ceilometer

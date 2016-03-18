@@ -1,0 +1,45 @@
+---
+# Setting up cinder using nfs until a different driver is supplied
+- name: install cinder components
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-cinder
+    - openstack-utils
+    - python-memcached
+    - python-keystonemiddleware
+    - python-openstackclient
+    - nfs-utils
+  tags: cinder
+
+- name: Update cinder config file
+  ini_file:
+    dest: /etc/cinder/cinder.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "debug", value: "true"}
+    - { section: "DEFAULT", option: "auth_startegy", value: "keystone"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "memcached_servers", value: "{{ cinder_memcached_servers }}"}
+    - { section: "DEFAULT", option: "notification_driver", value: "messaging"}
+    - { section: "DEFAULT", option: "control_exchange", value: "cinder"}
+    - { section: "DEFAULT", option: "glance_host", value: "{{ glance_private_vip }}"}
+    - { section: "DEFAULT", option: "host", value: "{{ ansible_hostname }}"}
+    - { section: "DEFAULT", option: "osapi_volume_listen", value: "{{ cinder_osapi_volume_listen }}"}
+    - { section: "DEFAULT", option: "osapi_volume_listen_port", value: "{{ cinder_osapi_volume_listen_port | default (8776) }}"}
+    - { section: "keystone_authtoken", option: "identity_uri", value: "{{ keystone_auth_protocol | default('http') }}://{{ keystone_admin_vip }}:{{ keystone_auth_port | default (35357) }}/"}
+    - { section: "keystone_authtoken", option: "auth_uri", value: "{{ keystone_public_protocol | default('http') }}://{{ keystone_public_vip }}:{{ keystone_public_port | default (5000) }}/"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "cinder"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ cinder_pass }}"}
+    - { section: "database", option: "connection", value: "mysql://cinder:{{ cinder_db_pass }}@{{ lb_db_vip}}/cinder"}
+    - { section: "database", option: "max_retries", value: "-1"}
+  tags: cinder
+

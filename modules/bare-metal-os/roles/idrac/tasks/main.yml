@@ -1,0 +1,95 @@
+---
+- name: Set facts for the next play
+  set_fact:
+    ansible_ssh_host: "{{ ipmi_ip_address }}"
+    ansible_ssh_user: "{{ ipmi_username | default ('root') }}"
+    ansible_ssh_pass: "{{ ipmi_password | default ('calvin') }}"
+
+- name: clear all pending jobs.
+  raw: racadm jobqueue delete -i JID_CLEARALL_FORCE
+  register: result
+  failed_when: ('ERROR' in result.stdout) or ('COMMAND PROCESSING FAILED' in result.stdout) or ('error' in result.stdout or result.rc != 0)
+
+- name: pause for 120s
+  pause: minutes=2
+
+- name: get vdisks
+  raw: racadm raid get vdisks
+  register: vdisks
+
+- name: create vdisks
+  when: '("virtual disks are displayed" in vdisks.stdout or initialize_disks)  or ({{vdisks.stdout_lines | length }} == "1")'
+  include: vdisk.yml
+
+- name: check if bootmode is set to BIOS not EFI
+  raw: racadm get BIOS.BiosBootSettings.BootMode
+  register: bootmode
+  failed_when: "'ERROR' in bootmode.stdout or 'COMMAND PROCESSING FAILED' in bootmode.stdout or 'error' in bootmode.stdout or bootmode.rc != 0"
+
+- name: set bootmode to BIOS
+  when: '"BootMode=Bios" not in bootmode.stdout'
+  raw: racadm set BIOS.BiosBootSettings.BootMode Bios
+  register: result
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+
+- name: add bootmode to jobqueue
+  when: '"BootMode=Bios" not in bootmode.stdout'
+  raw: racadm jobqueue create BIOS.Setup.1-1
+  register: result
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+
+- set_fact:
+    list_test: '{{ result.stdout|list}}'
+  when: '"BootMode=Bios" not in bootmode.stdout'
+
+- name: get jobqueue ID
+  set_fact:
+    jid: '{% for i in  [127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142] %}{{list_test[i]}}{% endfor %}'
+  when: '"BootMode=Bios" not in bootmode.stdout'
+
+- name: powercycle
+  raw: racadm serveraction powercycle
+  when: '"BootMode=Bios" not in bootmode.stdout'
+
+- name: wait for jobqueue 1 to complete
+  raw: racadm jobqueue view -i {{jid}}
+  register: jobqueue_view
+  until: (jobqueue_view.stdout | search("Job completed successfully"))
+  retries: 30
+  delay: 30
+  when: '"BootMode=Bios" not in bootmode.stdout'
+
+- name: check legacyBootproto
+  raw: racadm get Nic.NICConfig.{{nic_num | default(3)}}
+  register: bootproto
+  failed_when: "'ERROR' in bootproto.stdout or 'COMMAND PROCESSING FAILED' in bootproto.stdout or 'error' in bootproto.stdout or bootproto.rc != 0"
+
+- name: set legacybootproto
+  raw: racadm set Nic.NICConfig.{{nic_num | default(3)}} PXE
+  register: result
+  when: '"LegacyBootProto=PXE" not in bootproto.stdout'
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+
+- name: set pxe boot persistant
+  raw: racadm config -g cfgServerInfo -o cfgServerBootOnce 0
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+  register: result
+
+- name: check vtx
+  raw: racadm get BIOS.ProcSettings.ProcVirtualization
+  failed_when: "'ERROR' in procset.stdout or 'COMMAND PROCESSING FAILED' in procset.stdout or 'error' in procset.stdout or procset.rc != 0"
+  register: procset
+
+- name: set vtx
+  when: '"ProcVirtualization=Enabled" not in procset.stdout'
+  raw: racadm set BIOS.ProcSettings.ProcVirtualization Enabled
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+  register: result
+
+- name: turn on ipmi
+  raw: racadm set iDRAC.IPMILan.Enable Enabled
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+  register: result
+
+- name: poweroff nodes when done
+  raw: racadm serveraction powerdown

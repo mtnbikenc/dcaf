@@ -1,0 +1,14 @@
+service rsync
+​ {
+​     port            = 873
+​     disable         = no
+​     socket_type     = stream
+​     protocol        = tcp
+​     wait            = no
+​     user            = root
+​     group           = root
+​     groups          = yes
+​     server          = /usr/bin/rsync
+​     bind            = {{ swift_rsync_if.ipaddr }}
+​     server_args = --daemon --config /etc/rsync.conf
+​ }

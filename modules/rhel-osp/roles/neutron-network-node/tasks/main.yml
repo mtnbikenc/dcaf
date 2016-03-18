@@ -1,0 +1,10 @@
+---
+- name: install & configure neutron juno
+  include: juno.yml
+  when: openstack_release == 'juno'
+  tags: neutron
+
+- name: install & configure neutron kilo
+  include: kilo.yml
+  when: openstack_release == 'kilo'
+  tags: neutron

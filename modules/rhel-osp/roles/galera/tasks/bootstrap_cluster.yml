@@ -1,0 +1,79 @@
+---
+- name: deploy non-cluster galera.cnf on 1st node
+  template:
+    src: galera_bootstrap.cnf.j2 
+    dest: /etc/my.cnf.d/galera.cnf
+    mode: 0644
+    owner: root
+    group: root
+    force: yes
+  when: ansible_hostname not in groups['sql'][1:]
+  tags: galera
+
+- name: start mariadb on 1st node
+  service:
+    name: mariadb
+    state: restarted
+  when: ansible_hostname not in groups['sql'][1:]
+  tags:
+    - bootstrap
+    - galera
+
+- name: start mariadb on other nodes in cluster
+  service:
+    name: mysqld
+    state: started
+  when: ansible_hostname in groups['sql'][1:]
+  tags:
+    - bootstrap
+    - galera
+
+- name: wait for clustercheck to respond with 200
+  command: clustercheck
+  register: result
+  when: ansible_hostname in groups['sql'][1:]
+  until: result.stdout.find("Galera cluster node is synced.")
+  retries: 10
+  delay: 5
+  tags:
+    - bootstrap
+    - galera
+
+- name: stop mysql on 1st node
+  service:
+    name: mariadb
+    state: stopped
+  when: ansible_hostname not in groups['sql'][1::]
+  tags:
+    - bootstrap
+    - galera
+
+- name: deploy cluster galera.cnf on 1st
+  template:
+    src: galera.cnf.j2
+    dest: /etc/my.cnf.d/galera.cnf
+    mode: 0644
+    owner: root
+    group: root
+    force: yes
+  when: ansible_hostname not in groups['sql'][1::]
+  tags: galera
+
+- name: start mariadb on 1st node in cluster
+  service:
+    name: mysqld
+    state: started
+  when: ansible_hostname not in groups['sql'][1::]
+  tags:
+    - bootstrap
+    - galera
+
+- name: wait for clustercheck to respond with 200
+  command: clustercheck
+  register: result
+  until: result.stdout.find("Galera cluster node is synced.")
+  retries: 10
+  delay: 5
+  tags:
+    - bootstrap
+    - galera

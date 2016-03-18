@@ -1,0 +1,43 @@
+---
+- name: install haproxy
+  yum:
+    pkg: "{{item}}"
+    state: present
+  with_items:
+    - haproxy
+    - openstack-selinux
+  tags: haproxy
+
+- name: set sysctl
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: 1
+    reload: yes
+  tags: haproxy
+
+- name: set rsyslog/haproxy.conf file
+  copy:
+    force: yes
+    src: haproxy.conf
+    dest: /etc/rsyslog.d/haproxy.conf
+  tags: haproxy
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+
+- name: set haproxy.cfg file
+  template:
+    src: "{{openstack_release}}.haproxy.cfg.j2"
+    dest: /etc/haproxy/haproxy.cfg
+  tags: haproxy
+
+- name: restart and disable haproxy
+  service:
+    name: "{{item}}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - haproxy
+  tags: haproxy

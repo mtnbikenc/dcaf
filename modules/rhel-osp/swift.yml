@@ -1,0 +1,80 @@
+---
+- name: gather info
+  hosts: openstack 
+  gather_facts: true
+
+- name: Swift base setup
+  hosts: swift
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: openstack
+  tags: swift
+
+
+- name: install swift-proxy rules
+  hosts:
+    - swift-proxy
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for swift-proxy
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 2
+    with_items:
+      - { port: 8080, protocol: tcp, comment: "swift proxy" }
+    tags:
+      -  iptables
+      -  swift
+- name: install swift-storage rules
+  hosts:
+    - swift-storage
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for swift storage nodes nodes
+    iptables:
+      port: "{{item.port}}"
+      protocol: "{{item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 2
+    with_items:
+      - { port: 873, protocol: tcp, comment: "rsync replication traffic" }
+      - { port: ['6200:6202'], protocol: tcp, comment: "swift services" }
+    tags:
+      - swift
+      - iptables
+
+
+- name: Controller Swift Proxy 1
+  hosts: swift-proxy
+  max_fail_percentage: 0
+  roles:
+    - swift-proxy-1
+
+- name: Swift Storage 1
+  hosts: swift-storage
+  max_fail_percentage: 0
+  roles:
+    - swift-storage-1
+
+- name: Controller Swift Proxy 2
+  hosts: controller
+  max_fail_percentage: 0
+  roles:
+    - swift-proxy-2
+
+- name: Swift Storage 2
+  hosts: swift-storage
+  max_fail_percentage: 0
+  roles:
+    - swift-storage-2
+
+- name: Controller Swift Glance
+  hosts: glance
+  max_fail_percentage: 0
+  roles:
+    - swift-glance

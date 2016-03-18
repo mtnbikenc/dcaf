@@ -1,0 +1,43 @@
+---
+- name: create databases
+  mysql_db:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - keystone
+    - glance
+    - cinder
+    - nova
+    - neutron
+    - heat
+  delay: 2
+  run_once: true
+  tags: mysql
+
+- name: create keystone database users
+  mysql_user:
+    name: "{{ item.name }}"
+    host: "%"
+    password: "{{ item.password }}"
+    priv: "{{ item.db }}.*:{{ item.priv }} "
+    state: present
+  with_items:
+    - { name: root, password: "{{ db_root_password }}", db: '*', priv: 'ALL,GRANT' }
+    - { name: keystone, password: "{{ keystone_db_pass }}", db: keystone, priv: ALL }
+    - { name: glance, password: "{{ glance_db_pass }}", db: glance, priv: ALL }
+    - { name: cinder, password: "{{ cinder_db_pass }}", db: cinder, priv: ALL }
+    - { name: nova, password: "{{ nova_db_pass }}", db: nova, priv: ALL }
+    - { name: neutron, password: "{{ neutron_db_pass }}", db: neutron, priv: ALL }
+    - { name: heat, password: "{{ heat_db_pass }}", db: heat, priv: ALL }
+  run_once: true
+  tags: mysql
+
+- name : wait for DB to create users
+  pause:
+    seconds: 30
+  tags: mysql
+
+- name: flush db hosts
+  command: mysqladmin flush-hosts
+  run_once: true
+  tags: mysql

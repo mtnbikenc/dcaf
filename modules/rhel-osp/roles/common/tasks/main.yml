@@ -1,0 +1,123 @@
+---
+- name: set sysctl
+  sysctl:
+    name: "{{item.name}}"
+    value: "{{item.value}}"
+    reload: yes
+  with_items:
+    - {name: "net.ipv4.ip_nonlocal_bind", value: "1"}
+    - {name: "net.ipv4.tcp_keepalive_intvl", value: "1"}
+    - {name: "net.ipv4.tcp_keepalive_time", value: "5"}
+    - {name: "net.ipv4.tcp_keepalive_probes", value: "5"}
+    - {name: "net.ipv4.ip_forward", value: "1"}
+    - { name: net.ipv4.conf.default.rp_filter, value: 2 }
+    - { name: net.ipv4.conf.all.rp_filter, value: 2 }
+
+- name: deploy resolv.conf
+  template: 
+    src: resolv.conf.j2 
+    dest: /etc/resolv.conf
+  tags: dns
+
+
+- name: create /etc/hosts with all nodes
+  tags: dns
+  lineinfile:
+    dest: /etc/hosts 
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item]['ansible_'+control_if.device]['ipv4']['address'] }} {{item}}"
+    state: present
+  with_items: "{{groups[group]}}"
+
+- name: update all packages
+  yum:
+   name: "*"
+   state: latest
+  when: not offline and update_rpms
+
+
+- name: install base rpms
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{rpms_to_install}}"
+
+- name: set selinux policy and mode
+  selinux:
+    policy: targeted
+    state: permissive
+  tags: selinux
+
+- name: install ntp and iptables-services
+  yum:
+   name: "{{item}}"
+   state: installed
+  with_items:
+    - ntp
+    - iptables-services 
+  tags: 
+    - iptables
+    - ntp
+
+- name: configure ntp service
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+    force: yes
+  tags: ntp
+
+- name: stop ntpd service to prepare for time synchronization
+  service:
+    name: ntpd
+    state: stopped
+  when: force_ntpdate == "yes"
+  tags: ntp
+
+- name: sync time from ntp servers
+  command: ntpdate {{ ntp | join(" ") }}
+  when: force_ntpdate == "yes"
+  tags: ntp
+
+- name: Set hostname
+  command: hostnamectl set-hostname --static --transient {{ inventory_hostname }}
+  tags: dns
+
+- name: turn off firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+  tags: iptables
+  ignore_errors: yes
+
+- name: iptables start
+  service:
+    name: iptables
+    state: started
+    enabled: yes
+  tags: iptables
+
+- name: insert established matched rule
+  iptables:
+    match:  "state --state ESTABLISHED,RELATED"
+  tags: iptables
+
+- name: insert loopback rules
+  iptables:
+    position: 2
+    in_interface: lo
+  tags: iptables
+
+- name: insert ssh rule
+  iptables:
+    position: 3
+    port: 22
+    comment: "ssh incoming"
+  tags: iptables
+
+- name: insert reject all
+  iptables:
+    comment: "reject all others"
+    target: REJECT
+  tags: iptables
+

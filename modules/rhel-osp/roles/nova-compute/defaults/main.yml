@@ -1,0 +1,142 @@
+---
+# verbose logging
+verbose: true
+
+#Keystone admin passwords
+credentials_dir: /var/lib/ansible
+
+# ====== Rabbitmq settings =======
+# Use HA queues in RabbitMQ (x-ha-policy: all). If you change
+# this option, you must wipe the RabbitMQ database. (boolean
+rabbitmq_ha_queue: True
+
+#Use durable queues in amqp
+rabbitmq_durable_queues: False
+
+# The RabbitMQ userid. (string value)
+# rabbitmq_user: guest
+rabbitmq_user: guest
+
+# The RabbitMQ password. (string value)
+# rabbitmq_pass: guest
+rabbitmq_pass: guest
+
+# message  port for rabbitmq
+rabbit_port: 5672
+# ==== general Nova settings
+# If set, send api.fault notifications on caught exceptions in
+# the API service. (boolean value)
+notify_api_faults: false
+
+# Top-level directory for maintaining nova's state (string value)
+nova_state_path: /var/lib/nova
+
+# Seconds between nodes reporting state to datastore (integer value)
+nova_report_interval: 10
+
+# Maximum time since last check-in for up service (integer value)
+nova_service_down_time: 60
+
+# When creating multiple instances with a single request using
+# the os-multiple-create API extension, this template will be
+# used to build the display name for each instance. The
+# benefit is that the instances end up with different
+# hostnames. To restore legacy behavior of every instance
+# having the same name, set this option to "%(name)s".  Valid
+# keys for the template are: name, uuid, count. (string value)
+nova_multi_instance_display_name_template: '%%(name)s-%%(count)s'
+
+# Amount of memory in MB to reserve for the host (integer value)
+nova_reserved_host_memory_mb: 1024
+
+# Use syslog for logging. Existing syslog format is DEPRECATED
+# during I, and will change in J to honor RFC5424. (boolean value)
+nova_use_syslog: false
+
+# Driver to use for controlling virtualization. Options
+# include: libvirt.LibvirtDriver, xenapi.XenAPIDriver,
+# fake.FakeDriver, baremetal.BareMetalDriver,
+# vmwareapi.VMwareVCDriver, hyperv.HyperVDriver (string value)
+nova_compute_driver: libvirt.LibvirtDriver
+
+# Fail instance boot if vif plugging fails (boolean value)
+nova_vif_plugging_timeout: 300
+
+# Number of seconds to wait for neutron vif plugging events to
+# arrive before continuing or failing (see
+# vif_plugging_is_fatal). If this is set to zero and
+# vif_plugging_is_fatal is False, events should not be
+# expected to arrive at all. (integer value)
+nova_vif_plugging_is_fata: True
+
+# Firewall driver (defaults to hypervisor specific iptables
+# driver) (string value)
+#firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+nova_firewall_driver: nova.virt.firewall.NoopFirewallDriver
+
+# VM image preallocation mode: "none" => no storage
+# provisioning is done up front, "space" => storage is fully
+# allocated at instance start (string value)
+nova_preallocate_images: none
+
+# Force backing images to raw format (boolean value)(ceph)
+nova_force_raw_images: false
+
+# port glance uses for API
+glance_port: 9292
+
+# Template string to be used to generate instance names
+# (string value)
+nova_instance_name_template: r'%(name)s-%(uuid)s'
+
+# ===== libvirt settings =====
+# Libvirt domain type (valid options are: kvm, lxc, qemu, uml,
+# xen) if using virtualized compute nodes for testing set nova_virt_type
+# on host_vars to kvm-qemu
+nova_virt_type: kvm
+virt: false
+# enable live migration
+nova_instance_live_migration: True
+
+# Migration flags to be set for live migration (string value)
+nova_live_migration_flag: 'VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE, VIR_MIGRATE_TUNNELLED'
+
+# Migration flags to be set for block migration (string value)
+nova_block_migration_flag: 'VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE, VIR_MIGRATE_TUNNELLED, VIR_MIGRATE_NON_SHARED_INC'
+
+# Set to "host-model" to clone the host CPU feature flags; to
+# "host-passthrough" to use the host CPU model exactly; to
+# "custom" to use a named CPU model; to "none" to not set any
+# CPU model. If virt_type="kvm|qemu", it will default to
+# "host-model", otherwise it will default to "none" (string
+# value)
+nova_cpu_mode: host-model
+
+# Method used to wipe old volumes (valid options are: none,
+# zero, shred) (string value)
+nova_volume_clear: zero
+
+# Size in MiB to wipe at start of old volumes. 0 => all (integer value)
+nova_volume_clear_size: 50
+
+
+# ===== Neutron Settings =====
+# Allow an instance to have multiple vNICs attached to the
+# same Neutron network. (boolean value)
+neutron_allow_duplicate_networks: false
+
+# Number of seconds before querying neutron for extensions (integer value)
+neutron_extension_sync_interval: 600
+
+# Name of Integration Bridge used by Open vSwitch (string value)
+neutron_ovs_intergration_bridge: br-int
+
+# Neutron API port
+neutron_port: 9696
+
+# Timeout value for connecting to neutron in seconds (integer value)
+neutron_url_timeout: 30
+
+# keystone private api port
+keystone_private_port: 5000
+

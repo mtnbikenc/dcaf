@@ -1,0 +1,168 @@
+---
+- name: install glance packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - nfs-utils
+    - openstack-glance
+    - openstack-utils
+    - openstack-selinux
+    - python-openstackclient
+  tags: glance
+
+- name: Update glance-api config file
+  ini_file:
+    dest: /etc/glance/glance-api.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues true", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "notification_driver", value: "messaging"}
+    - { section: "DEFAULT", option: "registry_host", value: "{{ glance_vip }}"}
+    - { section: "DEFAULT", option: "bind_host", value: "{{ glance_bind_host }}"}
+    - { section: "DEFAULT", option: "bind_port", value: "{{ glance_api_port }}"}
+    - { section: "database", option: "connection", value: "mysql://glance:{{ glance_db_pass }}@{{ lb_db_vip }}/glance"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "paste_deploy", option: "flavor", value: "keystone"}
+    - { section: "keystone_authtoken", option: "identity_uri", value: "http://{{ keystone_vip }}:{{ keystone_auth_port | default(35357)}}"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "glance"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ glance_pass }}"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+  tags: glance
+
+- name: Update glance-registry config file
+  ini_file:
+    dest: /etc/glance/glance-registry.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues true", value: "true"}
+    - { section: "DEFAULT", option: "notification_driver", value: "messaging"}
+    - { section: "DEFAULT", option: "registry_host", value: "{{ glance_vip }}"}
+    - { section: "DEFAULT", option: "bind_host", value: "{{ glance_bind_host }}"}
+    - { section: "DEFAULT", option: "bind_port", value: "{{ glance_reg_port }}"}
+    - { section: "database", option: "connection", value: "mysql://glance:{{ glance_db_pass }}@{{ lb_db_vip }}/glance"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "paste_deploy", option: "flavor", value: "keystone"}
+    - { section: "keystone_authtoken", option: "identity_uri", value: "http://{{ keystone_vip }}:{{ keystone_auth_port | default(35357) }}"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "glance"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ glance_pass }}"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+  tags: glance
+
+# commenting out pacemaker tasks
+#- name: restart and disable glance
+#  service:
+#    name: "{{ item }}"
+#    state: restarted
+#    enabled: no
+#  with_items:
+#    - openstack-glance-api
+#    - openstack-glance-registry
+#  tags: glance
+#  when: use_pacemaker
+- name: check for tables
+  command: mysql -e "select count(*) from information_schema.tables where table_schema='glance'" -sN
+  run_once: true
+  register: mysql_result
+  tags: glance
+
+- name: run db_sync for glance
+  shell: runuser glance -s /bin/sh -c '/usr/bin/glance-manage db_sync'
+  when: mysql_result.stdout|int == 0
+  run_once: true
+  tags: glance
+
+- name: restart and disable glance
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - openstack-glance-api
+    - openstack-glance-registry
+  tags: glance
+  when: not use_pacemaker
+
+
+- name: create the NFS share mountpoint on the nfs server
+  file:
+    path: "{{ glance_datadir }}"
+    owner: glance
+    group: nobody
+    state: directory
+  tags: glance
+  when: default_store == 'file'
+
+- name: enable nfs support services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - rpcbind
+    - nfs-server
+    - nfs-lock
+    - nfs-idmapd
+  when: default_store == 'file'
+  tags: glance
+
+
+## commenting out pacemaker tasks
+#- name: use pacemaker to mount the NFS share as service.
+#  pcs_resource: command=create name=glance-fs type=Filesystem clone=yes
+#  args:
+#     options:
+#        device: "{{ inventory_hostname }}:{{ glance_datadir }}"
+#        directory: "{{ glance_datadir }}"
+#        fstype: "nfs"
+#        options: "v3"
+#     operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  when: default_store == 'file' and use_pacemaker
+#  tags: glance
+#
+#- name: create pacemaker resources for glance services
+#  pcs_resource: command=create name=glance-{{ item }} type=systemd:openstack-glance-{{ item }} clone=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  with_items:
+#    - registry
+#    - api
+#  tags: glance
+#  when: use_pacemaker
+#
+#- name: create pacemaker constraints for glance-fs
+#  shell: pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}
+#  with_items:
+#    - { id: order-glance-fs-clone-glance-registry-clone-mandatory, cmd: "order start glance-fs-clone then glance-registry-clone" }
+#    - { id: colocation-glance-registry-clone-glance-fs-clone-mandatory, cmd: "colocation add glance-registry-clone with glance-fs-clone" }
+#  when: default_store == 'file'
+#  tags: glance
+#  when: use_pacemaker
+#
+#- name: create pacemaker constraints for glance
+#  shell: pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}
+#  with_items:
+#    - { id: order-keystone-clone-glance-registry-clone-mandatory, cmd: "order start keystone-clone then glance-registry-clone" }
+#    - { id: order-glance-registry-clone-glance-api-clone-mandatory, cmd: "order start glance-registry-clone then glance-api-clone" }
+#    - { id: colocation-glance-api-clone-glance-registry-clone-mandatory, cmd: "colocation add glance-api-clone with glance-registry-clone" }
+#  run_once: true
+#  when: use_pacemaker
+#  tags: glance

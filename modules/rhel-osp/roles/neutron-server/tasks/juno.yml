@@ -1,0 +1,55 @@
+---
+- name: check for tables
+  command: mysql -e "select count(*) from information_schema.tables where table_schema='neutron'" -sN
+  run_once: true
+  register: mysql_result
+  tags: neutron
+
+- name: stamp neutron database
+  command: /usr/bin/neutron-db-manage --config-file /usr/share/neutron/neutron-dist.conf --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugin.ini upgrade head
+  when: mysql_result.stdout|int <= 1
+  run_once: true
+  tags: neutron
+
+## commenting out pacemaker tasks
+#- name: "[pacemaker]disable neutron services for pacemaker"
+#  service:
+#    name: "{{ item }}"
+#    state: stopped
+#    enabled: no
+#  with_items:
+#    - neutron-server
+#  when: use_pacemaker
+#  tags: neutron
+
+- name: enable neutron services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - neutron-server
+  when: not use_pacemaker
+  tags: neutron
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker] create pacemaker resources for neutron-server"
+#  pcs_resource: command=create name=neutron-server type=systemd:neutron-server clone=yes interleave=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  when: use_pacemaker
+#  tags: neutron
+#
+#- name: "[pacemaker] create pacemaker constraints for neutron"
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-keystone-clone-neutron-server-clone, cmd: "order start keystone-clone then neutron-server-clone" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  when: use_pacemaker
+#  tags: neutron

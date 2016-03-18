@@ -1,0 +1,107 @@
+---
+# vdisk setup
+- name: check bootseq
+  raw: racadm get BIOS.BiosBootSettings.bootseq
+  register: seq
+
+- name: set HD boot to avoid reboot loop
+  raw: "racadm set BIOS.BiosBootSettings.bootseq HardDisk.List.1-1"
+  register: result
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0"
+
+- name: set pxe boot persistant
+  raw: racadm config -g cfgServerInfo -o cfgServerBootOnce 0
+  register: result
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+  failed_when: "'ERROR' in result.stdout or 'COMMAND PROCESSING FAILED' in result.stdout or 'error' in result.stdout or result.rc != 0 or 'Configuration Job not Created'  in result.stdout"
+
+- name: vdisk_bootseq jobqueue
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+  raw: racadm jobqueue create BIOS.Setup.1-1
+  register: result
+  failed_when: ('ERROR' in result.stdout) or ('COMMAND PROCESSING FAILED' in result.stdout) or ('error' in result.stdout or result.rc != 0)
+
+- set_fact:
+    list_test: '{{ result.stdout|list}}'
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+
+- name: get jobqueue ID vdisk_bootseq
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+  set_fact:
+    jid: '{% for i in  [127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142] %}{{list_test[i]}}{% endfor %}'
+
+- name: powercycle vdisk_bootseq
+  raw: racadm serveraction powercycle
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+
+- name: wait for jobqueue vdisk_bootseq to complete
+  when: "'BootSeq=HardDisk.List.1-1' not in seq.stdout and 'No virtual disks are displayed' not in vdisks.stdout"
+  raw: racadm jobqueue view -i {{jid}}
+  register: jobqueue_view
+  until: (jobqueue_view.stdout | search("Job completed successfully"))
+  retries: 30
+  delay: 30
+
+- name: delete original vdisks
+  raw: 'racadm raid deletevd:{{item}}'
+  when: '"No virtual disks are displayed" not in vdisks.stdout'
+  register: result
+  with_items: "{{ vdisks.stdout_lines }}"
+  failed_when: ('ERROR' in result.stdout) or ('COMMAND PROCESSING FAILED' in result.stdout) or ('error' in result.stdout or result.rc != 0)
+
+- name: add jobqueue delete_vdisk
+  raw: racadm jobqueue create RAID.Integrated.1-1
+  when: '"No virtual disks are displayed" not in vdisks.stdout'
+  register: jobqueue
+#  failed_when: ('ERROR' in result.stdout) or ('COMMAND PROCESSING FAILED' in result.stdout) or ('error' in result.stdout or result.rc != 0)
+
+- set_fact:
+    list_test: '{{ jobqueue.stdout|list}}'
+  when: '"No virtual disks are displayed" not in vdisks.stdout'
+
+- name: powercycle 1
+  raw: racadm serveraction powercycle
+  when: '"No virtual disks are displayed" not in vdisks.stdout'
+
+- name: get jobqueue ID 1
+  set_fact:
+    jid: '{% for i in  [127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142] %}{{list_test[i]}}{% endfor %}'
+  when: '"No virtual disks are displayed" not in vdisks.stdout'
+
+- name: wait for jobqueue 1 to complete
+  raw: racadm jobqueue view -i {{jid}}
+  register: jobqueue_view
+  until: (jobqueue_view.stdout | search("Job completed successfully"))
+  retries: 30
+  delay: 30
+  when: '"No virtual disks are displayed" not in vdisks.stdout'
+
+- name: create raid1 vdisks
+  raw: "racadm raid createvd:RAID.Integrated.1-1 -rl r1 -pdkey:Disk.Bay.{{raid1_disk[0]|default(0)}}:Enclosure.Internal.0-1:RAID.Integrated.1-1,Disk.Bay.{{raid1_disk[1]|default(1)}}:Enclosure.Internal.0-1:RAID.Integrated.1-1"
+
+- name: create raid0 vdisks
+  raw: "racadm raid createvd:RAID.Integrated.1-1 -rl r0 -pdkey:Disk.Bay.{{ item }}:Enclosure.Internal.0-1:RAID.Integrated.1-1"
+  with_items: "{{ raid0_disk1 }}"
+  when: create_storage_disks
+
+- name: add jobqueue 2
+  raw: racadm jobqueue create RAID.Integrated.1-1
+  register: jobqueue
+
+- name: powercycle 2
+  raw: racadm serveraction powercycle
+
+- set_fact:
+    list_test: '{{ jobqueue.stdout|list}}'
+
+- name: get jobqueue ID 2
+  set_fact:
+    jid: '{% for i in  [127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142] %}{{list_test[i]}}{% endfor %}'
+
+- name: wait for jobqueue 2 to complete
+  raw: racadm jobqueue view -i {{jid}}
+  register: jobqueue_view
+  until: (jobqueue_view.stdout | search("Job completed successfully"))
+  retries: 30
+  delay: 30

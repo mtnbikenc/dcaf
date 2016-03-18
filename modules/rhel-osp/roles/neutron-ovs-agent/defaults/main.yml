@@ -1,0 +1,153 @@
+---
+# use_l2: Boolean operator, this should be true if l2population is used in the mechinism drivers for ml2.
+use_l2: true
+
+# The ovs bridge to use for l3 traffic leaving the OSP cluster
+neutron_ovs_external_bridge: "br-ex"
+
+# =========== OVS plugin variables =============
+# IntOpt) This is the MTU size of veth interfaces.
+# Do not change unless you have a good reason to.
+# The default MTU size of veth interfaces is 1500.
+# This option has no effect if use_veth_interconnection is False
+veth_mtu: 1500
+
+# (ListOpt) The types of tenant network tunnels supported by the agent.
+# Setting this will enable tunneling support in the agent. This can be set to
+# either 'gre' or 'vxlan'. If this is unset, it will default to [] and
+# disable tunneling support in the agent. When running the agent with the OVS
+# plugin, this value must be the same as "tunnel_type" in the "[ovs]" section.
+# When running the agent with ML2, you can specify as many values here as
+# your compute hosts supports.
+neutron_tunnel_type: vxlan
+
+# (IntOpt) The port number to utilize if tunnel_types includes 'vxlan'. By
+# default, this will make use of the Open vSwitch default value of '4789' if
+# not specified.
+neutron_vxlan_udp_port: 4789
+
+# <physical_network>[:<vlan_min>:<vlan_max>] tuples enumerating ranges
+# of VLAN IDs on named physical networks that are available for
+# allocation. All physical networks listed are available for flat and
+# VLAN provider network creation. Specified ranges of VLAN IDs are
+# available for tenant network allocation if tenant_network_type is
+# 'vlan'. If empty, only gre, vxlan and local networks may be created.
+neutron_network_vlan_ranges: "physnet1"
+
+# (ListOpt) Comma-separated list of <physical_network>:<bridge> tuples
+# mapping physical network names to the agent's node-specific OVS
+# bridge names to be used for flat and VLAN networks. The length of
+# bridge names should be no more than 11. Each bridge must
+# exist, and should have a physical network interface configured as a
+# port. All physical networks listed in network_vlan_ranges on the
+# server should have mappings to appropriate bridges on each agent.
+neutron_ovs_bridge_mappings: "physnet1:br-ex"
+
+# Do not change this parameter unless you have a good reason to.
+# This is the name of the OVS integration bridge. There is one per hypervisor.
+# The integration bridge acts as a virtual "patch bay". All VM VIFs are
+# attached to this bridge and then "patched" according to their network
+# connectivity.
+neutron_ovs_intergration_bridge: br-int
+
+# Only used for the agent if tunnel_id_ranges (above) is not empty for
+# the server.  In most cases, the default value should be fine.
+neutron_ovs_tunnel_bridge: br-tun
+
+# Firewall driver for realizing neutron security group function.
+# firewall_driver:  neutron.agent.firewall.NoopFirewallDriver
+# firewall_driver: neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+neutron_ovs_firewall_driver: neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+
+# Admin options:
+# use_pacemaker: Boolean operator to decide if pacemaker is in use for HA service control
+# use_pacemaker: false
+use_pacemaker: false
+
+# The RabbitMQ userid. (string value)
+# rabbitmq_user: guest
+rabbitmq_user: guest
+
+# The RabbitMQ password. (string value)
+# rabbitmq_pass: guest
+rabbitmq_pass: guest
+
+# The RabbitMQ broker port where a single node is used.
+# (integer value)
+rabbit_port: 5672
+
+# Auth token options
+keystone_auth_protocol: http
+keystone_auth_port: 35357
+keystone_public_port: 5000
+neutron_auth_strategy: keystone
+
+# Local directory on ansible server that credentials can be found.
+credentials_dir: /var/lib/ansible
+
+
+#  ======== neutron nova interactions ==========
+# Send notification to nova when port status is active.
+# neutron_nova_on_port_status_changes = True
+neutron_notify_nova_on_port_status_changes: true
+
+# Send notifications to nova when port data (fixed_ips/floatingips) change
+# so nova can update it's cache.
+# neutron_notify_nova_on_port_data_changes: true
+neutron_notify_nova_on_port_data_changes: true
+
+# port that nova is listening on
+# nova_osapi_compute_listen_port: 8774
+nova_osapi_compute_listen_port: 8774
+
+# region that nova is in.
+# nova_region_name: regionOne
+nova_region_name: regionOne
+
+
+
+## ======= ML2 Plugin Variables ========##
+# (ListOpt) List of network type driver entrypoints to be loaded from
+# the neutron.ml2.type_drivers namespace.
+neutron_ml2_type_drivers: vxlan,flat,vlan,gre,local
+
+# (ListOpt) Ordered list of networking mechanism driver entrypoints
+# to be loaded from the neutron.ml2.mechanism_drivers namespace.
+neutron_ml2_mechanism_drivers: openvswitch,l2population
+
+# (ListOpt) Ordered list of network_types to allocate as tenant
+# networks. (defined at the top of page)
+#neutron_tunnel_type: vxlan
+
+# Controls if neutron security group is enabled or not.
+# It should be false when you use nova security group.
+# neutron_enable_security_group: True
+neutron_enable_security_group: true
+
+# ======vlans======
+# (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
+# specifying physical_network names usable for VLAN provider and
+# tenant networks, as well as ranges of VLAN tags on each
+# physical_network available for allocation as tenant networks.
+neutron_network_vlan_ranges: "physnet1"
+
+# ====== flat =====
+# (ListOpt) List of physical_network names with which flat networks
+# can be created. Use * to allow flat networks with arbitrary
+# physical_network names.
+neutron_ml2_type_flat: "\"*\""
+
+# ===== vxlan ======
+# (ListOpt) Comma-separated list of <vni_min>:<vni_max> tuples enumerating
+# ranges of VXLAN VNI IDs that are available for tenant network allocation.
+neutron_vxlan_vni_ranges: 10:10000
+
+# (StrOpt) Multicast group for the VXLAN interface. When configured, will
+# enable sending all broadcast traffic to this multicast group. When left
+# unconfigured, will disable multicast VXLAN mode.
+neutron_vxlan_group: 239.1.1.1
+
+# ===== GRE =======
+# (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of
+# GRE tunnel IDs that are available for tenant network allocation
+neutron_gre_tunnel_id_ranges: 1:1000

@@ -1,0 +1,8 @@
+---
+- name: unregister vms
+  hosts: openstack
+  max_fail_percentage: 100
+  tasks:
+    - name: unregister vms
+      command: subscription-manager unregister
+      ignore_errors: yes

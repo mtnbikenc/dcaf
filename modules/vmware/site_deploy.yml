@@ -1,0 +1,299 @@
+---
+
+- name: Hanlon Setup
+  hosts: deploy_node
+  gather_facts: False
+  tags:
+    - hanlon_setup
+
+  tasks:
+    - name: Add an ESXi image to Hanlon
+      hanlon_image:
+        base_url: "{{ hanlon_base_url }}"
+        type: esxi
+        path: "{{ esxi_iso_path }}"
+        name: "{{ esxi_image_name }}"
+        version: "{{ esxi_version }}"
+      register: image
+
+    - name: Add an ESXi Model to Hanlon
+      hanlon_model:
+        base_url: "{{ hanlon_base_url }}"
+        template: vmware_esxi_5_dhcp
+        label: esxi_model
+        image_uuid: "{{ image.uuid }}"
+        esx_license: "{{ esx_license }}"
+        root_password: "{{ site_passwd }}"
+        hostname_prefix: esxi-node
+      register: model
+
+    - name: Create policy for node using SMBIOS UUID
+      hanlon_policy:
+        base_url: "{{ hanlon_base_url }}"
+        policy_template: vmware_hypervisor
+        label: "{{ hostvars[item].inventory_hostname }}"
+        model_uuid: "{{ model.uuid }}"
+        tags: "{{ hostvars[item].smbios_uuid }}"
+        line_number: 0
+        enabled: true
+        state: present
+      with_items: groups['esxi']
+
+- name: Initiate Node Installs
+  hosts: esxi
+  max_fail_percentage: 0
+  gather_facts: False
+  tags:
+    - node_install
+
+  tasks:
+    - name: Initiate reboot of node
+      local_action:
+        module: hanlon_node
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+        username: "{{ ipmi_username }}"
+        password: "{{ ipmi_password }}"
+        power_state: "reset"
+        ipmi_options: '{"driver": "lan20"}'
+      register: node_reboot
+
+    - name: Remove current Active Model for node
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+        state: absent
+      when: node_reboot.changed
+
+    - name: Wait for nodes to complete installation
+      local_action:
+        module: hanlon_active_model
+        base_url: "{{ hanlon_base_url }}"
+        smbios_uuid: "{{ smbios_uuid }}"
+      register: active_model
+      until: not(active_model.current_state is none) and (active_model.current_state | search("complete"))
+      retries: 60
+      delay: 30
+
+    - name: Configure static PXE Network IP on host
+      local_action:
+        module: vmware_vmkernel_ip_config
+        hostname: "{{ active_model.node_ip }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        vmk_name: vmk0
+        ip_address: "{{ pxe_ip_address }}"
+        subnet_mask: "{{ pxe_subnet_mask }}"
+
+- name: ESXi Initial Network Setup
+  hosts: esxi
+  gather_facts: False
+  tags:
+    - esxi_network
+  tasks:
+    - include: tasks/deploy/esxi_network.yml
+
+- name: Configure VMware VSAN Cluster
+  hosts: deploy_node
+  gather_facts: False
+  tags:
+    - vsan
+  tasks:
+    - name: Get Canonical
+      vmware_target_canonical_facts:
+        hostname: "{{ item }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        target_id: 10
+      with_items: groups['foundation_esxi']
+      register: target
+
+    - name: Enable SSD
+      command: /usr/bin/esxcli --server {{ item.0 }} --username {{ esxi_username }} --password {{ site_passwd }} storage nmp satp rule add -s VMW_SATP_LOCAL -d {{ item.1.canonical }} -o enable_ssd
+      with_together:
+        - groups['foundation_esxi']
+        - target.results
+
+    - name: storage reclaim
+      command: /usr/bin/esxcli --server {{ item.0 }} --username {{ esxi_username }} --password {{ site_passwd }} storage core claiming reclaim -d {{ item.1.canonical }}
+      with_together:
+        - groups['foundation_esxi']
+        - target.results
+
+    - name: Configure VSAN on first host
+      vmware_vsan_cluster:
+        hostname: "{{ groups['foundation_esxi'][0] }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+      register: vsan_cluster
+
+    - name: Configure VSAN on remaining hosts
+      vmware_vsan_cluster:
+        hostname: "{{ item }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        cluster_uuid: "{{ vsan_cluster.cluster_uuid }}"
+      with_items: groups['foundation_esxi'][1:]
+
+- name: Install vCenter Server Appliance
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - vcsa_install
+  tasks:
+    - include: tasks/deploy/vcsa_install.yml
+
+- name: Configure vCenter Server Appliance
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - vcsa_config
+  tasks:
+    - include: tasks/deploy/vcsa_config.yml
+
+- name: Update site hosts files
+  hosts: vcsa
+  gather_facts: False
+  tags:
+    - vsphere_hosts
+  tasks:
+    - name: Build hosts file
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '.*{{ hostvars[item].hostname }}$'
+        line: "{{ hostvars[item].mgmt_ip_address }} {{ hostvars[item].hostname }}"
+        state: present
+        backup: yes
+      when: hostvars[item].mgmt_ip_address is defined
+      with_items: groups['vsphere']
+
+- name: Create Datacenter & Cluster
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - datacenter
+  tasks:
+    - name: Create Datacenter
+      local_action:
+        module: vmware_datacenter
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        datacenter_name: "{{ mgmt_vdc }}"
+        state: present
+
+    - name: Create Cluster
+      local_action:
+        module: vmware_cluster
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        datacenter_name: "{{ mgmt_vdc }}"
+        cluster_name: "{{ mgmt_cluster }}"
+        enable_ha: True
+        enable_drs: True
+        enable_vsan: True
+
+- name: Create a Distributed Virtual Switch Networking
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - dvs_network
+  tasks:
+    - include: tasks/deploy/dvs_network.yml
+
+- name: Add ESXi Host to VCSA
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - add_host
+  tasks:
+    - name: Add Host
+      local_action:
+        module: vmware_host
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        datacenter_name: "{{ mgmt_vdc }}"
+        cluster_name: "{{ mgmt_cluster }}"
+        esxi_hostname: "{{ hostvars[item].hostname }}"
+        esxi_username: "{{ esxi_username }}"
+        esxi_password: "{{ site_passwd }}"
+        state: present
+      with_items: groups['foundation_esxi']
+
+- name: Add ESXi Host to dVS
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - add_host_dvs
+  tasks:
+    - name: Add Host to dVS
+      local_action:
+        module: vmware_dvs_host
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        esxi_hostname: "{{ hostvars[item].hostname }}"
+        switch_name: dvSwitch
+        vmnics: "{{ dvs_vmnic }}"
+        state: present
+      with_items: groups['foundation_esxi']
+
+- name: Migrate VMK interfaces to dVS
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - migrate_vmk
+  tasks:
+    - include: tasks/deploy/migrate_vmk.yml
+
+- name: Migrate VCSA to vDS
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - migrate_vcsa
+  tasks:
+    - name: Migrate VCSA to vDS
+      local_action:
+        module: vmware_vm_vss_dvs_migrate
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        vm_name: "{{ hostname }}"
+        dvportgroup_name: Management
+
+- name: Remove temporary vSS
+  hosts: esxi
+  gather_facts: False
+  tags:
+    - remove_vSS
+  tasks:
+    - name: Remove temporary vSwitch
+      local_action:
+        module: vmware_vswitch
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        switch_name: temp_vswitch
+        nic_name: "{{ vss_vmnic }}"
+        state: absent
+
+- name: Add ESXi vmnic to dVS
+  hosts: foundation-vcsa
+  gather_facts: False
+  tags:
+    - update_host_dvs
+  tasks:
+    - name: Add ESXi vmnic to dVS
+      local_action:
+        module: vmware_dvs_host
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        esxi_hostname: "{{ hostvars[item].hostname }}"
+        switch_name: dvSwitch
+        vmnics: "{{ dvs_vmnic }},{{ vss_vmnic }}"
+        state: present
+      with_items: groups['foundation_esxi']

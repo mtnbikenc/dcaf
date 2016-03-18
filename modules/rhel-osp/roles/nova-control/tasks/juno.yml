@@ -1,0 +1,170 @@
+---
+- name: install nova packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-nova-console
+    - openstack-nova-novncproxy
+    - openstack-utils
+    - openstack-nova-api
+    - openstack-nova-conductor
+    - openstack-nova-scheduler
+    - python-cinderclient
+    - python-memcached
+    - openstack-nova-common
+    - python-nova
+    - python-novaclient
+  tags: nova
+
+- name: Update nova.conf file
+  ini_file:
+    dest: /etc/nova/nova.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true" }
+    - { section: "DEFAULT", option: "vncserver_proxyclient_address", value: "{{ control_ipaddr }}" }
+    - { section: "DEFAULT", option: "vncserver_listen", value: "{{ control_ipaddr }}" }
+    - { section: "DEFAULT", option: "novncproxy_host", value: "{{ control_ipaddr }}" }
+    - { section: "DEFAULT", option: "novncproxy_base_url", value: "http://{{ nova_public_vip }}:6080/vnc_auto.html" }
+    - { section: "DEFAULT", option: "novncproxy_host", value: "{{ control_ipaddr}}" }
+    - { section: "database", option: "connection", value: "mysql://nova:{{ nova_db_pass }}@{{ lb_db_vip }}/nova" }
+    - { section: "database", option: "max_retries", value: "-1" }
+    - { section: "DEFAULT", option: "auth_strategy", value: "keystone" }
+    - { section: "DEFAULT", option: "memcache_servers", value: "{{ nova_memcached_servers }}" }
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}" }
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true" }
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "osapi_compute_listen", value: "{{ control_ipaddr }}" }
+    - { section: "DEFAULT", option: "metadata_host", value: "{{ nova_private_vip }}" }
+    - { section: "DEFAULT", option: "metadata_listen", value: "{{ control_ipaddr }}" }
+    - { section: "DEFAULT", option: "metadata_listen_port", value: "{{ nova_metadata_port }}" }
+    - { section: "neutron", option: "service_metadata_proxy", value: "True" }
+    - { section: "neutron", option: "metadata_proxy_shared_secret", value: "{{ neutron_metadata_proxy_shared_secret }}" }
+    - { section: "DEFAULT", option: "glance_host", value: "{{ glance_private_vip }}" }
+    - { section: "DEFAULT", option: "glance_port", value: "{{ glance_port | default(9292) }}" }
+    - { section: "DEFAULT", option: "network_api_class", value: "nova.network.neutronv2.api.API" }
+    - { section: "DEFAULT", option: "neutron_url", value: "http://{{ neutron_private_vip | default('127.0.0.1') }}:{{ neutron_port | default(9696) }}/" }
+    - { section: "DEFAULT", option: "neutron_admin_tenant_name", value: "services" }
+    - { section: "DEFAULT", option: "neutron_admin_username", value: "neutron" }
+    - { section: "DEFAULT", option: "neutron_admin_password", value: "{{ neutron_pass }}" }
+    - { section: "DEFAULT", option: "neutron_admin_auth_url", value: "http://{{ keystone_private_vip | default('127.0.0.1') }}:{{ keystone_private_port | default(5000) }}/v2.0" }
+    - { section: "DEFAULT", option: "ovs_bridge", value: "br-int" }
+    - { section: "DEFAULT", option: "auth_strategy", value: "keystone" }
+    - { section: "DEFAULT", option: "firewall_driver", value: "nova.virt.firewall.NoopFirewallDriver" }
+    - { section: "DEFAULT", option: "libvirt_vif_driver", value: "nova.virt.libvirt.vif.LibvirtGenericVIFDriver" }
+    - { section: "DEFAULT", option: "security_group_api", value: "{{ nova_security_group_api }}" }
+    - { section: "conductor", option: "use_local", value: "false" }
+    - { section: "DEFAULT", option: "scheduler_host_subset_size", value: "30" }
+    - { section: "DEFAULT", option: "notification_topics", value: "notifications" }
+    - { section: "DEFAULT", option: "notification_driver", value: "ceilometer.compute.nova_notifier" }
+    - { section: "DEFUALT", option: "notification_driver", value: "nova.openstack.common.notifier.rpc_notifier" }
+    - { section: "DEFAULT", option: "rpc_backend", value: "nova.openstack.common.rpc.impl_kombu" }
+  tags: nova
+
+- name: Update api-paste.ini file
+  ini_file:
+    dest: /etc/nova/api-paste.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "filter:authtoken", option: "auth_host", value: "{{ keystone_admin_vip | default('127.0.0.1') }}"}
+    - { section: "filter:authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "filter:authtoken", option: "admin_user", value: "nova"}
+    - { section: "filter:authtoken", option: "admin_password", value: "{{ nova_pass }}"}
+  tags: nova
+
+- name: add novnc vip /etc/hosts with all nodes
+  tags: nova
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ nova_private_vip }} {{inventory_hostname}}"
+    state: present
+  tags: nova
+
+- name: check for tables
+  command: mysql -e "select count(*) from information_schema.tables where table_schema='nova'" -sN
+  run_once: true
+  register: mysql_result
+  tags: nova
+
+- name: run dbsync for nova
+  shell: runuser nova -s /bin/sh -c '/usr/bin/nova-manage db sync'
+  when: mysql_result.stdout|int == 0
+  run_once: true
+  tags: nova
+
+# commenting out pacemaker tasks
+#- name: '[pacemaker] disable nova services'
+#  service:
+#    name: "{{ item }}"
+#    enabled: no
+#  with_items:
+#    - openstack-nova-consoleauth
+#    - openstack-nova-novncproxy
+#    - openstack-nova-api
+#    - openstack-nova-scheduler
+#    - openstack-nova-conductor
+#  tags: nova
+#  when: use_pacemaker
+
+- name: enable nova services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  with_items:
+    - openstack-nova-consoleauth
+    - openstack-nova-novncproxy
+    - openstack-nova-api
+    - openstack-nova-scheduler
+    - openstack-nova-conductor
+  tags: nova
+  when: not use_pacemaker
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker] create pacemaker resources for nova control services"
+#  pcs_resource: command=create name=nova-{{ item }} type=systemd:openstack-nova-{{ item }} clone=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  with_items:
+#    - novncproxy
+#    - api
+#    - scheduler
+#    - conductor
+#  tags: nova
+#  when: use_pacemaker
+#
+#- name: "[pacemaker] create pacemaker resources for nova consoleauth"
+#  pcs_resource: command=create name=nova-consoleauth type=systemd:openstack-nova-consoleauth
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  when: use_pacemaker
+#
+#- name: "[pacemaker] create pacemaker constraints for nova-control"
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-nova-api-clone-nova-novncproxy-clone-mandatory, cmd: "order start nova-api-clone then nova-novncproxy-clone" }
+#    - { id: colocation-nova-api-clone-nova-novncproxy-clone, cmd: "colocation add nova-api-clone with nova-novncproxy-clone" }
+#    - { id: order-nova-api-clone-nova-scheduler-clone-mandatory, cmd: "order start nova-api-clone then nova-scheduler-clone" }
+#    - { id: colocation-nova-scheduler-clone-nova-api-clone, cmd: "colocation add nova-scheduler-clone with nova-api-clone" }
+#    - { id: order-nova-scheduler-clone-nova-conductor-clone-mandatory, cmd: "order start nova-scheduler-clone then nova-conductor-clone" }
+#    - { id: colocation-nova-conductor-clone-nova-scheduler-clone, cmd: "colocation add nova-conductor-clone with nova-scheduler-clone" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  tags: nova
+#  when: use_pacemaker

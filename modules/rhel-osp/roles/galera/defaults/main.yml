@@ -1,0 +1,16 @@
+---
+# boolean operator to enable galera
+use_galera: true
+
+# User for clustercheck to use to determine if the cluster is synced
+clustercheck_db_user: clustercheck
+
+# name of the galera cluster
+wsrep_cluster_name: galera_cluster
+
+# location on autodeploy node for temp storage.
+temporary_dir: /var/lib/ansible
+
+# location on autodeploy node for credentials.
+credentials_dir: /var/lib/ansible
+

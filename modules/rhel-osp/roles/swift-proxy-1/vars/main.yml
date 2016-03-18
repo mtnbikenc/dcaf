@@ -1,0 +1,8 @@
+---
+public_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + control_if.device ].ipv4.address }}"
+internal_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' +control_if.device ].ipv4.address }}"
+swift_memcached_servers: "{% for node in groups['swift-proxy'] %}{{ hostvars[node]['ansible_'+control_if.device]['ipv4']['address'] }}:{{memcached_port | default(11211)}}{% if not loop.last %},{% endif %}{% endfor %}"
+swift_pathprefix: "{{ lookup('password', credentials_dir + '/credentials/swift_prefix chars=ascii_letters,digits') }}"
+swift_pathsuffix: "{{ lookup('password', credentials_dir + '/credentials/swift_suffix chars=ascii_letters,digits') }}"
+vip_keystone_pub: "{{haproxy_vip}}"
+swift_pass: "{{ lookup('password', credentials_dir + '/credentials/swift_pass chars=ascii_letters,digits') }}"

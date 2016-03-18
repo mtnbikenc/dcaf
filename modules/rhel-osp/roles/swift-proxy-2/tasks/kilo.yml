@@ -1,0 +1,75 @@
+---
+- name: rebalance rings
+  command: swift-ring-builder {{item}} rebalance
+  with_items:
+    - "/etc/swift/object.builder"
+    - "/etc/swift/account.builder"
+    - "/etc/swift/container.builder"
+  tags: swift
+  run_once: true
+
+- name: get rings to pass to nodes later
+  fetch:
+    src: "/etc/swift/{{ item }}"
+    dest: "{{ temporary_dir }}/{{ item }}"
+    flat: yes
+    fail_on_missing: yes
+  with_items:
+    - "object.ring.gz"
+    - "account.ring.gz"
+    - "container.ring.gz"
+  tags: swift
+  run_once: true
+
+- name: copy ring to all proxy hosts
+  copy:
+    src: "{{ temporary_dir }}/{{ item }}"
+    dest: "/etc/swift/{{ item }}"
+    owner: root
+    group: swift
+  with_items:
+    - "object.ring.gz"
+    - "account.ring.gz"
+    - "container.ring.gz"
+  tags: swift
+
+- name: chown etc/swift to root/swift
+  file:
+    state: directory
+    recurse: yes
+    owner: root
+    group: swift
+    path: /etc/swift
+  tags: swift
+
+- name: start swift-proxy
+  service:
+    name: "{{item}}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - openstack-swift-proxy
+    - openstack-swift-object-expirer
+  tags: swift
+  when: not use_pacemaker
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker] create pcs resource for swift"
+#  pcs_resource: "{{item}}"
+#  with_items:
+#    - "command=create name=swift-proxy type=systemd:openstack-swift-proxy clone=yes interleave=yes"
+#    - "command=create name=swift-object-expirer type=systemd:openstack-swift-object-expirer"
+#  run_once: true
+#  tags: swift
+#  when: use_pacemaker
+#
+#  #add constraints
+#- name: create constraint for swift-proxy-clone then swift-object-expirer
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-swift-proxy-clone-swift-object-expirer-mandatory, cmd: "order start swift-proxy-clone then swift-object-expirer" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  when: use_pacemaker
+#  tags: swift

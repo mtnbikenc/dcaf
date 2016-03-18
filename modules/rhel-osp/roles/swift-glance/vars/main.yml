@@ -1,0 +1,2 @@
+keystone_vip: "{{haproxy_vip}}"
+glance_pass: "{{  lookup('password', credentials_dir + '/credentials/glance_pass chars=ascii_letters,digits') }}"

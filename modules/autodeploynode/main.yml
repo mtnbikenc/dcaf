@@ -1,0 +1,14 @@
+---
+# This playbook will prepare the autodeploynode for use with the DCAF projects.
+
+- name: Stage DCAF automation resources on autodeploynode
+  hosts: localhost
+  gather_facts: true
+  roles:
+    - base
+    - { role: createrepo, when: offline }
+    - prep-projects
+
+- include: site_docker.yml
+
+- include: site_discovery.yml
