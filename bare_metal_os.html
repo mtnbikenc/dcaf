@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Bare Metal OS Deployment &mdash; CSC DCAF 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
+        <link rel="next" title="Known Issues and Troubleshooting" href="known_issues.html"/>
+        <link rel="prev" title="AutoDeployNode Creation - Offline Mode" href="offline_autodeploy_node.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CSC DCAF
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">CSC DCAF Automation Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline_autodeploy_node.html">AutoDeployNode Creation - Offline Mode</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Bare Metal OS Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-an-inventory">Create an inventory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#update-group-variables">Update group variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-initial-deployment-playbook">Running the initial deployment playbook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resetting-the-environment-and-preparing-for-deployment">Resetting the environment and preparing for deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-reference">Configuration Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#directory-file-structure">Directory/File Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hosts-ini">hosts.ini</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#host-vars">host_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#group-vars">group_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variables-in-roles">Variables in Roles</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues and Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">CSC DCAF</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Bare Metal OS Deployment</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/bare_metal_os.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="bare-metal-os-deployment">
+<h1>Bare Metal OS Deployment<a class="headerlink" href="#bare-metal-os-deployment" title="Permalink to this headline">¶</a></h1>
+<p>At this point the AutoDeployNode has been successfully created and is ready to
+use. The automation projects source configuration needs to be sanitized and
+configured for the deployment environment.</p>
+<div class="section" id="create-an-inventory">
+<h2>Create an inventory<a class="headerlink" href="#create-an-inventory" title="Permalink to this headline">¶</a></h2>
+<p>Begin by editing the example inventory file <code class="code docutils literal"><span class="pre">inventory/example_inventory.csv</span></code>
+with details reflecting the deployment environment. The example_inventory.csv has
+some added columns that this deployment won’t be used that should be removed
+including disk, fstype, mount_opts and mount. An inventory creation playbook
+<code class="code docutils literal"><span class="pre">site_inventory.yml</span></code> will be run which will use this file to create all
+needed host variables.</p>
+<div class="section" id="update-group-variables">
+<h3>Update group variables<a class="headerlink" href="#update-group-variables" title="Permalink to this headline">¶</a></h3>
+<p>There is a file which defines variables for the project used deployment-wide
+<code class="code docutils literal"><span class="pre">inventory/group_vars/all.yml</span></code>. This needs to be edited with values that
+reflect the deployment environment in order for the following scripts to function.</p>
+</div>
+</div>
+<div class="section" id="running-the-initial-deployment-playbook">
+<h2>Running the initial deployment playbook<a class="headerlink" href="#running-the-initial-deployment-playbook" title="Permalink to this headline">¶</a></h2>
+<p>After all variables are put in place, the inventory playbook needs to be run:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook site_inventory.yml
+</pre></div>
+</div>
+<p>This first run will populate all needed host variables and definitions from the
+inventory file previously created. This playbook will need to be run a second
+time to retrieve the SMBIOS UUID from each host and update the host_vars files:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook site_inventory.yml
+</pre></div>
+</div>
+</div>
+<div class="section" id="resetting-the-environment-and-preparing-for-deployment">
+<h2>Resetting the environment and preparing for deployment<a class="headerlink" href="#resetting-the-environment-and-preparing-for-deployment" title="Permalink to this headline">¶</a></h2>
+<p>The next playbook being run will power cycle all nodes in the deployment and
+ensure they have been discovered:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook site_reset.yml
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuration-reference">
+<h2>Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="directory-file-structure">
+<h3>Directory/File Structure<a class="headerlink" href="#directory-file-structure" title="Permalink to this headline">¶</a></h3>
+<p>The Ansible configurations are stored in <code class="code docutils literal"><span class="pre">YAML</span></code> format. They contain all the
+information needed by the Ansible Playbooks and are stored in .yml format. Refer
+to <a class="reference external" href="http://docs.ansible.com/YAMLSyntax.html">http://docs.ansible.com/YAMLSyntax.html</a> for more information about the
+<code class="docutils literal"><span class="pre">Ansible</span> <span class="pre">YAML</span> <span class="pre">Syntax</span></code>.</p>
+<p>Ansible works against multiple systems in the infrastructure at the same time. It
+does this by selecting portions of systems listed in the Ansible <code class="code docutils literal"><span class="pre">inventory</span></code>
+file. This inventory is configurable and multiple inventory files can be used at
+the same time. Refer to <a class="reference external" href="http://docs.ansible.com/intro_inventory.html">http://docs.ansible.com/intro_inventory.html</a> for more
+information about the Ansible inventory.</p>
+<p>This is how the inventory for Bare-Metal-OS is structured. Variables for Slimer
+and Ansible-ScaleIO are also included in this inventory. Notice there is a
+<code class="code docutils literal"><span class="pre">host_var</span></code> file for each host.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>inventory/
+├── group_vars
+│   ├── all.yml
+├── hosts.ini
+├── host_vars
+│   ├── autodeploynode.yml
+│   ├── compute1.yml
+│   ├── compute2.yml
+│   ├── compute3.yml
+│   ├── compute4.yml
+│   ├── controller1.yml
+│   ├── controller2.yml
+│   ├── controller3.yml
+│   ├── scaleio-1.yml
+│   ├── scaleio-2.yml
+│   ├── scaleio-3.yml
+│   ├── swift1.yml
+│   ├── swift2.yml
+│   └── swift3.yml
+</pre></div>
+</div>
+</div>
+<div class="section" id="hosts-ini">
+<h3>hosts.ini<a class="headerlink" href="#hosts-ini" title="Permalink to this headline">¶</a></h3>
+<p>The hosts.ini file should include all hosts in the environment to be deployed to.
+The hosts can be grouped as needed by specifying the <code class="code docutils literal"><span class="pre">[group</span> <span class="pre">name]</span></code> in
+square brackets. Refer to <a class="reference external" href="http://docs.ansible.com/intro_inventory.html">http://docs.ansible.com/intro_inventory.html</a> for more
+information about the Ansible inventory.</p>
+<p>This inventory supports Slimer and Ansible-ScaleIO so in our example there are
+groups for both. There is a <code class="code docutils literal"><span class="pre">[group_heading]</span></code> for each group of like hosts
+with the corresponding hosts beneath it. Specifically for bare-metal-os,
+the <code class="code docutils literal"><span class="pre">[deploy:children]</span></code> group is used.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">[</span>controller<span class="o">]</span>
+controller-1
+controller-2
+controller-3
+
+<span class="o">[</span>swift<span class="o">]</span>
+controller-1
+controller-2
+controller-3
+
+<span class="o">[</span>compute<span class="o">]</span>
+compute-1
+compute-2
+compute-3
+compute-4
+
+<span class="o">[</span>scaleio<span class="o">]</span>
+compute-1
+compute-2
+compute-3
+compute-4
+scaleio-1
+scaleio-2
+scaleio-3
+
+<span class="o">[</span>mdm<span class="o">]</span>
+scaleio-1
+scaleio-2
+
+<span class="o">[</span>tb<span class="o">]</span>
+scaleio-3
+
+<span class="o">[</span>auto_deploy_node<span class="o">]</span>
+auto-deploy-node
+
+<span class="o">[</span>mongodb:children<span class="o">]</span>
+controller
+
+<span class="o">[</span>openstack:children<span class="o">]</span>
+controller
+compute
+swift
+
+<span class="o">[</span>deploy:children<span class="o">]</span>
+openstack
+scaleio
+
+<span class="o">[</span>sds:children<span class="o">]</span>
+mdm
+tb
+
+<span class="o">[</span>gateway:children<span class="o">]</span>
+controller
+
+<span class="o">[</span>sdc:children<span class="o">]</span>
+sds
+gateway
+compute
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="code docutils literal"><span class="pre">[mdm]</span></code> and <code class="code docutils literal"><span class="pre">[tb]</span></code> sections should refer to the same hosts
+as the <code class="code docutils literal"><span class="pre">[compute]</span></code> section if you are co-locating the ScaleIO and
+Compute services.</p>
+</div>
+</div>
+<div class="section" id="host-vars">
+<h3>host_vars<a class="headerlink" href="#host-vars" title="Permalink to this headline">¶</a></h3>
+<p>The variables that will be applied to a specific host by Ansible are stored in
+a <code class="code docutils literal"><span class="pre">inventory/host_vars/host_name.yml</span></code> files. There should be one of these
+for each host in the hosts.ini file. These files should be created automatically
+when <code class="code docutils literal"><span class="pre">site_inventory.yml</span></code> is run in the previous steps.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>├── host_vars
+│   ├── autodeploynode.yml
+│   ├── compute1.yml
+│   ├── compute2.yml
+│   ├── compute3.yml
+│   ├── compute4.yml
+│   ├── controller1.yml
+│   ├── controller2.yml
+│   ├── controller3.yml
+│   ├── scaleio-1.yml
+│   ├── scaleio-2.yml
+│   ├── scaleio-3.yml
+│   ├── swift1.yml
+│   ├── swift2.yml
+│   └── swift3.yml
+</pre></div>
+</div>
+</div>
+<div class="section" id="group-vars">
+<h3>group_vars<a class="headerlink" href="#group-vars" title="Permalink to this headline">¶</a></h3>
+<p>As mentioned above Ansible allows you to group hosts and assign variables to a
+<code class="code docutils literal"><span class="pre">[group]</span></code>. This allows you to run plays against multiple hosts without
+having to specify them individually. The group _vars variables are in the
+<code class="code docutils literal"><span class="pre">inventory/group_vars/all.yml</span></code>. The all.yml is used by all hosts in the
+hosts.ini.</p>
+<p>Edit the <code class="code docutils literal"><span class="pre">group_vars/all.yml</span></code> file as needed for your environment. The
+following variables are all you may need to change.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="l l-Scalar l-Scalar-Plain">partition_additional_disks</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="l l-Scalar l-Scalar-Plain">auto_deploy_node</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">x.x.x.x</span>
+<span class="l l-Scalar l-Scalar-Plain">dns1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">x.x.x.x</span>
+<span class="l l-Scalar l-Scalar-Plain">inventory_path</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">./inventory/</span>
+<span class="l l-Scalar l-Scalar-Plain">inventory_csv_file</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">./inventory/example_inventory.csv</span>
+<span class="l l-Scalar l-Scalar-Plain">site_password</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">localpassword</span>
+<span class="l l-Scalar l-Scalar-Plain">ipmi_username</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+<span class="l l-Scalar l-Scalar-Plain">ipmi_password</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">localpassword</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="variables-in-roles">
+<h3>Variables in Roles<a class="headerlink" href="#variables-in-roles" title="Permalink to this headline">¶</a></h3>
+<p>Ansible roles allow you to organize playbooks and reuse common configuration steps
+between different types of hosts. A role will allow you to define what a host is
+supposed to do, instead of having to specify the steps needed to get a server
+configured a certain way. Role specific variables are stored in the role/vars
+directory.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="known_issues.html" class="btn btn-neutral float-right" title="Known Issues and Troubleshooting" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="offline_autodeploy_node.html" class="btn btn-neutral" title="AutoDeployNode Creation - Offline Mode" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, CSC.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

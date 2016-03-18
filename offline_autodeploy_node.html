@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>AutoDeployNode Creation - Offline Mode &mdash; CSC DCAF 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
+        <link rel="next" title="Bare Metal OS Deployment" href="bare_metal_os.html"/>
+        <link rel="prev" title="AutoDeployNode Creation - Online Mode" href="config_autodeploy_node.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CSC DCAF
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">CSC DCAF Automation Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">AutoDeployNode Creation - Offline Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-the-staging-node">Prepare the Staging Node</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-usb-hard-drive">Prepare the USB Hard Drive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-resources-to-staging-node">Stage Resources to Staging Node</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-offline-autodeploynode">Create the Offline AutoDeployNode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-rhel-os">Install the RHEL OS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-the-static-ip">Set the Static IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-the-hostname">Set the Hostname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-the-automation-resources-on-autodeploynode">Stage the Automation Resources on AutoDeployNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-the-offline-rpm-repository">Configure the Offline RPM Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-required-support-packages">Install the Required Support Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-the-dcaf-base-playbooks">Run the DCAF Base Playbooks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bare_metal_os.html">Bare Metal OS Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues and Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">CSC DCAF</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>AutoDeployNode Creation - Offline Mode</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/offline_autodeploy_node.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="autodeploynode-creation-offline-mode">
+<h1>AutoDeployNode Creation - Offline Mode<a class="headerlink" href="#autodeploynode-creation-offline-mode" title="Permalink to this headline">¶</a></h1>
+<p>In offline mode a <code class="code docutils literal"><span class="pre">staging</span> <span class="pre">node</span></code> will be used to download all automation
+resources and prepare them to be staged on the offline AutoDeployNode. The
+<code class="code docutils literal"><span class="pre">staging</span> <span class="pre">node</span></code> can be an existing instance of RHEL or a new installation.
+In either case be sure it meets the defined requirements in the <code class="docutils literal"><span class="pre">Offline</span> <span class="pre">Staging</span> <span class="pre">Node</span></code>
+section of <a class="reference external" href="http://csc.github.io/dcaf/requirements.html">http://csc.github.io/dcaf/requirements.html</a> for more information.</p>
+<div class="section" id="prepare-the-staging-node">
+<h2>Prepare the Staging Node<a class="headerlink" href="#prepare-the-staging-node" title="Permalink to this headline">¶</a></h2>
+<p>When offline mode is used the <code class="code docutils literal"><span class="pre">staging</span> <span class="pre">node</span></code> is used to gather the automation
+resources and put them on a portable USB hard drive so they can be used by the
+offline AutoDeployNode.</p>
+<div class="section" id="prepare-the-usb-hard-drive">
+<h3>Prepare the USB Hard Drive<a class="headerlink" href="#prepare-the-usb-hard-drive" title="Permalink to this headline">¶</a></h3>
+<p>Login as a user with elevated privileges and connect the USB hard drive. Once
+connected Linux will add a new block device into the <code class="code docutils literal"><span class="pre">/dev/</span></code> directory. The
+drive needs to be mounted by the OS. To find out the name given to the USB drive
+run the following <code class="code docutils literal"><span class="pre">fdisk</span></code> command:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>fdisk -l
+Disk /dev/sdb: 20.0 GB, <span class="m">20000268288</span> bytes
+<span class="nv">Units</span> <span class="o">=</span> sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+Disk identifier: 0x000b2b03
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The name of the connected device - in the above example it is <code class="code docutils literal"><span class="pre">sdb</span></code>.
+Substitute your connected device name in its place if needed.</p>
+</div>
+<p>Now create the local directory within Linux where the USB drive will be mounted.
+Use the device name from the <code class="code docutils literal"><span class="pre">fdisk</span></code> command in the previous step, our
+example was <code class="code docutils literal"><span class="pre">sdb</span></code></p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /mnt/sdb
+</pre></div>
+</div>
+<p>Now run the mount command and mount the drive:</p>
+<p>Leave the USB drive connected until all the automation resources have been
+downloaded at the end of the following section.</p>
+</div>
+<div class="section" id="stage-resources-to-staging-node">
+<h3>Stage Resources to Staging Node<a class="headerlink" href="#stage-resources-to-staging-node" title="Permalink to this headline">¶</a></h3>
+<p>Set the environment variables for Red Hat Subscription Manage credentials:
+​</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">RHN_USER</span><span class="o">=</span><span class="s2">&quot;username&quot;</span>
+<span class="nb">export</span> <span class="nv">RHN_PASS</span><span class="o">=</span><span class="s2">&quot;password&quot;</span>    <span class="c1"># escape dollar signs (\$)</span>
+<span class="nb">export</span> <span class="nv">RHN_POOL</span><span class="o">=</span><span class="s2">&quot;pool_id&quot;</span>     <span class="c1"># 32-char pool ID</span>
+</pre></div>
+</div>
+<p>Create a ssh key file for GitHub access.  Put the text for a private key which
+has access to the GitHub repositories in the lines below:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; ~/github.pem</span>
+<span class="s">-----BEGIN RSA PRIVATE KEY-----</span>
+<span class="s">&lt;insert_key_file_text_here&gt;</span>
+<span class="s">-----END RSA PRIVATE KEY-----</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+<p>Change the file permissions to ensure security.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>chmod <span class="m">0600</span> ~/github.pem
+</pre></div>
+</div>
+<p>With the environment variables defined and the ssh key file created, the build
+script can be launched:
+​</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/offline_stage.sh <span class="p">|</span> bash​
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The offline_build.sh script will stage all automation project resources to
+itself then copy them to the USB hard drive. Refer to the DCAF project
+documentation for more details.</p>
+</div>
+<p>At this point the automation resources have been staged to the USB hard drive.</p>
+<p>Unmount the USB hard drive and disconnect it from the <code class="code docutils literal"><span class="pre">staging</span> <span class="pre">node</span></code>.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>umount /dev/sdb
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="create-the-offline-autodeploynode">
+<h2>Create the Offline AutoDeployNode<a class="headerlink" href="#create-the-offline-autodeploynode" title="Permalink to this headline">¶</a></h2>
+<p>The offline AutoDeployNode will be created on a physical or virtual device connected
+to an air-gapped network. The support packages and other automation resources will
+be installed from the portable USB hard drive where they were saved.</p>
+<div class="section" id="install-the-rhel-os">
+<h3>Install the RHEL OS<a class="headerlink" href="#install-the-rhel-os" title="Permalink to this headline">¶</a></h3>
+<p>The RHEL OS can be installed by attaching the ISO image with the vendor supplied
+management utility or whatever other method is available.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For more information on attaching an ISO image refer to the vendor documentation.</p>
+</div>
+<p>On the installation summary page, you may see different selections with yellow
+exclamation or warning marks.</p>
+<p>These are areas that require some setup:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>Date <span class="p">&amp;</span> Time : Current Date / Time ? Time Zone
+Installation Source : Local Media
+Software Selection : Minimal Install
+Installation Destination : Partitioning : Automatically configure partitioning
+Network <span class="p">&amp;</span> Hostname : Enable the network interface and configure with relative
+static network information
+Root Password : Set the root password
+Create User: autodeploy
+</pre></div>
+</div>
+<p>Here is a link to the Red Hat Install guide <a class="reference external" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Installation_Guide/sect-installation-graphical-mode-x86.html">https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Installation_Guide/sect-installation-graphical-mode-x86.html</a></p>
+</div>
+<div class="section" id="set-the-static-ip">
+<h3>Set the Static IP<a class="headerlink" href="#set-the-static-ip" title="Permalink to this headline">¶</a></h3>
+<p>Boot the AutoDeployNode and configure the network interface with a static IP address.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>vi /etc/sysconfig/network-scripts/ifcfg-your_interface
+</pre></div>
+</div>
+<p>Modify the file, where <code class="docutils literal"><span class="pre">ifcfg-interface</span></code> is the management network interface, to
+resemble the example below with your specific network configuration.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">BOOTPROTO</span><span class="o">=</span><span class="s2">&quot;none&quot;</span>
+<span class="nv">ONBOOT</span><span class="o">=</span>yes
+<span class="nv">IPADDR</span><span class="o">=</span>x.x.x.x
+<span class="nv">NETMASK</span><span class="o">=</span>x.x.x.x
+<span class="nv">GATEWAY</span><span class="o">=</span>x.x.x.x
+<span class="nv">DNS1</span><span class="o">=</span>x.x.x.x
+</pre></div>
+</div>
+<p>For more information on configuring the network refer to the  <a class="reference external" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/sec-Using_the_Command_Line_Interface.html">https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/sec-Using_the_Command_Line_Interface.html</a> document.</p>
+</div>
+<div class="section" id="set-the-hostname">
+<h3>Set the Hostname<a class="headerlink" href="#set-the-hostname" title="Permalink to this headline">¶</a></h3>
+<p>Next configure the hostname:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>hostnamectl set-hostname autodeploy.local
+</pre></div>
+</div>
+</div>
+<div class="section" id="stage-the-automation-resources-on-autodeploynode">
+<h3>Stage the Automation Resources on AutoDeployNode<a class="headerlink" href="#stage-the-automation-resources-on-autodeploynode" title="Permalink to this headline">¶</a></h3>
+<p>Now that the OS has been installed it is time to stage the automation resources.</p>
+<p>Login as a user with elevated privileges and connect the USB hard drive. Once
+connected Linux will add a new block device into the <code class="code docutils literal"><span class="pre">/dev/</span></code> directory. The
+drive needs to be mounted by the OS. To find out the name given to the USB drive
+run the following <code class="code docutils literal"><span class="pre">fdisk</span></code> command:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>fdisk -l
+Disk /dev/sdb: 20.0 GB, <span class="m">20000268288</span> bytes
+<span class="nv">Units</span> <span class="o">=</span> sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+Disk identifier: 0x000b2b03
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The name of the connected device - in the above example it is <code class="code docutils literal"><span class="pre">sdb</span></code>.
+Substitute your connected device name in its place if needed.</p>
+</div>
+<p>Now create the local directory within Linux where the USB drive will be mounted.
+Use the device name from the <code class="code docutils literal"><span class="pre">fdisk</span></code> command in the previous step, our example
+was <code class="code docutils literal"><span class="pre">sdb</span></code></p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /mnt/sdb
+</pre></div>
+</div>
+<p>Now run the mount command and mount the drive:</p>
+<p>Next copy the automation resources from the USB drive to the <code class="code docutils literal"><span class="pre">/opt/</span></code> directory.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cp -r /mnt/sdb1/autodeploy* /opt
+chown -R autodeploy /opt/autodeploy/
+</pre></div>
+</div>
+<p>Now that files exist locally on the AutoDeployNode the local repository needs to
+be configured.</p>
+</div>
+<div class="section" id="configure-the-offline-rpm-repository">
+<h3>Configure the Offline RPM Repository<a class="headerlink" href="#configure-the-offline-rpm-repository" title="Permalink to this headline">¶</a></h3>
+<p>The required RPM packages were staged on the AutoDeployNode in the
+<code class="code docutils literal"><span class="pre">/opt/autodeploy/resources/rpms</span></code> directory. The offline repository was
+created in this directory using the <code class="code docutils literal"><span class="pre">createrepo</span></code> utility. To configure
+<code class="code docutils literal"><span class="pre">yum</span></code> to use it, copy the local.repo file into the <code class="code docutils literal"><span class="pre">/etc/yum.repos.d/</span></code>
+directory.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cp /opt/autodeploy/projects/dcaf/modules/autodeploynode/files/local.repo /etc/yum.repos.d/
+</pre></div>
+</div>
+<p>Check to see that the repo is listed:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>yum repolist
+  local_repo
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-the-required-support-packages">
+<h3>Install the Required Support Packages<a class="headerlink" href="#install-the-required-support-packages" title="Permalink to this headline">¶</a></h3>
+<p>Next install Git and Ansible to be used for automation. Ansible is installed from
+the rpm file created in the staging process found in the offline repository.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>yum -y install git ansible
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-dcaf-base-playbooks">
+<h3>Run the DCAF Base Playbooks<a class="headerlink" href="#run-the-dcaf-base-playbooks" title="Permalink to this headline">¶</a></h3>
+<p>Now that the variables have been configured, run the following playbooks to
+finish the AutoDeployNode deployment.</p>
+<p>The <code class="code docutils literal"><span class="pre">main.yml</span></code> playbook will also run the <code class="code docutils literal"><span class="pre">site_docker.yml</span></code> and
+<code class="code docutils literal"><span class="pre">site_discovery.yml</span></code> playbooks.</p>
+<p>The <code class="code docutils literal"><span class="pre">site_docker.yml</span></code> playbook will start the Hanlon Docker environment.
+First it will clean up any existing containers. Then it will start the Mongo,
+Hanlon Server and TFTP Server containers.</p>
+<p>The <code class="code docutils literal"><span class="pre">site_discovery.yml</span></code> playbook will configure the DHCP service and
+prepare the Hanlon Server for the bare metal OS deployment.</p>
+<p>At this point the AutoDeployNode has been configured and is ready to start using
+for automation.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bare_metal_os.html" class="btn btn-neutral float-right" title="Bare Metal OS Deployment" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="config_autodeploy_node.html" class="btn btn-neutral" title="AutoDeployNode Creation - Online Mode" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, CSC.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
