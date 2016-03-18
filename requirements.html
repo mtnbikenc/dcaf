@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Requirements &amp; Dependencies &mdash; CSC DCAF 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
+        <link rel="next" title="AutoDeployNode Creation - Online Mode" href="config_autodeploy_node.html"/>
+        <link rel="prev" title="Projects" href="projects.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CSC DCAF
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">CSC DCAF Automation Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Projects</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Requirements &amp; Dependencies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#user-access-requirements">User Access Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#physical-hardware">Physical Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network-requirements">Network Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#offline-staging-node-to-stage-offline-autodeploynode">Offline Staging Node (to stage offline AutoDeployNode)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#autodeploynode">AutoDeployNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#target-deployment-environment">Target Deployment Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline_autodeploy_node.html">AutoDeployNode Creation - Offline Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bare_metal_os.html">Bare Metal OS Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues and Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">CSC DCAF</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Requirements &amp; Dependencies</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/requirements.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="requirements-dependencies">
+<h1>Requirements &amp; Dependencies<a class="headerlink" href="#requirements-dependencies" title="Permalink to this headline">¶</a></h1>
+<p>A CSC DCAF Deployment has the following requirements and dependencies.</p>
+<div class="section" id="user-access-requirements">
+<h2>User Access Requirements<a class="headerlink" href="#user-access-requirements" title="Permalink to this headline">¶</a></h2>
+<p>To retrieve the automation resources from their online repositories you will
+need the following:</p>
+<ul class="simple">
+<li>A valid github.com user account with access to the CSC Git repositories.</li>
+<li>A user account on the Red Hat website with a valid subscription associated
+with it.</li>
+</ul>
+</div>
+<div class="section" id="physical-hardware">
+<h2>Physical Hardware<a class="headerlink" href="#physical-hardware" title="Permalink to this headline">¶</a></h2>
+<p>DCAF was developed and tested with the following hardware:</p>
+<ul class="simple">
+<li>DELL PowerEdge 630 | PowerEdge 730</li>
+<li>DELL PERC H730 RAID Controller</li>
+</ul>
+</div>
+<div class="section" id="network-requirements">
+<h2>Network Requirements<a class="headerlink" href="#network-requirements" title="Permalink to this headline">¶</a></h2>
+<p>There are several network requirements for the deployment.</p>
+<ul class="simple">
+<li>DNS server IP addresses need to be provided</li>
+<li>NTP server IP address needs to be provided</li>
+<li>The following VLANS are required:<ul>
+<li>Out-of-band management (IPMI)</li>
+<li>PXE Network</li>
+</ul>
+</li>
+<li>Out-of-band Network IP address for each node</li>
+<li>Management IP address for each node</li>
+</ul>
+</div>
+<div class="section" id="offline-staging-node-to-stage-offline-autodeploynode">
+<h2>Offline Staging Node (to stage offline AutoDeployNode)<a class="headerlink" href="#offline-staging-node-to-stage-offline-autodeploynode" title="Permalink to this headline">¶</a></h2>
+<p>For an offline mode deployment a Linux machine with Internet access is required
+to download the automation resources and prepare the USB drive.</p>
+<ul class="simple">
+<li>Staging node (existing or new laptop/server)</li>
+<li>Red Hat Enterprise Linux workstation or server instance</li>
+<li>A user with sudo access</li>
+<li>At least a 250GB USB Hard Drive (as a repository)</li>
+</ul>
+</div>
+<div class="section" id="autodeploynode">
+<h2>AutoDeployNode<a class="headerlink" href="#autodeploynode" title="Permalink to this headline">¶</a></h2>
+<p>The AutoDeployNode will contain all the necessary automation resources to use
+CSC DCAF.</p>
+<p>It has the following requirements:</p>
+<ul class="simple">
+<li>Deployed on a dedicated physical device with OOB management or a virtual
+machine in the environment</li>
+<li>Has an IP address on the PXE network</li>
+<li>At least 128GB HDD (SSD)</li>
+<li>Dual core CPU</li>
+<li>16GB RAM</li>
+</ul>
+</div>
+<div class="section" id="target-deployment-environment">
+<h2>Target Deployment Environment<a class="headerlink" href="#target-deployment-environment" title="Permalink to this headline">¶</a></h2>
+<p>The target deployment environment consists of all nodes that will participate in
+the deployment.</p>
+<ul class="simple">
+<li>The physical hardware has been installed and connected to the network</li>
+<li>A 1GB connection for OOB management on the management switch</li>
+<li>2 10GbE connections to the 10GbE network switches</li>
+<li>The upstream and management network have already been configured</li>
+<li>An on-site resource to configure the out-of-band management IP
+addresses</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="config_autodeploy_node.html" class="btn btn-neutral float-right" title="AutoDeployNode Creation - Online Mode" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="projects.html" class="btn btn-neutral" title="Projects" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, CSC.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
