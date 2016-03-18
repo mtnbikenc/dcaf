@@ -1,0 +1,71 @@
+---
+
+    - name: Configure ESXi hostname and DNS servers
+      local_action:
+        module: vmware_dns_config
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        change_hostname_to: "{{ hostname }}"
+        domainname: "{{ domain_name }}"
+        dns_servers: "{{ dns_servers }}"
+
+    - name: Add a temporary vSwitch
+      local_action:
+        module: vmware_vswitch
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        switch_name: temp_vswitch
+        nic_name: "{{ vss_vmnic }}"
+        mtu: 9000
+
+    - name: Add Management vmkernel port (vmk1)
+      local_action:
+        module: vmware_vmkernel
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        vswitch_name: temp_vswitch
+        portgroup_name: esx-mgmt
+        vlan_id: "{{ mgmt_vlan_id }}"
+        ip_address: "{{ mgmt_ip_address }}"
+        subnet_mask: "{{ mgmt_subnet_mask }}"
+        enable_mgmt: True
+
+    - name: Add vMotion vmkernel port (vmk2)
+      local_action:
+        module: vmware_vmkernel
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        vswitch_name: temp_vswitch
+        portgroup_name: vmotion
+        vlan_id: "{{ vmotion_vlan_id }}"
+        ip_address: "{{ vmotion_ip_address }}"
+        subnet_mask: "{{ vmotion_subnet_mask }}"
+        enable_vmotion: True
+
+    - name: Add VSAN vmkernel port (vmk3)
+      local_action:
+        module: vmware_vmkernel
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        vswitch_name: temp_vswitch
+        portgroup_name: vsan
+        vlan_id: "{{ vsan_vlan_id }}"
+        ip_address: "{{ vsan_ip_address }}"
+        subnet_mask: "{{ vsan_subnet_mask }}"
+        enable_vsan: True
+        mtu: 9000
+
+    - name: Add Management Network VM Portgroup
+      local_action:
+        module: vmware_portgroup
+        hostname: "{{ inventory_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ site_passwd }}"
+        switch_name: temp_vswitch
+        portgroup_name: PXE-Network
+        vlan_id: "{{ mgmt_vlan_id }}"

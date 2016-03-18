@@ -1,0 +1,139 @@
+---
+- name: install nova compute packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-nova-compute
+    - openstack-utils
+    - python-cinder
+    - nfs-utils
+    - libvirt
+    - python-nova
+    - python-novaclient
+    - openstack-nova-common
+  tags: nova
+
+- name: set libvirtd
+  template:
+    src: libvirtd.j2
+    dest: /etc/sysconfig/libvirtd
+    mode: 0644
+    owner: root
+    group: root
+    force: yes
+  when: nova_instance_live_migration
+  tags: nova
+
+- name: set libvirtd.conf
+  template: 
+    src: libvirtd.conf.j2
+    dest: /etc/libvirt/libvirtd.conf
+    mode: 0644 
+    owner: root
+    group: root
+    force: yes
+  when: nova_instance_live_migration
+  tags: nova
+
+
+- name: restart and enable libvirtd
+  service:
+    name: libvirtd
+    state: restarted
+    enabled: yes
+  tags: nova
+
+- name: Update api-paste.ini file
+  ini_file:
+    dest: /etc/nova/api-paste.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "filter:authtoken", option: "auth_host", value: "{{ keystone_admin_vip | default('127.0.0.1') }}"}
+    - { section: "filter:authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "filter:authtoken", option: "admin_user", value: "nova"}
+    - { section: "filter:authtoken", option: "admin_password", value: "{{ nova_pass }}"}
+  tags: nova
+
+- name: Update nova.conf file
+  ini_file:
+    dest: /etc/nova/nova.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    ## ===== [Default] =============
+    # Rabbitmq
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}" }
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "{{rabbitmq_ha_queue}}" }
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "amqp_durable_queues", value: "{{rabbitmq_durable_queues}}"}
+    # Notifications
+    - { section: "DEFAULT", option: "notification_topics", value: "notifications" }
+    - { section: "DEFAULT", option: "notification_driver", value: "ceilometer.compute.nova_notifier" }
+    - { section: "DEFUALT", option: "notification_driver", value: "nova.openstack.common.notifier.rpc_notifier" }
+    - { section: "DEFAULT", option: "notification_driver", value: "heat.openstack.common.notifier.rpc_notifier"}
+    - { section: "DEFAULT", option: "rpc_backend", value: "nova.openstack.common.rpc.impl_kombu" }
+    - { section: "DEFAULT", option: "notify_api_faults", value: "{{notify_api_faults}}"}
+    - { section: "DEFAULT", option: "state_path", value: "{{nova_state_path}}" }
+    - { section: "DEFAULT", option: "report_interval", value: "{{nova_report_interval}}" }
+    - { section: "DEFAULT", option: "service_down_time", value: "{{nova_service_down_time}}" }
+    - { section: "DEFAULT", option: "auth_startegy", value: "keystone"}
+    #- { section: "DEFAULT", option: "multi_instance_display_name_template", value: "{{nova_multi_instance_display_name_template}}" }
+    - { section: "DEFAULT", option: "reserved_host_memory_mb", value: "{{nova_reserved_host_memory_mb}}" }
+    #- { section: "DEFAULT", option: "instance_name_template", value: "{{nova_instance_name_template}}" }
+    - { section: "DEFAULT", option: "network_api_class", value: "nova.network.neutronv2.api.API"}
+    - { section: "DEFAULT", option: "metadata_host", value: "{{ nova_private_vip }}"}
+    - { section: "DEFAULT", option: "security_group_api", value: "neutron" }
+    - { section: "DEFAULT", option: "use_syslog", value: "{{nova_use_syslog}}" }
+    - { section: "DEFAULT", option: "vif_plugging_is_fatal", value: "False"}
+    - { section: "DEFAULT", option: "vif_plugging_timeout", value: "{{nova_vif_plugging_timeout}}"}
+    - { section: "DEFAULT", option: "firewall_driver", value: "{{nova_firewall_driver}}" }
+    - { section: "DEFAULT", option: "compute_driver", value: "{{nova_compute_driver}}" }
+    - { section: "DEFAULT", option: "preallocate_images", value: "{{nova_preallocate_images}}" }
+    - { section: "DEFAULT", option: "force_raw_images", value: "{{nova_force_raw_images}}" }
+    - { section: "DEFAULT", option: "vncserver_proxyclient_address", value: "{{ control_if.ipaddr }}"}
+    - { section: "DEFAULT", option: "vncserver_listen", value: "0.0.0.0"}
+    - { section: "DEFAULT", option: "novncproxy_base_url", value: "http://{{ nova_public_vip }}:6080/vnc_auto.html"}
+    - { section: "DEFAULT", option: "vnc_enabled", value: "True" }
+    - { section: "DEFAULT", option: "vnc_keymap", value: "en-US" }
+    - { section: "DEFAULT", option: "volume_api_class", value: "nova.volume.cinder.API" }
+    - { section: "DEFAULT", option: "sql_connection", value: "mysql://nova:{{ nova_db_pass }}@{{ lb_db_vip }}/nova" }
+    - { section: "DEFAULT", option: "image_service", value: "nova.image.glance.GlanceImageService" }
+    - { section: "glance", option: "api_servers", value: "{{glance_vip}}:{{glance_port | default(9292)}}" }
+    ## [libvirt]
+    - { section: "libvirt", option: "virt_type", value: "{{nova_virt_type}}" }
+    - { section: "libvirt", option: "inject_password", value: "false" }
+    - { section: "libvirt", option: "inject_key", value: "false" }
+    - { section: "libvirt", option: "inject_partition", value: "-2" }
+    - { section: "libvirt", option: "live_migration_uri", value: "qemu+tcp://nova@%s/system" }
+    - { section: "libvirt", option: "vif_driver", value: "nova.virt.libvirt.vif.LibvirtGenericVIFDriver"}
+    - { section: "libvirt", option: "live_migration_flag", value: "{{nova_live_migration_flag}}" }
+    - { section: "libvirt", option: "block_migration_flag", value: "{{nova_block_migration_flag}}" }
+    - { section: "libvirt", option: "cpu_mode", value: "{{nova_cpu_mode}}" }
+    - { section: "libvirt", option: "volume_clear", value: "{{nova_volume_clear}}" }
+    - { section: "libvirt", option: "volume_clear_size", value: "{{nova_volume_clear_size}}" }
+    ## [neutron]
+    - { section: "DEFAULT", option: "neutron_url", value: "http://{{ neutron_vip }}:{{ neutron_port | default(9696) }}/" }
+    - { section: "DEFAULT", option: "neutron_admin_tenant_name", value: "services"}
+    - { section: "DEFAULT", option: "neutron_admin_username", value: "neutron"}
+    - { section: "DEFAULT", option: "neutron_admin_password", value: "{{ neutron_pass }}"}
+    - { section: "DEFAULT", option: "neutron_admin_auth_url", value: "http://{{ keystone_vip }}:{{ keystone_private_port | default(5000) }}/v2.0"}
+    - { section: "DEFAULT", option: "neutron_url_timeout", value: "{{neutron_url_timeout}}" }
+    - { section: "DEFAULT", option: "neutron_region_name", value: "regionOne" }
+    - { section: "DEFAULT", option: "neutron_ovs_bridge", value: "{{neutron_ovs_intergration_bridge}}" }
+    - { section: "DEFAULT", option: "neutron_auth_strategy", value: "keystone" }
+    - { section: "DEFAULT", option: "neutron_extension_sync_interval", value: "" }
+    - { section: "DEFAULT", option: "allow_duplicate_networks", value: "{{neutron_allow_duplicate_networks}}" }
+
+- name: start nova-compute services
+  service:
+    name: openstack-nova-compute
+    state: started
+    enabled: yes
+  tags: nova
+

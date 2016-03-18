@@ -1,0 +1,35 @@
+---
+- name: base RHEL configuration
+  hosts: horizon
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: horizon
+  tags: horizon
+
+- name: install horizon  rules
+  hosts:
+    - horizon
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for nova-controller
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 4
+    with_items:
+      - { port: 80, protocol: tcp, comment: "dashboard access" }
+    tags:
+      - iptables
+      - horizon
+
+- name: install horizon
+  hosts: horizon
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - horizon
+  tags: horizon

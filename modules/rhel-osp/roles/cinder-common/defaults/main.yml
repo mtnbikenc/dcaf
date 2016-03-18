@@ -1,0 +1,20 @@
+---
+# Boolean operator to enable cinder installation
+use_cinder: true
+
+# location of credentials directory on autodeploy node.
+credentials_dir: /var/lib/ansible
+
+#use pacemaker to manage services?
+use_pacemaker: false
+
+# rabbitmq credentials
+rabbitmq_user: guest
+rabbitmq_pass: guest
+rabbit_port: 5672
+
+# cinder api bind address
+# cinder_osapi_volume_listen: 0.0.0.0
+
+# cinder api port
+cinder_osapi_volume_listen_port: 8776

@@ -1,0 +1,8 @@
+---
+- name: run keystone role based on juno release
+  include: juno.yml
+  when: openstack_release == 'juno'
+
+- name: run keystone role based on kilo release
+  include: kilo.yml
+  when: openstack_release == 'kilo'

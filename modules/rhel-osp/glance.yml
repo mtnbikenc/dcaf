@@ -1,0 +1,39 @@
+---
+- name: gather info
+  hosts: controller
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: glance 
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: glance
+  tags: glance
+
+- name: install glance rules
+  hosts:
+    - glance
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: iptable rules for glance
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 4
+      with_items:
+        - { port: "{{glance_api_port | default(9191)}}", protocol: tcp, comment: "glance api" }
+        - { port: "{{glance_api_port | default(9292)}}", protocol: tcp, comment: "glance registry api"}
+      tags:
+        - iptables
+        - glance
+
+- name: install glance
+  hosts: glance
+  max_fail_percentage: 0
+  roles:
+    - glance
+  tags: glance

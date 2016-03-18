@@ -1,0 +1,48 @@
+---
+- name: install galera db packages
+  yum:
+    pkg: mariadb-galera-server
+    state: present
+  tags: galera
+
+- name: install auxiliary database packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - MySQL-python
+    - xinetd
+    - nfs-utils
+    - rsync
+  tags: galera
+
+- name: fix permissions for mysql
+  file:
+    path: /var/lib/mysql
+    mode: 0777
+    owner: mysql
+    group: mysql
+    state: directory
+    recurse: yes
+  tags:  galera
+
+- name: set bind host for galera
+  ini_file:
+    dest: /etc/my.cnf.d/galera.cnf
+    section: mysqld
+    option: bind-address
+    value: "{{ mysql_bind_address }}"
+  tags: galera
+
+- name: start mariadb service
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+  tags: galera
+
+
+
+
+
+

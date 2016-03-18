@@ -1,0 +1,12 @@
+---
+- name: install & configure HAproxy juno
+  include: juno.yml
+  when: openstack_release == 'juno'
+  tags: HAproxy
+
+
+- name: install & configure HAproxy Kilo
+  include: kilo.yml
+  when: openstack_release == 'kilo'
+  tags: HAproxy
+

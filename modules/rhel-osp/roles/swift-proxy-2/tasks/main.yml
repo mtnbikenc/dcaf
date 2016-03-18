@@ -1,0 +1,8 @@
+---
+- name: include roles for juno release swift proxy 2
+  include: juno.yml
+  when: openstack_release == 'juno'
+
+- name: include roles for kilo release swift proxy 2
+  include: kilo.yml
+  when: openstack_release == 'kilo'

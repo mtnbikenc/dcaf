@@ -1,0 +1,33 @@
+---
+- name: base RHEL configuration
+  hosts: scaleio
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: scaleio
+
+
+- name: iptables for scale io
+  hosts: 
+    - scaleio
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: add firewall rules for haproxy
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 2
+      with_items:
+        - { port: 6611, protocol: tcp, comment: "MDM" }
+        - { port: 9011, protocol: tcp, comment: "MDM" }
+        - { port: 7072, protocol: tcp, comment: "sds" }
+        - { port: 9099, protocol: tcp, comment: "LIA" }
+        - { port: 162, protocol: udp, comment: "SNMP" }
+        - { port: 80, protocol: tcp, comment: "REST" }
+        - { port: 443, protocol: tcp, comment: "REST" }
+      tags:
+        - iptables
+        - haproxy

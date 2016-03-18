@@ -1,0 +1,19 @@
+---
+# part_power = 2 ^ partition power = partition count. ( The partition is rounded up after calculation.)
+part_power: 18
+#replica couunt =  The number of times that your data will be replicated in the cluster.
+replica_count: 3
+# min_part_hours =  Minimum number of hours before a partition can be moved. This parameter increases availability of data by not moving more than one copy of a given data item within that min_part_hours amount of time.
+min_part_hours: 24
+
+#keystone admin defaults
+keystone_public_protocol: http
+keystone_public_port: 5000
+
+# use_pacemaker: Boolean operator to decide if pacemaker is in use for HA service control
+# use_pacemaker: false
+use_pacemaker: false
+
+# location of credential files on autodeploy node.
+credentials_dir: /var/lib/ansible
+

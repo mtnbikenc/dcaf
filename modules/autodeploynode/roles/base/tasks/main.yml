@@ -1,0 +1,125 @@
+---
+# The base role will do the initial preparation of the AutoDeployNode.
+
+- name: Install required support packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items: "{{ autodeploy_support_pkgs }}"
+
+- name: Install required pip-based support packages (Online)
+  pip:
+    requirements: "{{ item }}"
+    state: present
+    extra_args: "--upgrade"
+  when: not offline
+  with_fileglob: "../../files/*pip-requirements*"
+
+- name: Install required pip-based support packages (Offline)
+  pip:
+    requirements: "{{ item }}"
+    state: present
+    extra_args: "--index-url=file://{{ packages_path }}simple/"
+  when: offline
+  with_fileglob: "../../files/*pip-requirements*"
+
+- name: Create the .ssh directory
+  file:
+    path: /root/.ssh/
+    state: directory
+
+- name: Create SSH Key Pair for root user
+  user:
+    name: root
+    generate_ssh_key: yes
+
+- name: Copy the .ssh/config file
+  copy:
+    src: config
+    dest: /root/.ssh/config
+    mode: 0600
+
+- name: Retrieve deployment node public key
+  shell: cat /root/.ssh/id_rsa.pub
+  register: pub_key
+
+- name: Add deployment node SSH key to node authorized users
+  authorized_key:
+    user: root
+    key: "{{ pub_key.stdout }}"
+
+- name: Disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Create directories for hanlon
+  file:
+    path: "{{ item }}"
+    state: directory
+    setype: svirt_sandbox_file_t
+    recurse: true
+  with_items:
+    - /opt/hanlon
+    - /opt/hanlon/image
+    - /opt/deploy
+
+- name: Set the correct timezone
+  file:
+    src: /usr/share/zoneinfo/{{ ntp_timezone }}
+    dest: /etc/localtime
+    state: link
+    force: yes
+
+- name: Configure NTP
+  lineinfile:
+    backup: yes
+    dest: /etc/ntp.conf
+    line: "restrict default limited kod nomodify notrap nopeer noquery"
+    state: present
+
+- name: Copy the iptables config file
+  copy:
+    src: iptables
+    dest: /etc/sysconfig/iptables
+
+- name: Start & enable iptables, ntpd & docker
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  with_items:
+    - iptables
+    - ntpd
+    - docker
+
+- name: Clone the project repos from Git
+  git:
+    repo: "{{ item.repo }}"
+    dest: "{{ projects_base_path }}/{{ item.name }}"
+    accept_hostkey: yes
+    key_file: "{{ github_key_file }}"
+  with_items: "{{ git_repos }}"
+  ignore_errors: true
+  when: not offline
+
+- name: Checkout the latest tagged version
+  shell: "git checkout $(git describe --abbrev=0 --tags)"
+  args:
+    chdir: "{{ projects_base_path }}/{{ item.name }}"
+  with_items: "{{ git_repos }}"
+  when: not offline
+
+- name: Update default Ansible configuration
+  lineinfile:
+    dest: /etc/ansible/ansible.cfg
+    regexp: "(^#|^){{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: 'inventory', line: 'inventory = ./hosts.ini' }
+    - { regexp: 'forks', line: 'forks = 20' }
+    - { regexp: 'host_key_checking', line: 'host_key_checking = False' }
+    - { regexp: 'log_path', line: 'log_path = ./ansible.log' }
+    - { regexp: 'ssh_args', line: 'ssh_args = -o ControlMaster=auto -o ControlPersist=60s' }
+    - { regexp: 'pipelining', line: 'pipelining = True' }

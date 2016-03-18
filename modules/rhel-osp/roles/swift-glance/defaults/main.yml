@@ -1,0 +1,10 @@
+# Auth token options
+keystone_auth_protocol: http
+keystone_auth_port: 5000
+
+# location of credential files on autodeploy node.
+credentials_dir: /var/lib/ansible
+
+# use_pacemaker: Boolean operator to decide if pacemaker is in use for HA service control
+# use_pacemaker: false
+use_pacemaker: false

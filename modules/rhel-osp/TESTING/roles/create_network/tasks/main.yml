@@ -1,0 +1,26 @@
+---
+- name: create  Network
+  command: >
+    neutron {{os_tenant_auth}}
+    net-create {{network_name}}
+  run_once: true
+
+- name: create Subnet with dhcp
+  command: >
+    neutron {{os_tenant_auth}}
+    subnet-create {{network_name}}
+    {{network_ip}}/{{network_prefix}}
+    --dns-nameserver {{network_dns}}
+    --enable_dhcp --name {{network_name}}_subnet
+  when: enable_dhcp
+  run_once: true
+
+- name: create Subnet without dhcp
+  command: >
+    neutron {{os_tenant_auth}}
+    subnet-create {{network_name}}
+    {{network_ip}}/{{network_prefix}}
+    --dns-nameserver {{network_dns}}
+    --disable-dhcp {{network_name}}_subnet
+  when: not enable_dhcp
+  run_once: true

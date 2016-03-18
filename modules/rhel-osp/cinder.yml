@@ -1,0 +1,65 @@
+---
+- name: gather info
+  hosts: controller
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: cinder
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: cinder
+  tags: cinder
+
+- name: install cinder-server rules
+  hosts:
+    - cinder-server
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for cinder
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 2
+    with_items:
+      - { port: 8776, protocol: tcp, comment: "cinder api 8776" }
+    tags:
+      -  iptables
+      -  cinder
+
+- name: install cinder-volume rules
+  hosts:
+    - cinder-volume
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for cinder
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 2
+    with_items:
+      - { port: 3260, protocol: tcp, comment: "iscsi traffic incoming 3260"}
+    tags:
+      -  iptables
+      -  cinder
+
+- name: install cinder server
+  hosts: cinder-server
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - cinder-common
+    - cinder-server
+  tags: cinder
+
+- name: install cinder volume
+  hosts: cinder-volume
+  max_fail_percentage: 0
+  roles:
+    - cinder-common
+    - cinder-volume
+  tags: cinder

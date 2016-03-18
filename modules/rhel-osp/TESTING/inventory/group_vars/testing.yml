@@ -1,0 +1,45 @@
+# keystone auth for openstack commands
+keystone_user: user 
+keystone_tenant: Benny_testing
+keystone_password: password
+keystone_auth_url: http://192.168.11.8:5000/v2.0/
+keystone_region: RegionOne
+
+#floating IP network unique part of floating IP address that can be search for
+float_network: 172.17
+
+#temp directory to create heat template to run.
+temp_dir: /tmp
+
+# heat stack info
+heat_stack_name: test-stack
+heat_key_name: benny
+heat_flavor: m2.medium
+heat_image_name: rhel-guest-image-7.1-20150224.0.x86_64.qcow2
+heat_cloud_user_password: password
+heat_image_id: 62840a1d-09ba-45a3-a7ec-cf8670722c5f
+heat_public1_net: 2f78b920-d923-4a8f-9f6e-0ddb8770adb6
+
+mgmt_router_name: bennys 
+
+
+### Networks to create in test environment
+# ansible net
+ansible_net_name: provisioning
+ansible_net_ip: 192.168.0.0
+ansible_net_prefix: 24
+ansible_net_dns: 192.168.70.3
+
+# management network, base network for VMs
+mgmt_net_name: mgmt_net
+mgmt_net_ip: 192.168.100.0
+mgmt_net_prefix: 24
+mgmt_net_dns: 192.168.70.3
+
+heat_network:
+  control: { "name": "control", "ip": "192.168.101.0", "prefix": "24", "dns": ["192.168.70.3"], "enable_dhcp": false }
+  extnet: { name: "fake_external_net", ip: 10.10.0.0, prefix: 24, dns: [192.168.70.3], enable_dhcp: false}
+  sql: { name: sql_replication, ip: 172.16.28.0, prefix: 24, enable_dhcp: false}
+  datanet: { name: Data_Network_Transport, ip: 172.16.23.0, prefix: 24,enable_dhcp: false}
+  scaleIO: { name: scaleIO,ip: 172.16.26.0,prefix: 24, enable_dhcp: false }
+  rsync: { name: Swift_RSYNC,ip: 172.16.25.0,prefix: 24,enable_dhcp: false }

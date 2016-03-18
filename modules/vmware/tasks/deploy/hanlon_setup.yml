@@ -1,0 +1,31 @@
+---
+- name: Add an ESXi image to Hanlon
+  hanlon_image:
+    base_url: "{{ hanlon_base_url }}"
+    type: esxi
+    path: "{{ esxi_iso_path }}"
+    name: "{{ esxi_image_name }}"
+    version: "{{ esxi_version }}"
+  register: image
+
+- name: Add an ESXi Model to Hanlon
+  hanlon_model:
+    base_url: "{{ hanlon_base_url }}"
+    template: vmware_esxi_5_dhcp
+    label: esxi_model
+    image_uuid: "{{ image.uuid }}"
+    esx_license: "{{ esx_license }}"
+    root_password: "{{ site_passwd }}"
+    hostname_prefix: esxi-node
+  register: model
+
+- name: Create policy for node using SMBIOS UUID
+  hanlon_policy:
+    base_url: "{{ hanlon_base_url }}"
+    policy_template: vmware_hypervisor
+    label: "{{ hostvars[item].inventory_hostname }}"
+    model_uuid: "{{ model.uuid }}"
+    tags: "{{ hostvars[item].smbios_uuid }}"
+    enabled: true
+    state: present
+  with_items: groups['esxi']

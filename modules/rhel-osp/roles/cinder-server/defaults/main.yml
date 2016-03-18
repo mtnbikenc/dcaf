@@ -1,0 +1,6 @@
+# Boolean operator to enable cinder installation
+use_cinder: true
+
+#use pacemaker to manage services?
+use_pacemaker: false
+

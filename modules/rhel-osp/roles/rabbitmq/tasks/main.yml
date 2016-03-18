@@ -1,0 +1,142 @@
+---
+- name: install rabbitmq-server package
+  yum:
+    pkg: rabbitmq-server
+    state: present
+  tags: rabbitmq
+
+- name: copy rabbitmq.config file
+  template:
+    src: rabbitmq.config
+    dest: /etc/rabbitmq/rabbitmq.config
+    mode: 0644
+    owner: root
+    group: root
+  tags: rabbitmq
+
+- name: deploy rabbitmq-env.conf file
+  template:
+    src: rabbitmq-env.conf.j2
+    dest: /etc/rabbitmq/rabbitmq-env.conf
+    mode: 0644
+    owner: root
+    group: root
+  tags: rabbitmq
+
+- name: increase the number of allowed open file descriptors for rabbitmq
+  template:
+    src: limits.conf.j2
+    dest: /etc/security/limits.d/90-rabbitmq.conf
+  tags: rabbitmq
+
+- name: remove cookie if exists
+  file:
+    path: /var/lib/rabbitmq/.erlang.cookie
+    state: absent
+  tags: rabbitmq
+
+- name: touch erlang cookie
+  file:
+    path: /var/lib/rabbitmq/.erlang.cookie
+    state: touch
+    mode: 0400
+    owner: rabbitmq
+    group: rabbitmq
+  tags: rabbitmq
+
+- name: add cookie string
+  lineinfile:
+    dest: /var/lib/rabbitmq/.erlang.cookie
+    line: erlangcookie
+    insertafter: EOF
+    state: present
+    mode: 0400
+    owner: rabbitmq
+    group: rabbitmq
+  tags: rabbitmq
+
+- name: start rabbitmq servers
+  service:
+    name: rabbitmq-server
+    enabled: no
+    state: started
+  tags: rabbitmq
+
+- name: stop rabbitmq app on other controller nodes
+  shell: creates=/etc/rabbitmq/step.stop_app rabbitmqctl stop_app; touch /etc/rabbitmq/step.stop_app
+  when: inventory_hostname != groups.rabbitmq_cluster[0]
+  register: rabbitstop
+  tags: rabbitmq
+
+- name: ensure rabbitmq is stopped
+  command: rabbitmqctl status
+  register: cmd
+  when: inventory_hostname != groups.rabbitmq_cluster[0] and rabbitstop|changed
+  until: cmd.stdout.find("RabbitMQ") == -1
+  ignore_errors: true
+  tags: rabbitmq
+
+- name: join rabbitmq cluster from other controller nodes
+  shell: creates=/etc/rabbitmq/step.join_cluster rabbitmqctl join_cluster rabbit@{{ groups.rabbitmq_cluster[0] }}; touch /etc/rabbitmq/step.join_cluster
+  when: inventory_hostname != groups.rabbitmq_cluster[0]
+  tags: rabbitmq
+
+- name: pause to let rabbitmq nodes join the cluster
+  pause: seconds=5
+  tags: rabbitmq
+
+- name: start rabbitmq app on other controller nodes
+  shell: creates=/etc/rabbitmq/step.start_app rabbitmqctl start_app; touch /etc/rabbitmq/step.start_app
+  when: inventory_hostname != groups.rabbitmq_cluster[0]
+  tags: rabbitmq
+
+- name: wait for rabbitmq apps to start
+  wait_for: timeout=5
+  tags: rabbitmq
+
+- name: set rabbitmq HA policy
+  rabbitmq_policy:
+    name: HA
+    pattern: '^(?!amq\.).*'
+    tags: "ha-mode=all"
+    node: "rabbit@{{ ansible_hostname }}"
+  run_once: true
+  tags: rabbitmq_policy
+
+- name: enable plugins
+  command: rabbitmq-plugins enable {{ item }}
+  with_items:
+    - "rabbitmq_management"
+    - "rabbitmq_management_agent"
+  tags: rabbitmq
+
+- name: restart rabbitmq to enable plugins
+  service:
+    name: rabbitmq-server
+    state: restarted
+  tags: rabbitmq
+
+# commenting out pacemaker tasks
+#- name: stop rabbitmq servers
+#  service:
+#    name: rabbitmq-server
+#    enabled: no
+#    state: stopped
+#  tags: rabbitmq
+#  when: use_pacemaker
+#
+#- name: wait for all rabbitmq servers to stop
+#  pause: seconds=10
+#  tags: rabbitmq
+#  when: use_pacemaker
+#
+#- name: create pacemaker resources for rabbitmq
+#  pcs_resource: command=create name=rabbitmq type=systemd:rabbitmq-server clone=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 20s
+#  run_once: true
+#  tags: rabbitmq
+#  when: use_pacemaker

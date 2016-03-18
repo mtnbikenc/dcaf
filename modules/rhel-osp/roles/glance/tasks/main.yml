@@ -1,0 +1,10 @@
+---
+- name: install & configure glance juno
+  include: juno.yml
+  when: openstack_release == 'juno'
+  tags: glance
+
+- name: install & configure glance kilo
+  include: kilo.yml
+  when: openstack_release == 'kilo'
+  tags: glance

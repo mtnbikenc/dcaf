@@ -1,0 +1,134 @@
+- name: install neutron packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-neutron
+    - openstack-utils
+    - openstack-selinux
+    - openstack-neutron-ml2
+  tags: neutron
+
+- name: get tenant services uuid
+  shell: keystone {{os_admin_auth2}} keystone tenant-get services | awk '/id/ { print $4 }'
+  register: tenant_services_uuid
+  tags: neutron
+
+- name: link plugin.ini to the ml2 plugin config file
+  file:
+    src: /etc/neutron/plugins/ml2/ml2_conf.ini
+    dest: /etc/neutron/plugin.ini
+    state: link
+  tags: neutron
+
+- name: get services id
+  keystone_user:
+    tenant: services
+    endpoint: "{{ keystone_adminurl }}"
+    token: "{{ keystone_admin_token }}"
+  register: keystone
+  run_once: true
+
+- name: configure the neutron.conf file
+  ini_file:
+    dest: /etc/neutron/neutron.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_hosts", value: "{{ rabbit_hosts }}"}
+    - { section: "DEFAULT", option: "rabbit_ha_queues", value: "true"}
+    - { section: "DEFAULT", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
+    - { section: "DEFAULT", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
+    - { section: "DEFAULT", option: "bind_host", value: "{{ neutron_bind_host }}"}
+    - { section: "DEFAULT", option: "auth_strategy", value: "{{ neutron_auth_strategy }}"}
+    - { section: "DEFAULT", option: "notification_driver", value: "{{ neutron_notification_driver }}"}
+    - { section: "DEFAULT", option: "nova_url", value: "http://{{ nova_private_vip }}:{{ nova_osapi_compute_listen_port }}/v2"}
+    - { section: "DEFAULT", option: "notify_nova_on_port_status_changes", value: "{{ neutron_notify_nova_on_port_status_changes }}"}
+    - { section: "DEFAULT", option: "notify_nova_on_port_data_changes", value: "{{ neutron_notify_nova_on_port_data_changes }}"}
+    - { section: "DEFAULT", option: "nova_admin_auth_url", value: "{{ keystone_auth_protocol  }}://{{ keystone_admin_vip }}:{{ keystone_auth_port  }}/v2.0"}
+    - { section: "DEFAULT", option: "nova_region_name", value: "{{ nova_region_name }}"}
+    - { section: "DEFAULT", option: "nova_admin_username", value: "compute"}
+    - { section: "DEFAULT", option: "nova_admin_tenant_id", value: "{{ keystone.id }}"}
+    - { section: "DEFAULT", option: "nova_admin_password", value: "{{ nova_pass }}"}
+    - { section: "DEFAULT", option: "core_plugin", value: "{{ neutron_core_plugin }}"}
+    - { section: "DEFAULT", option: "service_plugins", value: "{{ neutron_service_plugins | join(',') }}"}
+    - { section: "DEFAULT", option: "router_scheduler_driver", value: "{{ neutron_router_scheduler_driver }}"}
+    - { section: "DEFAULT", option: "dhcp_agents_per_network", value: "{{ neutron_dhcp_agents_per_network }}"}
+    - { section: "DEFAULT", option: "network_scheduler_driver", value: "{{ neutron_network_scheduler_driver }}"}
+    - { section: "DEFAULT", option: "agent_down_time", value: "{{ agent_down_time }}"}
+    - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
+    - { section: "keystone_authtoken", option: "admin_user", value: "neutron"}
+    - { section: "keystone_authtoken", option: "admin_password", value: "{{ neutron_pass }}"}
+    - { section: "keystone_authtoken", option: "auth_uri", value: "{{ keystone_auth_protocol }}://{{ keystone_public_vip}}:{{ keystone_public_port  }}/"}
+    - { section: "keystone_authtoken", option: "identity_uri", value: "{{ keystone_auth_protocol  }}://{{ keystone_admin_vip }}:{{ keystone_auth_port  }}/"}
+    - { section: "database", option: "connection", value: "mysql://neutron:{{ neutron_db_pass }}@{{ lb_db_vip }}/neutron"}
+    - { section: "database", option: "max_retries", value: "-1"}
+    - { section: "agent", option: "report_interval", value: "{{report_interval}}" }
+  tags: neutron
+
+
+
+- name: configure the neutron.conf file for ha l3
+  ini_file:
+    dest: /etc/neutron/neutron.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "l3_ha", value: "True"}
+    - { section: "DEFAULT", option: "max_l3_agents_per_router", value: "2"}
+    - { section: "DEFAULT", option: "min_l3_agents_per_router", value: "2"}
+  tags: neutron
+
+- name: configure the ml2_conf.ini file base
+  ini_file:
+    dest: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "ml2", option: "type_drivers", value: "{{ neutron_ml2_type_drivers }}"}
+    - { section: "ml2", option: "tenant_network_types", value: "{{ neutron_tunnel_type }}"}
+    - { section: "ml2", option: "mechanism_drivers", value: "{{neutron_ml2_mechanism_drivers}}"}
+    - { section: "ml2_type_flat", option: "flat_networks", value: "{{neutron_ml2_type_flat}}"}
+    - { section: "ml2_type_vlan", option: "network_vlan_ranges", value: "{{ neutron_network_vlan_ranges }}"}
+    - { section: "securitygroup", option: "enable_security_group", value: "{{ neutron_enable_security_group }}"}
+  tags: neutron
+
+- name: configure the ml2_conf.ini file GRE
+  ini_file:
+    dest: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "ml2_type_gre", option: "tunnel_id_ranges", value: "{{neutron_gre_tunnel_id_ranges}}" }
+  tags: neutron
+  when: use_gre
+
+- name: configure the ml2_conf.ini file vxlan
+  ini_file:
+    dest: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "ml2_type_vxlan", option: "vni_ranges", value: "{{ neutron_vxlan_vni_ranges }}"}
+    - { section: "ml2_type_vxlan", option: "vxlan_group", value: "{{ neutron_vxlan_group }}"}
+  tags: neutron
+  when: use_vxlan
+
+- name: configure lbaas in neutron.conf when use_lbaas is true
+  when: use_lbaas
+  ini_file:
+    dest: /etc/neutron/neutron.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "service_providers", option: "service_provider", value: "LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default" }
+  tags: neutron
+  when: use_lbaas

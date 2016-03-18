@@ -1,0 +1,14 @@
+---
+# port that Rabbit accepts incoming connections on
+rabbit_port: 5672
+
+# Password to connect to rabbitmq
+rabbitmq_pass: guest
+# user to connect ot rabbitmq
+rabbitmq_user: guest
+
+#rabbitmq_limit_nofile: 1024
+rabbitmq_limit_nofile: 102400
+
+# Use pacemaker to manage service
+use_pacemaker: false

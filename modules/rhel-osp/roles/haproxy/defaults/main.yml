@@ -1,0 +1,5 @@
+---
+# location of credentials directory on autodeploy node.
+credentials_dir: /var/lib/ansible
+haproxy_admin_port: 8888
+

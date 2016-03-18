@@ -1,0 +1,32 @@
+---
+- name: gather facts about controllers
+  hosts: controller
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: haproxy
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: haproxy 
+  tasks:
+    - name: add firewall rules for haproxy
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 4
+      with_items:
+        - { port: "{{haproxy_admin_port | default(8888)}}", protocol: tcp, comment: "admin uri" }
+      tags:
+        - iptables
+        - haproxy      
+
+
+- name: install haproxy node
+  hosts: haproxy
+  max_fail_percentage: 0
+  roles:
+    - keepalived
+    - haproxy

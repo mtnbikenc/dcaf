@@ -1,0 +1,43 @@
+---
+
+    - name: Migrate Management vmk
+      local_action:
+        module: vmware_migrate_vmk
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        esxi_hostname: "{{ hostvars[item].hostname }}"
+        device: vmk1
+        current_switch_name: temp_vswitch
+        current_portgroup_name: esx-mgmt
+        migrate_switch_name: dvSwitch
+        migrate_portgroup_name: Management
+      with_items: groups['foundation_esxi']
+
+    - name: Migrate vMotion vmk
+      local_action:
+        module: vmware_migrate_vmk
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        esxi_hostname: "{{ hostvars[item].hostname }}"
+        device: vmk2
+        current_switch_name: temp_vswitch
+        current_portgroup_name: vmotion
+        migrate_switch_name: dvSwitch
+        migrate_portgroup_name: vMotion
+      with_items: groups['foundation_esxi']
+
+    - name: Migrate vSAN vmk
+      local_action:
+        module: vmware_migrate_vmk
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        esxi_hostname: "{{ hostvars[item].hostname }}"
+        device: vmk3
+        current_switch_name: temp_vswitch
+        current_portgroup_name: vsan
+        migrate_switch_name: dvSwitch
+        migrate_portgroup_name: vSAN
+      with_items: groups['foundation_esxi']

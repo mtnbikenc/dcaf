@@ -1,0 +1,3 @@
+---
+public_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + ctr_if ].ipv4.address }}"
+internal_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' +ctr_if ].ipv4.address }}"

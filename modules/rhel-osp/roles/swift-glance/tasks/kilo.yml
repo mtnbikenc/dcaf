@@ -1,0 +1,36 @@
+---
+- name: configure glance to use swift as backend
+  ini_file:
+    dest: /etc/glance/glance-api.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "default_store", value: "swift"}
+    - { section: "glance_store", option: "stores", value: "glance.store.swift.Store"}
+    - { section: "glance_store", option: "swift_store_auth_version", value: "2"}
+    - { section: "glance_store", option: "swift_store_auth_address", value: "{{ keystone_auth_protocol  }}://{{ keystone_vip }}:{{ keystone_auth_port  }}/v2.0"}
+    - { section: "glance_store", option: "swift_store_user", value: "services:glance"}
+    - { section: "glance_store", option: "swift_store_key", value: "{{ glance_pass }}"}
+    - { section: "glance_store", option: "swift_store_container", value: "glance"}
+    - { section: "glance_store", option: "swift_store_create_container_on_put", value: "true"}
+  tags: swift_glance
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker] create pacemaker constraint for glance-swift backend"
+#  shell: pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}
+#  with_items:
+#    - { id: order-swift-proxy-clone-glance-api-clone-mandatory, cmd: "order start swift-proxy-clone then glance-api-clone" }
+#  run_once: true
+#  when: use_pacemaker
+#  tags: glance
+#
+#- name: restart glance
+#  service:
+#    name: openstack-glance-{{ item }}
+#    state: restarted
+#  with_items:
+#    - "api"
+#    - "registry"
+#  tags: swift_glance

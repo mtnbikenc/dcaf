@@ -1,0 +1,73 @@
+---
+# configure cluster
+- name: create clustercheck database user
+  command: mysql -e "CREATE USER 'clustercheck'@'localhost' IDENTIFIED BY '{{clustercheck_db_pass}}';"
+  tags: galera
+  ignore_errors: yes
+
+- name: deploy clustercheck
+  template: src=clustercheck.j2 dest=/etc/sysconfig/clustercheck mode=0644 owner=root group=root
+  tags: galera
+
+- name: create mariadb directory in systemd
+  file:
+    state: directory
+    path: /etc/systemd/system/mariadb.service.d/
+    mode: 0644
+    owner: root
+    group: root
+  tags: galera
+
+- name: deploy mariadb server config file with increased number of max_connections
+  copy:
+    src: server.cnf
+    dest: /etc/my.cnf.d/server.cnf
+    mode: 0644
+    owner: root
+    group: root
+  tags: galera
+
+- name: deploy galera.cnf on sql_nodes
+  template:
+    src: galera.cnf.j2
+    dest: /etc/my.cnf.d/galera.cnf
+    mode: 0644
+    owner: root
+    group: root
+  tags: galera
+
+
+
+- name: Create Galera systemd configuration file, to allow a higher number of files to be opened
+  copy:
+    src: limits.conf
+    dest:  /etc/systemd/system/mariadb.service.d/limits.conf
+    mode: 0644
+    owner: root
+    group: root
+  tags: galera
+
+- name: deploy galera-monitor config file
+  copy:
+    src: galera-monitor
+    dest: /etc/xinetd.d/galera-monitor
+    mode: 0644
+    owner: root
+    group: root
+  tags: galera
+
+- name: enable xinetd service
+  service:
+    name: xinetd
+    enabled: yes
+    state: started
+  tags: galera
+
+- name: enable mariadb service
+  service:
+    name: mariadb
+    enabled: yes
+    state: stopped
+  tags: galera
+
+

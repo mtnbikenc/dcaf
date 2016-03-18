@@ -1,0 +1,53 @@
+---
+# The prep-scaleio play will take the scaleio software zip file, extract and copy the files
+# to the ansible-scaleio project directories as needed.
+
+- name: Check if ScaleIO zip file exist in /opt/autodeploy/resources/scaleio
+  stat:
+    path: "{{ scaleio_path }}/{{ scaleio_source_zip }}"
+  register: scaleio_zip
+
+- name: Download ScaleIO files for ansible-scaleio project (Online)
+  get_url:
+    url:  "{{ scaleio_source_url }}"
+    dest: "{{ scaleio_path }}"
+  register: download_file
+  when: not (scaleio_zip.stat.exists or offline)
+
+# TODO Test if the source file has been extracted
+- name: Extract the ScaleIO source files
+  unarchive:
+    src: "{{ scaleio_path }}/{{ scaleio_source_zip }}"
+    dest: "{{ scaleio_path }}"
+
+- name: Find ScaleIO RPMs to be copied
+  shell: 'find {{ scaleio_path }} -type f -name "*.rpm" | egrep "RHEL7|Gateway" | egrep -v "MACOSX"'
+  register: scaleio_files
+
+- name: Copy ScaleIO RPMs to the ansible-scaleio project
+  copy:
+    src: "{{ item }}"
+    dest: "{{ scaleio_rpm_path }}"
+  with_items: "{{ scaleio_files.stdout_lines }}"
+
+- name: Find ScaleIO Openstack driver file to extract
+  shell: 'find {{ scaleio_path }} -type f -name {{ scaleio_os_driver_zip }} | egrep -v "MACOSX"'
+  register: os_driver_zip
+
+- name: Extract the ScaleIO OpenStack drivers
+  unarchive:
+    src: "{{ item }}"
+    dest: "{{ scaleio_path }}"
+  with_items: "{{ os_driver_zip.stdout_lines }}"
+
+- name: Copy ScaleIO OpenStack-Compute Drivers to ansible-scaleio project
+  copy:
+    src: "{{ scaleio_path }}/{{ item }}"
+    dest: "{{ scaleio_compute_path }}"
+  with_items: "{{ scaleio_os_files }}"
+
+- name: Copy ScaleIO OpenStack-Controller Drivers to ansible-scaleio project
+  copy:
+    src: "{{ scaleio_path }}/{{ item }}"
+    dest: "{{ scaleio_controllers_path }}"
+  with_items: "{{ scaleio_os_files }}"

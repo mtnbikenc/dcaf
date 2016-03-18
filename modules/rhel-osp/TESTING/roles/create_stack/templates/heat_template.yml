@@ -1,0 +1,254 @@
+---
+heat_template_version: 2013-05-23
+
+description: >
+  This template deploys the servers and networks needed to test the DCAF RHEL
+  OSP deployment
+
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: {{heat_key_name}}
+  flavor:
+    type: string
+    description: Flavor to use for servers
+    default: {{heat_flavor}}
+  image:
+    type: string
+    description: Name of image to use for servers
+    default: {{heat_image_name}}
+  cloud_user_password:
+    type: string
+    default: {{heat_cloud_user_password}}
+  image_id:
+    type: string
+    default: {{heat_image_id}}
+  public1_net:
+    type: string
+    description: >
+      ID of public network for which floating IP addresses will be allocated
+    default: 2f78b920-d923-4a8f-9f6e-0ddb8770adb6
+  mgmt_net:
+    type: string
+    description: ID of mgmt_network that vms boot on
+    default: {{mgmt_net_id}}
+
+
+resources:
+#global
+  server_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Add security group rules for server
+      name: security-group
+      rules:
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 1
+          port_range_max: 65535
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: icmp
+
+  cloud-init-data:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        #cloud-config
+        # vim:syntax=yaml
+        debug: True
+        ssh_pwauth: True
+        disable_root: false
+        password: {get_param: cloud_user_password }
+        runcmd:
+        - sed -i'.orig' -e's/without-password/yes/' /etc/ssh/sshd_config
+        - echo "UseDNS no" >> /etc/ssh/sshd_config
+        - service sshd restart
+
+  ctrl_router:
+    type: OS::Neutron::Router
+    properties:
+      name: ctrl_router
+      external_gateway_info:
+        network: { get_param: public1_net}
+
+  ctrl_router_interface1611:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: ctrl_router }
+      subnet_id: { get_resource: control_subnet }
+
+#### Build Networks ####
+{% for network in heat_network %}
+  {{network}}:
+    type: OS::Neutron::Net
+    properties:
+      name: {{heat_network[network]['name']}}
+
+  {{network}}_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: {{network}} }
+      cidr: {{heat_network[network]['ip']}}/{{heat_network[network]['prefix']}}
+      enable_dhcp: {{heat_network[network]['enable_dhcp']}}
+
+
+{% endfor %}
+#### Build servers #####
+
+{% for node in groups['openstack'] %}
+
+  {{ node }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ node }}
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      image: { get_param: image }
+      networks:
+        - port: { get_resource: {{ node }}_portmgmt }
+        - port: { get_resource: {{ node }}_portctl }
+{% if node in groups['swift-storage'] %}
+#swift-storage interfaces
+        - port: { get_resource: {{node}}_rsync}
+{% endif %}
+{% if node in groups['neutron-network-node'] %}
+#neutron-network-node intefaces
+        - port: { get_resource: {{node}}_datanet}
+        - port: { get_resource: {{node}}_extnet}
+{% endif %}
+{% if node in groups['scaleio-mgmt'] %}
+#scaleio node interfaces
+        - port: { get_resource: {{node}}_scaleio}
+{% endif %}
+{% if node in groups['compute'] %}
+#compute node interfaces
+        - port: { get_resource: {{node}}_datanet}
+        - port: { get_resource: {{node}}_scaleio}
+{% endif %}
+      block_device_mapping: [
+        { volume_id: { get_resource: {{ node }}_vda}, device_name: vda}{% if (node in groups['swift-storage']) or (node in groups['compute'])  %},
+        { volume_id: { get_resource: {{ node }}_vdb}, device_name: vdb}{% if node in groups['compute']  %},
+        { volume_id: { get_resource: {{ node }}_vdc}, device_name: vdc}{% endif %}{% endif %}
+      ]
+      user_data_format: RAW
+      user_data: { get_resource: cloud-init-data }
+
+## Define Volumes
+  {{ node }}_vda:
+    type: OS::Cinder::Volume
+    properties:
+      name: {{ node }}_vda
+      image: { get_param: image_id }
+{% if node not in groups['compute'] %}
+      size: 20
+{% else %}
+# compute node
+      size: 50
+{% endif %}
+{% if (node in groups['swift-storage']) %}
+# swift-storage additional drives
+  {{ node }}_vdb:
+    type: OS::Cinder::Volume
+    properties:
+      name: {{ node }}_vdb
+      size: 50
+{% endif %}
+{% if (node in groups['compute']) %}
+# compute additional drives
+  {{ node }}_vdb:
+    type: OS::Cinder::Volume
+    properties:
+      name: {{ node }}_vdb
+      size: 100
+  {{ node }}_vdc:
+    type: OS::Cinder::Volume
+    properties:
+      name: {{ node }}_vdc
+      size: 100
+{% endif %}
+
+## network interfaces
+  {{ node }}_portmgmt:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: mgmt_net }
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'mgmt_if' ]['ipaddr']  }}
+      security_groups: [{ get_resource: server_security_group }]
+  {{ node }}_portctl:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: control }
+      fixed_ips:
+        - ip_address: {{ hostvars[node]['control_if' ]['ipaddr']  }}
+{% if node  ==  groups['haproxy'][0] %}
+# VIP interface for haproxy1
+        - ip_address: {{haproxy_vip}}
+{% endif %}
+{% if (node in groups['compute']) %}
+# Additional interfaces for compute
+  {{ node }}_datanet:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource:  datanet }
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'datanet_if' ]['ipaddr']   }}
+      security_groups: [{ get_resource: server_security_group }]
+  {{ node }}_scaleio:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource:  scaleIO }
+      security_groups: [{ get_resource: server_security_group }]
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'scaleio_if' ]['ipaddr']  }}
+      security_groups: [{ get_resource: server_security_group }]
+{% endif %}
+{% if (node in groups['neutron-network-node']) %}
+# additional interfaces for network-nodes
+  {{ node }}_datanet:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource:  datanet }
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'datanet_if' ]['ipaddr']  }}
+      security_groups: [{ get_resource: server_security_group }]
+  {{ node }}_extnet:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource:  extnet }
+      security_groups: [{ get_resource: server_security_group }]
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'ext_if' ]['ipaddr']  }}
+      security_groups: [{ get_resource: server_security_group }]
+{% endif %}
+{% if (node in groups['swift-storage']) %}
+# additional interfaces for swift-storage
+  {{ node }}_rsync:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: rsync }
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'swift_rsync_if' ]['ipaddr']  }}
+      security_groups: [{ get_resource: server_security_group }]
+{% endif %}
+{% if (node in groups['scaleio-mgmt']) %}
+  {{ node }}_scaleio:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource:  scaleIO }
+      security_groups: [{ get_resource: server_security_group }]
+      fixed_ips:
+        - ip_address: {{ hostvars[node][ 'scaleio_if' ]['ipaddr']  }}
+      security_groups: [{ get_resource: server_security_group }]
+{% endif %}
+
+  {{ node }}_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public1_net}
+      port_id: { get_resource: {{node}}_portmgmt}
+
+{% endfor %}
+### end server build
+

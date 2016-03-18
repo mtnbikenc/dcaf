@@ -1,0 +1,8 @@
+---
+ansible_ssh_user: root
+ansible_ssh_pass: "{{ site_passwd }}"
+mgmt_vlan_id: 1801
+vmotion_vlan_id: 1802
+vsan_vlan_id: 1803
+ipmi_username: root
+ipmi_password: calvin

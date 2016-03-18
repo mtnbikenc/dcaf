@@ -1,0 +1,169 @@
+---
+# use_lbaas: Boolean operator that will enable Load balancer as a service.  The haproxy plugin is used for LBaaS
+use_lbaas: True
+
+# use_fwaas: Boolean operator that will enable Firewall as a service.
+use_fwaas: true
+
+# use_gre: boolean operator that enables the gre driver in neutron ml2 plugin.
+use_gre: True
+
+# use_gre: boolean operator that enables the vxlan driver in neutron ml2 plugin.
+use_vxlan: True
+
+# neutron_tunnel_type: the type of tunnel that neutron will use for connecting the compute nodes to the networking node.
+# neutron_tunnel_type: vxlan
+neutron_tunnel_type: vxlan
+
+# neutron_dhcp_agents_per_network: the number of dhcp agents that will be created for each tenant network.  For HA
+# this number should be greater the 3, for a single controller this needs to be set to 1.
+# neutron_dhcp_agents_per_network: 3
+neutron_dhcp_agents_per_network: 3
+
+# Admin options:
+# use_pacemaker: Boolean operator to decide if pacemaker is in use for HA service control
+# use_pacemaker: false
+use_pacemaker: false
+
+# The RabbitMQ userid. (string value)
+# rabbitmq_user: guest
+rabbitmq_user: guest
+
+# The RabbitMQ password. (string value)
+# rabbitmq_pass: guest
+rabbitmq_pass: guest
+
+# The RabbitMQ broker port where a single node is used.
+# (integer value)
+rabbit_port: 5672
+
+# Auth token options
+keystone_auth_protocol: http
+keystone_auth_port: 35357
+keystone_public_port: 5000
+neutron_auth_strategy: keystone
+admin_user: admin
+admin_tenant: admin
+
+# Local directory on ansible server that credentials can be found.
+credentials_dir: /var/lib/ansible
+
+
+# ======== neutron nova interactions ==========
+# Send notification to nova when port status is active.
+# neutron_nova_on_port_status_changes = True
+neutron_notify_nova_on_port_status_changes: true
+
+# Send notifications to nova when port data (fixed_ips/floatingips) change
+# so nova can update it's cache.
+# neutron_notify_nova_on_port_data_changes: true
+neutron_notify_nova_on_port_data_changes: true
+
+# port that nova is listening on
+# nova_osapi_compute_listen_port: 8774
+nova_osapi_compute_listen_port: 8774
+
+# region that nova is in.
+# nova_region_name: regionOne
+nova_region_name: regionOne
+
+# =========neutron api server settings =============
+# Driver or drivers to handle sending notifications
+# neutron_notification_driver: "neutron.openstack.common.notifier.rpc_notifier"
+neutron_notification_driver: "neutron.openstack.common.notifier.rpc_notifier"
+
+# neutron core plugin to use:
+# neutron_core_plugin: neutron.plugins.ml2.plugin.Ml2Plugin
+neutron_core_plugin: neutron.plugins.ml2.plugin.Ml2Plugin
+
+# ListOpt) List of service plugin entrypoints to be loaded from the
+# neutron.service_plugins namespace. See setup.cfg for the entrypoint names of
+# the plugins included in the neutron source distribution. For compatibility
+# with previous versions, the class name of a plugin can be specified instead
+# of its entrypoint name.
+# neutron_service_plugins:
+#  - neutron.services.l3_router.l3_router_plugin.L3RouterPlugin
+#  - neutron.services.firewall.fwaas_plugin.FirewallPlugin
+#  - neutron.services.metering.metering_plugin.MeteringPlugin
+#  - neutron.services.loadbalancer.plugin.LoadBalancerPlugin
+neutron_service_plugins:
+  - neutron.services.l3_router.l3_router_plugin.L3RouterPlugin
+  - neutron.services.firewall.fwaas_plugin.FirewallPlugin
+  - neutron.services.metering.metering_plugin.MeteringPlugin
+  - neutron.services.loadbalancer.plugin.LoadBalancerPlugin
+
+kilo_neutron_service_plugins:
+  - router
+  - lbaas
+  - metering
+
+# =========== items for agent scheduler extension =============
+# Driver to use for scheduling network to DHCP agent
+# network_scheduler_driver: neutron.scheduler.dhcp_agent_scheduler.ChanceScheduler
+neutron_network_scheduler_driver: "neutron.scheduler.dhcp_agent_scheduler.ChanceScheduler"
+
+# Driver to use for scheduling router to a default L3 agent
+# router_scheduler_driver: neutron.scheduler.l3_agent_scheduler.ChanceScheduler
+neutron_router_scheduler_driver: "neutron.scheduler.l3_agent_scheduler.ChanceScheduler"
+
+# =========== items for agent management extension =============
+# These 2 intervals should be raised as the size of the cluster grows.
+
+# Seconds to regard the agent as down; should be at least twice
+# report_interval, to be sure the agent is down for good
+# agent_down_time: 75
+agent_down_time: 75
+
+
+# seconds between nodes reporting state to server; should be less than
+# agent_down_time, best if it is half or less than agent_down_time
+# report_interval: 30
+report_interval: 30
+
+
+
+## ======= ML2 Plugin Variables ========##
+# (ListOpt) List of network type driver entrypoints to be loaded from
+# the neutron.ml2.type_drivers namespace.
+neutron_ml2_type_drivers: vxlan,flat,vlan,gre,local
+
+# (ListOpt) Ordered list of networking mechanism driver entrypoints
+# to be loaded from the neutron.ml2.mechanism_drivers namespace.
+neutron_ml2_mechanism_drivers: openvswitch,l2population
+
+# (ListOpt) Ordered list of network_types to allocate as tenant
+# networks. (defined at the top of page)
+#neutron_tunnel_type: vxlan
+
+# Controls if neutron security group is enabled or not.
+# It should be false when you use nova security group.
+# neutron_enable_security_group: True
+neutron_enable_security_group: true
+
+# ======vlans======
+# (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
+# specifying physical_network names usable for VLAN provider and
+# tenant networks, as well as ranges of VLAN tags on each
+# physical_network available for allocation as tenant networks.
+neutron_network_vlan_ranges: "physnet1"
+
+# ====== flat =====
+# (ListOpt) List of physical_network names with which flat networks
+# can be created. Use * to allow flat networks with arbitrary
+# physical_network names.
+neutron_ml2_type_flat: "\"*\""
+
+# ===== vxlan ======
+# (ListOpt) Comma-separated list of <vni_min>:<vni_max> tuples enumerating
+# ranges of VXLAN VNI IDs that are available for tenant network allocation.
+neutron_vxlan_vni_ranges: 10:10000
+
+# (StrOpt) Multicast group for the VXLAN interface. When configured, will
+# enable sending all broadcast traffic to this multicast group. When left
+# unconfigured, will disable multicast VXLAN mode.
+neutron_vxlan_group: 239.1.1.1
+
+# ===== GRE =======
+# (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of
+# GRE tunnel IDs that are available for tenant network allocation
+neutron_gre_tunnel_id_ranges: 1:1000

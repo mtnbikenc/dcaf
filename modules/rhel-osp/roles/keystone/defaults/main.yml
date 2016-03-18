@@ -1,0 +1,17 @@
+---
+# enable or disable pacemaker management of services
+use_pacemaker: false
+
+# Keystone Auth construction variables
+keystone_admin_protocol: http
+keystone_public_protocol: http
+keystone_admin_port: 35357
+keystone_public_port: 5000
+keystone_default_api_verison: v2.0
+region: regionOne
+
+# rabbitmq Auth Variables
+rabbitmq_user: guest
+rabbitmq_pass: guest
+rabbit_port: 5672
+

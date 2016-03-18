@@ -1,0 +1,38 @@
+---
+- name: labeldisks provided to swift in group_vars/all.swift_data_drive
+  command: parted -s /dev/{{ item }} mklabel gpt
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  tags: swift
+
+- name: create primary partition table on group_vars/all.swift_data_drive
+  command: parted -s /dev/{{item}} unit mib mkpart primary 1 100%
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  tags: swift
+
+
+- name: format drive for swift using xfs
+  filesystem: dev=/dev/{{item}}1 force=yes fstype=xfs
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'  
+  tags: swift
+
+
+- name: create mount point
+  file: path=/srv/node/{{item}} state=directory owner=swift group=swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  tags: swift
+
+
+- name: mount swift data drive
+  mount: state=mounted  passno=0 dump=0 src=/dev/{{item}}1 name=/srv/node/{{item}} fstype=xfs opts=inode64,noatime,nodiratime
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  tags: swift
+
+
+- name: set selinux context on disk
+  command: restorecon -R /srv/
+  tags: swift

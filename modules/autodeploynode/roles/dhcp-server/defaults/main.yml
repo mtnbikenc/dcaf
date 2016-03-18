@@ -1,0 +1,7 @@
+---
+domain_name: "{{ ansible_domain }}"
+dns1: 8.8.8.8
+
+# Specify the last octet of the IP for the DHCP range
+dhcp_start: 20
+dhcp_end: 60

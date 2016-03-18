@@ -1,0 +1,37 @@
+---
+- name: base RHEL configuration
+  hosts: heat
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: heat
+  tags: cinder
+
+- name: install heat rules
+  hosts:
+    - heat
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for heat
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 4 
+    with_items:
+      - { port: 8003, protocol: tcp, comment: "cloudwatch API" }
+      - { port: 8004, protocol: tcp, comment: "heat api"}
+      - { port: 8000, protocol: tcp, comment: "cfn api"}
+    tags:
+      -  iptables
+      -  heat
+
+- name: install heat
+  hosts: heat
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - heat
+  tags: cinder

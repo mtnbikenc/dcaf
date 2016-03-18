@@ -1,0 +1,41 @@
+---
+# This play will download the initial source project to the
+# /opt/autodeploy/projects directory. All other plays will be run from those
+# projects. Change into the /opt/autodeploy/projects/dcaf/modules/autodeploynode
+# directory to continue installation.
+
+- name: Download the CSC DCAF source repo
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    autodeploy_base_path: /opt/autodeploy
+    projects_base_path: "{{ autodeploy_base_path }}/projects"
+    resources_base_path: "{{ autodeploy_base_path }}/resources"
+
+    git_repos:
+      - { name: "dcaf", repo: "git@github.com:csc/dcaf.git" }
+
+  tasks:
+
+    - name: Create the staging directories
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - "{{ projects_base_path }}"
+        - "{{ resources_base_path }}"
+
+    - name: Clone the project repos from Git
+      git:
+        repo: "{{ item.repo }}"
+        dest: "{{ projects_base_path }}/{{ item.name }}"
+        accept_hostkey: yes
+        key_file: "{{ github_key_file }}"
+      with_items: "{{ git_repos }}"
+
+    - name: Checkout the latest tagged version
+      shell: "git checkout $(git describe --abbrev=0 --tags)"
+      args:
+        chdir: "{{ projects_base_path }}/{{ item.name }}"
+      with_items: "{{ git_repos }}"

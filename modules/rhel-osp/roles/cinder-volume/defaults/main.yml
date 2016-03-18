@@ -1,0 +1,9 @@
+# Boolean operator to enable cinder installation
+use_cinder: true
+
+# use the nfs volume drivers for cinder
+use_cinder_nfs_volume_driver: false
+
+#use pacemaker to manage services?
+use_pacemaker: false
+

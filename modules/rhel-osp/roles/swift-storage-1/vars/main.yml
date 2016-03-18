@@ -1,0 +1,8 @@
+---
+public_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + control_if.device ].ipv4.address }}"
+internal_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + control_if.device ].ipv4.address }}"
+storage_devices: "{{ hostvars[inventory_hostname]['swift-data-disks'] }}"
+pdisk: '[{% for disk in ansible_devices %}{% if disk|map(atribute="model") != "Virtual Floppy" %}"{{ disk }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %} ]'
+mounted_disk: '[{% for disk in ansible_mounts %}"{{disk.device}}"{% if not loop.last %}, {% endif %}{% endfor %}]'
+swift_pathprefix: "{{ lookup('password', credentials_dir + '/credentials/swift_prefix chars=ascii_letters,digits') }}"
+swift_pathsuffix: "{{ lookup('password', credentials_dir + '/credentials/swift_suffix chars=ascii_letters,digits') }}"

@@ -1,0 +1,12 @@
+# Boolean operator to enable or disable the use of a non-rhn repository for rpms.  When set to false "repo_url" needs
+# to be set to the location of a .repo file that can be used to access an offline repository
+offline: false
+#
+# repo_url: http://some_address/offline.repo
+
+# RHN credentials to register systems
+# rhn_user: rhn-username
+# rhn_pass:  rhn-password
+
+# Specify a subscription pool name to consume. Regular expressions accepted.
+# pool: Openstack

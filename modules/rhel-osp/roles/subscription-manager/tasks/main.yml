@@ -1,0 +1,11 @@
+---
+# The subscription manager role will prepare the offline http repo if offline
+# or register with subscription manager if online.
+
+- name: online repo tasks
+  include: online.yml
+  when: not offline
+
+- name: offline repo tasks
+  include: offline.yml
+  when: offline

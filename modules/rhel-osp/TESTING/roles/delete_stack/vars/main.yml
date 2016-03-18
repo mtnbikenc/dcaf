@@ -1,0 +1,3 @@
+---
+os_tenant_auth: "--os-auth-url {{ keystone_auth_url}} --os-tenant-name {{keystone_tenant}} --os-username {{keystone_user }}  --os-password {{keystone_password}}"
+

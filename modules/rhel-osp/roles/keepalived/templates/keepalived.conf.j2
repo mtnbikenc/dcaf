@@ -1,0 +1,39 @@
+vrrp_script chk_haproxy {
+    script "/usr/bin/killall -0 haproxy"
+    interval 2
+    weight 2
+}
+
+vrrp_instance VI_PUBLIC {
+    interface {{ control_if.device }}
+{% for host in groups['haproxy'][1:] %}
+  {% if ansible_hostname == hostvars[host]['ansible_hostname'] %}
+    state BACKUP
+  {% else %}
+    state MASTER
+  {% endif %}
+{% endfor %}
+
+    virtual_router_id 51
+
+    unicast_src_ip {{control_if.ipaddr}}
+    unicast_peer {
+{% for host in groups['haproxy']  %}
+  {% if ansible_hostname !=  hostvars[host]['ansible_hostname']  %}
+    {{ hostvars[host][ 'ansible_' + control_if.device ].ipv4.address }}
+  {% endif %}
+{% endfor %}
+    }
+
+
+    priority {% for host in groups['haproxy'][1:] %}{% if ansible_hostname == hostvars[host]['ansible_hostname'] %}101
+{% else %}102
+{% endif %}{% endfor %}
+    virtual_ipaddress {
+        {{ haproxy_vip }}
+    }
+    track_script {
+        chk_haproxy
+    }
+}
+

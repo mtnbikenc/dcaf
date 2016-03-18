@@ -1,0 +1,54 @@
+---
+
+    - name: Create dvswitch
+      local_action:
+        module: vmware_dvswitch
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        datacenter_name: "{{ mgmt_vdc }}"
+        switch_name: dvSwitch
+        mtu: 9000
+        uplink_quantity: 2
+        discovery_proto: lldp
+        discovery_operation: both
+        state: present
+
+    - name: Create Management portgroup
+      local_action:
+        module: vmware_dvs_portgroup
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        portgroup_name: Management
+        switch_name: dvSwitch
+        vlan_id: "{{ hostvars[groups['foundation_esxi'][0]].mgmt_vlan_id }}"
+        num_ports: 120
+        portgroup_type: earlyBinding
+        state: present
+
+    - name: Create vMotion portgroup
+      local_action:
+        module: vmware_dvs_portgroup
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        portgroup_name: vMotion
+        switch_name: dvSwitch
+        vlan_id: "{{ hostvars[groups['foundation_esxi'][0]].vmotion_vlan_id }}"
+        num_ports: 120
+        portgroup_type: earlyBinding
+        state: present
+
+    - name: Create vSAN portgroup
+      local_action:
+        module: vmware_dvs_portgroup
+        hostname: "{{ mgmt_ip_address }}"
+        username: "{{ vcsa_user }}"
+        password: "{{ vcsa_pass }}"
+        portgroup_name: vSAN
+        switch_name: dvSwitch
+        vlan_id: "{{ hostvars[groups['foundation_esxi'][0]].vsan_vlan_id }}"
+        num_ports: 120
+        portgroup_type: earlyBinding
+        state: present

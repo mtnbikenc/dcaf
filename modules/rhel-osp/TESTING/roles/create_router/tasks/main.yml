@@ -1,0 +1,41 @@
+---
+- name: check to see if router exists
+  command: neutron {{os_tenant_auth}} router-list
+  register: routerlist
+
+- name: create router 
+  command: neutron {{os_tenant_auth}} router-create {{mgmt_router_name}}
+  when: '"{{mgmt_router_name}}" not in routerlist.stdout'
+  
+#- name: get routerid
+#  shell: neutron {{os_tenant_auth}} router-list | grep {{mgmt_router_name}} | gawk -F ' ' '{print $2}'
+#  register: routerid  
+#  when: '"{{mgmt_router_name}}" in routerlist.stdout'
+
+- name: set routergateway
+  command: neutron {{os_tenant_auth}} router-gateway-set {{mgmt_router_name}} {{heat_public1_net}}
+  when: '"{{mgmt_router_name}}" not in routerlist.stdout'
+
+- name: create ports 
+  command: neutron {{os_tenant_auth}} port-create {{item}} 
+  with_items: 
+    - "{{ansible_net_name}}"
+    - "{{mgmt_net_name}}"
+  when: '"{{mgmt_router_name}}" not  in routerlist.stdout'
+
+- name: get mgmt port id
+  command: neutron {{os_tenant_auth}} port-list | grep {{ mgmt_net_name}} | gawk -F ' ' '{print $2}'
+  register: mgmtportid
+  when: '"{{mgmt_router_name}}" not in routerlist.stdout'
+
+- name: get mgmt port id
+  command: neutron {{os_tenant_auth}} port-list | grep {{ ansible_net_name  }} | gawk -F ' ' '{print $2}'
+  register: ansibleportid
+  when: '"{{mgmt_router_name}}" not in routerlist.stdout'
+
+- name: add neutron router interfaces
+  command: neutron {{os_tenant_auth}} router-interface-add {{routerid.stdout}} {{item}}
+  with_items: 
+    - "{{ansibleportid.stdout}}"
+    - "{{mgmtportid.stdout}}"
+  when: '"{{mgmt_router_name}}" not in routerlist.stdout'

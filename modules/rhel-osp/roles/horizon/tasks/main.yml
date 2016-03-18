@@ -1,0 +1,8 @@
+---
+- name: include roles for juno release
+  include: juno.yml
+  when: openstack_release == 'juno'
+
+- name: include roles for kilo release
+  include: kilo.yml
+  when: openstack_release == 'kilo'

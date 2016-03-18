@@ -1,0 +1,8 @@
+---
+
+- name: set bios for automation
+  gather_facts: false
+  hosts: deploy
+  max_fail_percentage: 0
+  roles:
+    - idrac

@@ -1,0 +1,24 @@
+---
+- name: get mgmt_net_id
+  shell: neutron {{os_tenant_auth}} net-list | grep {{mgmt_net_name}} | gawk -F ' ' '{print $2}'
+  register: netid
+
+- set_fact:
+    mgmt_net_id: "{{netid.stdout}}"
+
+- name: create heat template
+  template:
+    src: heat_template.yml
+    dest: "{{temp_dir}}/heat_template.yml"
+    force: yes
+
+- name: heat stack-create
+  command: heat {{os_tenant_auth}} stack-create {{heat_stack_name}} -f {{temp_dir}}/heat_template.yml
+
+- name: wait for stack-create to finish
+  command: heat {{ os_tenant_auth}} stack-show {{heat_stack_name}}
+  register: show
+  until: ( show.stdout.find("CREATE_COMPLETE") != -1 ) or show.stdout.find("CREATE_FAILED") != -1
+  retries: 120
+  delay: 10
+  failed_when: "'CREATE_FAILED' in show.stdout"

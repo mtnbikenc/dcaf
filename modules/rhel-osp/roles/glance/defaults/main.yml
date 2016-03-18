@@ -1,0 +1,19 @@
+#use pacemaker to manage services?
+use_pacemaker: false
+
+# Port for glance api.  If changed, it will need to be changed for haproxy as well.
+glance_api_port: 9292
+# Port for glance registry.  If changed, it will need to be changed for haproxy as well.
+glance_reg_port: 9191
+
+#rabbitmq auth variables.
+rabbitmq_user: guest
+rabbitmq_pass: guest
+rabbit_port: 5672
+
+# Which backend scheme should Glance use by default is not specified
+# in a request to add a new image to Glance?
+default_store: swift
+
+# location of credentials directory on autodeploy node.
+credentials_dir: /var/lib/ansible

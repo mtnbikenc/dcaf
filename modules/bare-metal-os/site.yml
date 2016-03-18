@@ -1,0 +1,5 @@
+---
+
+- include: site_deploy.yml
+- include: ../slimer/site.yml
+- include: ../ansible-scaleio/site.yml

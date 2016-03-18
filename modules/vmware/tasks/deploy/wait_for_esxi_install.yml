@@ -1,0 +1,11 @@
+---
+
+- name: Wait for status to include complete
+  local_action: >
+    hanlon_active_model
+    base_url={{ hanlon_base_url }}
+    smbios_uuid={{ smbios_uuid }}
+  register: result
+  until: result.current_state.find( "complete" ) != -1
+  retries: 40
+  delay: 30

@@ -1,0 +1,16 @@
+---
+- name: unregister vms
+  hosts: testing
+  tasks:
+    - name: unregister vms
+      command: subscription-manager unregister
+      ignore_errors: yes
+      delegate_to: "{{item}}"
+      with_items: "{{ groups['openstack'] }}"
+
+- name: delete stack
+  hosts: testing
+  gather_facts: false
+  roles:
+    - name: delete stack
+      role: delete_stack

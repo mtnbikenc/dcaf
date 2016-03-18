@@ -1,0 +1,7 @@
+---
+- include: haproxy.yml
+- include: control_plane.yml
+- include: neutron-network-node.yml
+- include: compute_node.yml
+- include: swift.yml
+- include: prep_scaleio.yml

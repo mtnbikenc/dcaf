@@ -1,0 +1,28 @@
+---
+force_ntpdate: no
+rpms_to_install:
+    - nfs-utils
+    - iscsi-initiator-utils
+    - bridge-utils
+    - net-tools
+    - traceroute
+    - tcpdump
+    - sos
+    - libselinux-python
+    - openssh-clients
+    - ntp
+    - bind-utils
+    - openstack-utils
+    - vim
+
+ntp:
+  - 0.rhel.pool.ntp.org
+  - 1.rhel.pool.ntp.org
+  - 2.rhel.pool.ntp.org
+
+
+nameservers:
+ - 192.168.70.3
+
+search_domain: ".localdomain"
+

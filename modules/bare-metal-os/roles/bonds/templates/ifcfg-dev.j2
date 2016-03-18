@@ -1,0 +1,20 @@
+DEVICE={{ item.interface }}
+{% for k,v in common_cfg|dictsort %}
+{{ k|upper }}={{ v }}
+{% endfor %}
+{% if 'bond' in item.interface %}
+{% for k,v in bond_cfg|dictsort %}
+{{ k|upper }}={{ v }}
+{% endfor %}
+{% endif %}
+{% if 'bond' not in item.interface %}
+{% for k,v in bond_team_cfg|dictsort %}
+{{ k|upper }}={{ v }}
+{% endfor %}
+{% endif %}
+{% if item.master is defined %}
+MASTER={{ item.master }}
+{% endif %}
+{% if mtu is defined %}
+MTU={{ mtu }}
+{% endif %}

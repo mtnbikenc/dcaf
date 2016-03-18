@@ -1,0 +1,35 @@
+---
+- name: keepalive mcast rule
+  iptables:
+    state: present
+    position: 1
+    in_interface: "{{ control_if.device }}"
+    dest: "224.0.0.0/8"
+    target: ACCEPT
+  tags:
+    - keepalived
+    - iptables
+
+- name: install keepalived
+  yum:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - keepalived
+  tags: keepalived
+
+- name: configure keepalived
+  template:
+    force: yes
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  tags: keepalived
+
+- name: start and enable keepalived
+  service:
+    name: "{{item}}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - keepalived
+  tags: keepalived

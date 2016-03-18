@@ -1,0 +1,178 @@
+---
+- name: install swift node packages
+  yum:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-swift-object
+    - openstack-swift-container
+    - openstack-swift-account
+    - xinetd
+    - rsync
+    - openstack-swift
+    - openstack-utils
+    - python-swiftclient
+    - openstack-swift-container
+  tags: swift
+
+- name: configure swift-object-server
+  ini_file:
+    dest: /etc/swift/object-server.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "bind_ip", value: "{{internal_ipaddr}}"}
+    - { section: "DEFAULT", option: "log_name", value: "object-server"}
+    - { section: "DEFAULT", option: "log_facility", value: "LOG_LOCAL2"}
+    - { section: "DEFAULT", option: "log_level", value: "INFO"}
+    - { section: "DEFAULT", option: "log_address", value: "/dev/log"}
+  tags: swift
+
+- name: configure swift-account-server
+  ini_file:
+    dest: /etc/swift/account-server.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "bind_ip", value: "{{internal_ipaddr}}"}
+    - { section: "DEFAULT", option: "log_name", value: "account-server"}
+    - { section: "DEFAULT", option: "log_facility", value: "LOG_LOCAL2"}
+    - { section: "DEFAULT", option: "log_level", value: "INFO"}
+    - { section: "DEFAULT", option: "log_address", value: "/dev/log"}
+  tags: swift
+
+- name: configure swift-container-server
+  ini_file:
+    dest: /etc/swift/container-server.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "bind_ip", value: "{{internal_ipaddr}}"}
+    - { section: "DEFAULT", option: "log_name", value: "container-server"}
+    - { section: "DEFAULT", option: "log_facility", value: "LOG_LOCAL2"}
+    - { section: "DEFAULT", option: "log_level", value: "INFO"}
+    - { section: "DEFAULT", option: "log_address", value: "/dev/log"}
+  tags: swift
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+  tags: swift
+
+- name: check to see if swift disk is configured
+  command: mount
+  register: mount_out
+  tags: swift
+
+- name: setup up disks if not already mounted
+  include: swift_node_drive_setup.yml
+  when: "'/srv/node' not in mount_out.stdout"
+  tags: swift
+
+- name: chwon srv/node
+  command: chown swift:swift -R /srv/node
+  tags: swift
+
+## setup rsync and xinetd
+- name: copy over rysnc.conf
+  copy:
+    src: rsync.conf
+    dest: /etc/rsync.conf
+    mode: 0644
+    owner: root
+    group: root
+  tags: swift
+
+- name: add rsync to xinetd.d/
+  template:
+    src: rsync.j2
+    dest: /etc/xinetd.d/rsync
+    mode: 0600
+    owner: root
+    group: root
+  tags: swift
+
+- name: start xinetd
+  service:
+    name: xinetd
+    state: restarted
+    enabled: yes
+  tags: swift
+
+- name: create swift.conf on swift node
+  template:
+    src: swift.conf.j2
+    dest: /etc/swift/swift.conf
+  tags: swift
+
+# create the rings on the controller1
+- name: create account ring
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder account.builder add z{{zone_id}}-{{ control_if.ipaddr }}:6202/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  ignore_errors: yes
+  tags: swift
+
+- name: add container ring 1
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder container.builder add z{{ hostvars[groups['swift-storage'][0]].zone_id }}-{{ hostvars[groups['swift-storage'][0]].control_if.ipaddr }}:6201/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  run_once: true
+  tags: swift
+
+
+- name: add container ring 2
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder container.builder add z{{ hostvars[groups['swift-storage'][1]].zone_id }}-{{ hostvars[groups['swift-storage'][1]].control_if.ipaddr }}:6201/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  run_once: true
+  tags: swift
+
+- name: add container ring 3
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder container.builder add z{{ hostvars[groups['swift-storage'][2]].zone_id }}-{{ hostvars[groups['swift-storage'][2]].control_if.ipaddr }}:6201/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  run_once: true
+  tags: swift
+
+- name: create object ring 1
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder object.builder add z{{hostvars[groups['swift-storage'][0]].zone_id}}-{{ hostvars[groups['swift-storage'][0]].control_if.ipaddr }}:6200/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  run_once: true
+  tags: swift
+
+- name: create object ring 2
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder object.builder add z{{hostvars[groups['swift-storage'][1]].zone_id}}-{{ hostvars[groups['swift-storage'][1]].control_if.ipaddr }}:6200/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  run_once: true
+  tags: swift
+
+- name: create object ring 3
+  delegate_to: "{{ groups['controller'][0] }}"
+  command: swift-ring-builder object.builder add z{{hostvars[groups['swift-storage'][2]].zone_id}}-{{ hostvars[groups['swift-storage'][2]].control_if.ipaddr }}:6200/{{ item }} 100
+           chdir=/etc/swift
+  with_items: pdisk
+  when: '"/dev/{{item|string()}}1" not in mounted_disk  and "{{item|string}}" != "sr0"'
+  run_once: true
+  tags: swift

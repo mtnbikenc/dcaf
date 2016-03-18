@@ -1,0 +1,2 @@
+neutron_ext_ovs_bridge_mappings: "{{physical_net}}:{{neutron_ovs_bridges.ovs_bridge}}"
+neutron_metadata_proxy_shared_secret: "{{ lookup('password', credentials_dir + '/credentials/neutron_metadata_proxy_shared_secret chars=hexdigits') }}"

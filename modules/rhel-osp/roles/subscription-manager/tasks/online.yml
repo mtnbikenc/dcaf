@@ -1,0 +1,40 @@
+---
+- name: register to RHN
+  redhat_subscription:
+    state: present
+    username: "{{ rhn_user }}"
+    password: "{{ rhn_pass }}"
+    pool: "{{ pool }}"
+  tags: sub-mgr
+
+
+- name: enable repos for juno
+  shell: "subscription-manager repos --list-enabled | grep 'Repo ID:   {{ item }}' || subscription-manager repos --enable={{ item }}"
+  with_items:
+    - rhel-7-server-rpms
+    - rhel-7-server-openstack-6.0-rpms
+    - rhel-server-rhscl-7-rpms
+    - rhel-ha-for-rhel-7-server-rpms
+    - rhel-7-server-optional-rpms
+  register: result
+  changed_when: result.stdout.find('enabled') != -1
+  tags: sub-mgr
+  when: openstack_release == 'juno'
+
+
+
+- name: enable repos for kilo
+  shell: "subscription-manager repos --list-enabled | grep 'Repo ID:   {{ item }}' || subscription-manager repos --enable={{ item }}"
+  with_items:
+    - rhel-7-server-rpms
+    - rhel-7-server-openstack-7.0-rpms
+    - rhel-server-rhscl-7-rpms
+    - rhel-ha-for-rhel-7-server-rpms
+    - rhel-7-server-optional-rpms
+    - rhel-7-server-openstack-7.0-optools-rpms
+    - rhel-7-server-openstack-7.0-tools-rpms 
+    - rhel-7-server-openstack-7.0-director-rpms
+  register: result
+  changed_when: result.stdout.find('enabled') != -1
+  tags: sub-mgr
+  when: openstack_release == 'kilo'

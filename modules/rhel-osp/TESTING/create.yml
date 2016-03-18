@@ -1,0 +1,81 @@
+---
+- name:  check for networks
+  hosts: local
+  vars:
+    os_tenant_auth: "--os-auth-url {{ keystone_auth_url}} --os-tenant-name {{keystone_tenant}} --os-username {{keystone_user }}  --os-password {{keystone_password}}"
+  tasks:
+    - name: install openstack clients
+      yum:
+        state: present
+        name: '{{item}}'
+      with_items:
+        - python-openstackclient
+    - name: check for ansible_network
+      shell: neutron {{os_tenant_auth}} net-list
+      register: netlist
+
+- name:  create networks
+  hosts: local
+  gather_facts: false
+  roles:
+    - role: create_network
+      network_name: "{{ansible_net_name}}"
+      network_ip: "{{ansible_net_ip}}"
+      network_prefix: "{{ansible_net_prefix}}"
+      network_dns: "{{ansible_net_dns}}"
+      enable_dhcp: true
+      when: "'{{ansible_net_name}}' not in netlist.stdout"
+
+    - role: create_network
+      network_name: "{{mgmt_net_name}}"
+      network_ip: "{{mgmt_net_ip}}"
+      network_prefix: "{{mgmt_net_prefix}}"
+      network_dns: "{{mgmt_net_dns}}"
+      enable_dhcp: true
+      when: "'{{mgmt_net_name}}' not in netlist.stdout"
+
+    - create_router
+
+- name: check if stack exists
+  hosts: testing
+  vars:
+    os_tenant_auth: "--os-auth-url {{ keystone_auth_url}} --os-tenant-name {{keystone_tenant}} --os-username {{keystone_user }}  --os-password {{keystone_password}}"
+  tasks:
+    - name: check if heat stack exists
+      command: heat {{os_tenant_auth}} stack-list
+      register: stacklist
+
+
+- name: delete stack
+  hosts: testing
+  gather_facts: false
+  roles:
+    - name: delete stack if exsits
+      role: delete_stack
+      when: '"{{heat_stack_name}}" in stacklist.stdout'
+
+
+- name: create stack
+  hosts: testing
+  gather_facts: false
+  roles:
+    - create_stack
+
+- name: wait for vms
+  hosts: local
+  tasks:
+    - name: wait for VMs to come up
+      wait_for:
+        host: "{{item}}"
+        delay: 0
+        connect_timeout: 5
+        timeout: 330
+        state: started
+        port: 22
+      with_items: "{{ groups['openstack'] }}"
+
+- include: network_prep.yml
+
+
+
+

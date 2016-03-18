@@ -1,0 +1,10 @@
+---
+- name: install & configure nova-compute juno
+  include: juno.yml
+  when: openstack_release == 'juno'
+  tags: nova
+
+- name: install & configure nova-compute kilo
+  include: kilo.yml
+  when: openstack_release == 'kilo'
+  tags: nova

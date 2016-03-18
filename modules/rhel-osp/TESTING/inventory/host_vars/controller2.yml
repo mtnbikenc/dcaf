@@ -1,0 +1,15 @@
+---
+virt: true
+dns_if: eth1
+
+mgmt_if:
+  device: eth0
+  ipaddr: 192.168.100.22
+  netmask: 255.255.255.0
+  gateway: 192.168.100.1
+  dns1: 8.8.8.8
+
+control_if:  
+  device: eth1
+  ipaddr: 192.168.101.22
+  netmask: 255.255.255.0

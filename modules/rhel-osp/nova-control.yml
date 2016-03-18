@@ -1,0 +1,41 @@
+---
+- name: gather info
+  hosts: openstack
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: controller-nova
+  gather_facts: false
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: openstack 
+  tags: nova-ctr
+
+- name: install nova  rules
+  hosts:
+    - controller-nova
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for nova-controller
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 4
+    with_items:
+      - { port: 6080, protocol: tcp, comment: "novncproxy" }
+      - { port: [8774,8775,8773], protocol: tcp, comment: "nova api"}
+    tags:
+      - iptables
+      - nova-ctrl
+
+- name: install nova
+  hosts: controller-nova
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - nova-control 
+  tags: nova-ctr

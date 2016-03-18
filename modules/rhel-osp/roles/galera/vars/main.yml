@@ -1,0 +1,18 @@
+---
+mgmt_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + mgmt_if.device ].ipv4.address }}"
+control_ipaddr: "{{ hostvars[inventory_hostname][ 'ansible_' + control_if.device ].ipv4.address }}"
+mysql_bind_address: "{{ control_ipaddr }}"
+wsrep_cluster_address: "{% for node in groups['controller'] %}{{ hostvars[node][ 'ansible_' + control_if.device ].ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %} "
+number_of_nodes: "{{ groups['sql'] | length }}" 
+
+#database user passwords
+clustercheck_db_pass: "{{ lookup('password', credentials_dir + '/credentials/clustercheck_db_pass chars=ascii_letters,digits') }}"
+db_root_password: "{{ lookup('password', credentials_dir + '/credentials/db_root_password chars=ascii_letters,digits') }}"
+keystone_db_pass: "{{ lookup('password', credentials_dir + '/credentials/keystone_db_pass chars=ascii_letters,digits') }}"
+glance_db_pass: "{{ lookup('password', credentials_dir + '/credentials/glance_db_pass chars=ascii_letters,digits') }}"
+cinder_db_pass: "{{ lookup('password', credentials_dir + '/credentials/cinder_db_pass chars=ascii_letters,digits') }}"
+nova_db_pass: "{{ lookup('password', credentials_dir + '/credentials/nova_db_pass chars=ascii_letters,digits') }}"
+neutron_db_pass: "{{ lookup('password', credentials_dir + '/credentials/neutron_db_pass chars=ascii_letters,digits') }}"
+heat_db_pass: "{{ lookup('password', credentials_dir + '/credentials/heat_db_pass chars=ascii_letters,digits') }}"
+swift_db_pass: "{{ lookup('password', credentials_dir + '/credentials/swift_db_pass chars=ascii_letters,digits') }}"
+ceilometer_db_pass: "{{ lookup('password', credentials_dir + '/credentials/ceilometer_db_pass chars=ascii_letters,digits') }}"

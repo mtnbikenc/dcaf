@@ -1,0 +1,63 @@
+---
+- name: gather info
+  hosts: openstack
+  gather_facts: true
+
+- name: base RHEL configuration
+  hosts: compute
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: openstack
+  tags: nova-compute
+
+- name: install nova  rules
+  hosts:
+    - compute
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for nova-compute
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 4
+    with_items:
+    - { port: ["5900:5999"], protocol: tcp, comment: "vnc incoming" }
+    - { port: 4789, protocol: tcp, comment: "neutron tunnel" }
+    - { port: 4789, protocol: udp, comment: "neutron tunnels"}
+    - { port: ["16509", "49152:49215"], protocol: tcp, comment: "nova qemu incoming" }
+    tags:
+      - iptables
+      - nova-compute
+
+- name: install neutron-ovs rules
+  hosts:
+    - compute
+  max_fail_percentage: 0
+  tasks:
+  - name: iptable rules for nova-compute
+    iptables:
+      port: "{{ item.port }}"
+      protocol: "{{ item.protocol}}"
+      comment: "{{item.comment}}"
+      position: 4
+    with_items:
+    - { port: 67, protocol: udp, comment: "dhcp incoming" }
+    - { port: 68, protocol: udp, comment: "dhcp incoming" }
+    - { port: 4789, protocol: tcp, comment: "neutron tunnels"}
+    - { port: 4789, protocol: udp, comment: "neutron tunnels"}
+    tags:
+      - iptables
+      - neutron-compute
+
+- name: install compute 
+  hosts: compute
+  max_fail_percentage: 0
+  roles:
+    - nova-compute
+    - neutron-common
+    - neutron-ovs-agent
+    - ceilometer-compute
+  tags: nova-compute

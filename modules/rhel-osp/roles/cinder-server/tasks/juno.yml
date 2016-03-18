@@ -1,0 +1,60 @@
+---
+- name: check for tables
+  command: mysql -e "select count(*) from information_schema.tables where table_schema='cinder'" -sN
+  run_once: true
+  register: mysql_result
+  tags: cinder
+
+- name: run dbsync for cinder
+  command: runuser cinder -s /bin/sh -c '/usr/bin/cinder-manage db sync'
+  when: mysql_result.stdout|int == 0
+  run_once: true
+  tags: cinder
+
+- name: enable cinder services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - openstack-cinder-api
+    - openstack-cinder-scheduler
+  tags: cinder
+  when: not use_pacemaker
+
+# commenting out pacemaker tasks
+#- name: disable cinder services
+#  service:
+#    name: "{{ item }}"
+#    enabled: no
+#  with_items:
+#    - openstack-cinder-api
+#    - openstack-cinder-scheduler
+#  tags: cinder
+#  when: use_pacemaker
+#
+#- name: create pacemaker resources for cinder services
+#  pcs_resource: command=create name=cinder-{{ item }} type=systemd:openstack-cinder-{{ item }} clone=yes interleave=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  with_items:
+#    - api
+#    - scheduler
+#  tags: cinder
+#  when: use_pacemaker
+#
+#- name: create pacemaker constraints for cinder
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-keystone-clone-cinder-api-clone-mandatory, cmd: "order start keystone-clone then cinder-api-clone" }
+#    - { id: order-cinder-api-clone-cinder-scheduler-clone-mandatory, cmd: "order start cinder-api-clone then cinder-scheduler-clone" }
+#    - { id: colocation-cinder-scheduler-clone-cinder-api-clone, cmd: "colocation add cinder-scheduler-clone with cinder-api-clone" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  tags: cinder
+#  when: use_pacemaker

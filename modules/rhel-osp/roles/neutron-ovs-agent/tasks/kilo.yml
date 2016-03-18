@@ -1,0 +1,186 @@
+---
+- name: install openvswitch plugin
+  yum:
+    pkg: "{{item}}"
+    state: present
+  tags: neutron
+  with_items:
+    - openstack-neutron
+    - openvswitch
+    - openstack-neutron-openvswitch
+
+- name: start openvswitch
+  service:
+    name: openvswitch
+    state: started
+    enabled: yes
+  tags: neutron
+
+- name: "configure the ovs_neutron_plugin.ini file [base]"
+  ini_file:
+    dest: /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "ovs", option: "integration_bridge", value: "{{neutron_ovs_intergration_bridge}}"}
+    - { section: "ovs", option: "tunnel_bridge", value: "{{neutron_ovs_tunnel_bridge}}"}
+    - { section: "agent", option: "veth_mtu", value: "{{veth_mtu }}"}
+    - { section: "securitygroup", option: "firewall_driver", value: "{{ neutron_ovs_firewall_driver }}"}
+  tags: neutron
+
+
+- name: "configure the ovs_neutron_plugin.ini file [base] network-node"
+  ini_file:
+    dest: /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "ovs", option: "bridge_mappings", value: "{{ neutron_ovs_bridge_mappings }}"}
+    - { section: "ovs", option: "network_vlan_ranges", value: "{{ neutron_network_vlan_ranges }}"}
+  tags: neutron
+  when: ansible_hostname in groups['neutron-network-node']
+
+- name: "configure the ovs_neutron_plugin.ini file l2poplation"
+  ini_file:
+    dest: /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "agent", option: "arp_responder", value: "true"}
+    - { section: "agent", option: "l2_population", value: "true"}
+  when: use_l2
+  tags: neutron
+
+
+- name: "configure the ovs_neutron_plugin.ini file vxlan"
+  ini_file:
+    dest: /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "ovs", option: "enable_tunneling", value: "True"}
+    - { section: "ovs", option: "tenant_network_type", value: "{{ neutron_tunnel_type }}" }
+    - { section: "agent", option: "tunnel_types", value: "{{ neutron_tunnel_type }}"}
+    - { section: "agent", option: "vxlan_udp_port", value: "{{ neutron_vxlan_udp_port }}"}
+    - { section: "ovs", option: "local_ip", value: "{{ datanet_if.ipaddr}}" }
+  tags: neutron
+  when: neutron_tunnel_type == 'vxlan'
+
+- name: "configure the ovs_neutron_plugin.ini file gre"
+  ini_file:
+    dest: /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "ovs", option: "enable_tunneling", value: "True"}
+    - { section: "ovs", option: "tenant_network_type", value: "{{ neutron_tunnel_type }}" }
+    - { section: "agent", option: "tunnel_types", value: "{{ neutron_tunnel_type }}"}
+    - { section: "ovs", option: "tunnel_id_range", value: "{{ neutron_gre_tunnel_id_ranges }}"}
+    - { section: "ovs", option: "local_ip", value: "{{ datanet_if.ipaddr}}"}
+  tags: neutron
+  when: neutron_tunnel_type == 'gre'
+
+- name: create integration bridge
+  openvswitch_bridge:
+    bridge: "{{item}}"
+    state: present
+  with_items:
+    - "{{neutron_ovs_intergration_bridge}}"
+    - "{{neutron_ovs_tunnel_bridge}}"
+  tags: neutron
+
+- name: create external bridge
+  openvswitch_bridge:
+    bridge: "{{item}}"
+    state: present
+  with_items:
+    - "{{neutron_ovs_external_bridge}}"
+  tags: neutron
+  when: ansible_hostname in groups['neutron-network-node']
+
+- name: create ovs bridges
+  openvswitch_bridge:
+    bridge: "{{ item.ovs_bridge }}"
+    state: present
+  with_items: neutron_ovs_bridges
+  when: ansible_hostname in groups['neutron-network-node'] 
+  tags: neutron
+
+- name: configure ovs ports
+  openvswitch_port:
+    bridge: "{{ item.ovs_bridge }}"
+    port: "{{ item.physical_net }}"
+    state: present
+  with_items: neutron_ovs_bridges
+  when: ansible_hostname in groups['neutron-network-node']
+  tags: neutron
+
+- name: bring up bridge interfaces
+  command: ip link set  {{ item.ovs_bridge }} up
+  with_items:
+    - "{{ neutron_ovs_bridges }}"
+  when: ansible_hostname in groups['neutron-network-node']  
+  tags: neutron
+
+- name: bring up bridge with ifconfig
+  command: ip link set {{ item }} up
+  with_items:
+    - "{{ neutron_ovs_tunnel_bridge }}"
+    - "{{ neutron_ovs_intergration_bridge }}"
+  tags: neutron
+
+- name: enable neutron agents
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - neutron-ovs-cleanup
+    - neutron-openvswitch-agent
+  when: not use_pacemaker
+  tags: neutron
+
+# commenting out pacemaker tasks
+#- name: "[pacemaker] neutron-scale TEMP"
+#  command: pcs resource create neutron-scale ocf:neutron:NeutronScale --clone globally-unique=true clone-max=3 interleave=true
+#  run_once: true
+#  ignore_errors: true
+#  when: use_pacemaker and groups['controller']
+#  tags: neutron
+#
+#- name: "[pacemaker] create pacemaker resource for neutron agents"
+#  pcs_resource: command=create name={{ item.name }} type={{ item.type }} clone=yes interleave=yes
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  with_items:
+#    - { name: 'neutron-ovs-cleanup', type: 'ocf:neutron:OVSCleanup' }
+#    - { name: 'neutron-netns-cleanup', type: 'ocf:neutron:NetnsCleanup' }
+#    - { name: 'neutron-openvswitch-agent', type: 'systemd:neutron-openvswitch-agent' }
+#  when: use_pacemaker and groups['controller']
+#  tags: neutron
+#
+#- name: "[pacemaker] create pacemaker constraints for neutron"
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-neutron-scale-clone-neutron-ovs-cleanup-clone, cmd: "order start neutron-scale-clone then neutron-ovs-cleanup-clone" }
+#    - { id: colocation-neutron-ovs-cleanup-clone-neutron-scale-clone, cmd: "colocation add neutron-ovs-cleanup-clone with neutron-scale-clone" }
+#    - { id: order-neutron-ovs-cleanup-clone-neutron-netns-cleanup-clone, cmd: "order start neutron-ovs-cleanup-clone then neutron-netns-cleanup-clone" }
+#    - { id: colocation-neutron-netns-cleanup-clone-neutron-ovs-cleanup-clone, cmd: "colocation add neutron-netns-cleanup-clone with neutron-ovs-cleanup-clone" }
+#    - { id: order-neutron-netns-cleanup-clone-neutron-openvswitch-agent-clone, cmd: "order start neutron-netns-cleanup-clone then neutron-openvswitch-agent-clone" }
+#    - { id: colocation-neutron-openvswitch-agent-clone-neutron-netns-cleanup-clone, cmd: "colocation add neutron-openvswitch-agent-clone with neutron-netns-cleanup-clone" }
+#    - { id: order-neutron-server-clone-neutron-scale-clone, cmd: "order start neutron-server-clone then neutron-scale-clone" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  when: use_pacemaker and groups['controller']
+#  tags: neutron

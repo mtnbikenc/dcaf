@@ -1,0 +1,40 @@
+---
+- name: gather info
+  hosts: controller
+  gather_facts: true 
+
+- name: base RHEL configuration
+  hosts: keystone
+  max_fail_percentage: 0
+  roles:
+    - subscription-manager
+    - role: common
+      group: keystone
+  tags: keystone 
+
+- name: install keystone rules
+  hosts:
+    - keystone
+    - haproxy
+  max_fail_percentage: 0
+  tasks:
+    - name: iptable rules for keystone
+      iptables:
+        port: "{{ item.port }}"
+        protocol: "{{ item.protocol}}"
+        comment: "{{item.comment}}"
+        position: 3
+      with_items:
+        - { port: "{{keystone_public_port | default(5000)}}", protocol: tcp, comment: "keytone public API" }
+        - { port: "{{keystone_admin_port | default(35357)}}", protocol: tcp, comment: "keystone internal and admin api"}
+      tags:
+        - iptables
+        - keystone
+
+- name: install keystone
+  hosts: keystone
+  max_fail_percentage: 0
+  roles:
+    - memcached
+    - keystone
+  tags: keystone

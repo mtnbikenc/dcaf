@@ -1,0 +1,18 @@
+---
+virt: true
+dns_if: eth1
+haproxy_mgmt_if:
+  ipaddr: 192.168.100.11
+  netmask: 255.255.255.0
+  gateway: 192.168.100.1
+  dns1: 192.168.70.3
+
+haproxy_ctrl_if:
+  device: eth1
+  ipaddr: 192.168.101.11
+  netmask: 255.255.255.0
+
+
+keepalived_if:
+  ipaddr: 172.16.27.3
+  netmask: 255.255.255.0

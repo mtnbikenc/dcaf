@@ -1,0 +1,11 @@
+DEVICE={{ item.value['bond'] }}.{{ item.value['vlan'] }}
+MASTER={{ item.value['bond'] }}
+{% for k,v in common_cfg|dictsort %}
+{{ k|upper }}={{ v }}
+{% endfor %}
+{% for k,v in item.value|dictsort if k not in common_cfg and k != 'bond' %}
+{{ k|upper }}={{ v }}
+{% endfor %}
+{% if mtu is defined %}
+MTU={{ mtu }}
+{% endif %}

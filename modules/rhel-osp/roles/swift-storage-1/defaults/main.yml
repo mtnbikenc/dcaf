@@ -1,0 +1,3 @@
+# location of credential files on autodeploy node.
+credentials_dir: /var/lib/ansible
+
