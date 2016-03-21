@@ -45,7 +45,7 @@ example was :code:`sdb`
 
 Now run the mount command and mount the drive:
 
-.. code-block::
+.. code-block:: bash
 
     mount /dev/sdb /mnt/sdb
 
@@ -203,7 +203,7 @@ was :code:`sdb`
 
 Now run the mount command and mount the drive:
 
-.. code-block::
+.. code-block:: bash
 
     mount /dev/sdb /mnt/sdb
 
@@ -253,7 +253,7 @@ Run the DCAF Base Playbooks
 Now that the variables have been configured, run the following playbooks to
 finish the AutoDeployNode deployment.
 
-.. code-block::
+.. code-block:: bash
 
     cd /opt/autodeploy/projects/dcaf/modules/autodeploynode
     ansible-playbook main.yml
