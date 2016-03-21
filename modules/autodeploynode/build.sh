@@ -7,14 +7,6 @@
 # export RHN_PASS="password"    # escape dollar signs (\$)
 # export RHN_POOL="pool_id"     # 32-char pool ID
 
-# Additionally, a pem file should be created to provide access to private GitHub repos
-# cat << EOF > ~/github.pem
-# -----BEGIN RSA PRIVATE KEY-----
-# <insert_key_file_text_here>
-# -----END RSA PRIVATE KEY-----
-# EOF
-# chmod 0600 ~/github.pem
-
 # Once these prerequisites are in place, the script can be executed by:
 # curl https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/build.sh | bash
 
@@ -38,8 +30,8 @@ yum -y --nogpgcheck localinstall ./rpm-build/ansible-*.noarch.rpm
 cd ..
 
 wget https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/initial_stage.yml
-ansible-playbook initial_stage.yml --extra-vars "github_key_file=~/github.pem"
+ansible-playbook initial_stage.yml
 cd /opt/autodeploy/projects/dcaf/modules/autodeploynode
 
-ansible-playbook stage_resources.yml --extra-vars "github_key_file=~/github.pem rhn_user=$RHN_USER rhn_pass=$RHN_PASS"
-ansible-playbook main.yml --extra-vars "github_key_file=~/github.pem"
+ansible-playbook stage_resources.yml --extra-vars "rhn_user=$RHN_USER rhn_pass=$RHN_PASS"
+ansible-playbook main.yml

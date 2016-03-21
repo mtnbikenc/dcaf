@@ -98,8 +98,6 @@
   git:
     repo: "{{ item.repo }}"
     dest: "{{ projects_base_path }}/{{ item.name }}"
-    accept_hostkey: yes
-    key_file: "{{ github_key_file }}"
   with_items: "{{ git_repos }}"
   ignore_errors: true
   when: not offline

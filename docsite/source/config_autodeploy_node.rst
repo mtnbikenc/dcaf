@@ -82,25 +82,7 @@ Environment variables for Red Hat Subscription credentials should be defined:
     export RHN_PASS="password" # escape dollar signs (\\$)
     export RHN_POOL="pool_id" # 32-char pool ID
 
-Next, an ssh key file should be created for GitHub access. Put the text for a
-private key which has access to the GitHub repositories in the lines below:
-
-.. code-block:: bash
-
-    cat << EOF > ~/github.pem
-    -----BEGIN RSA PRIVATE KEY-----
-    <insert_key_file_text_here>
-    -----END RSA PRIVATE KEY-----
-    EOF
-
-Change the file permissions to ensure security.
-
-.. code-block:: bash
-
-    chmod 0600 ~/github.pem
-
-With the environment variables defined and the ssh key file created, the build
-script can be launched:
+With the environment variables defined, the build script can be launched:
 
 .. code-block:: bash
 
@@ -194,29 +176,11 @@ play from the :code:`dcaf` Git repository.
 
     wget https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/initial_stage.yml
 
-In order to download the projects from GitHub, a keyfile must be created. Put the
-text for a private key which has access to the GitHub repositories in the lines
-below:
+Now the initial_stage.yml playbook can be run, as shown below:
 
 .. code-block:: bash
 
-    cat << EOF > ~/github.pem
-    -----BEGIN RSA PRIVATE KEY-----
-    <insert_key_file_text_here>
-    -----END RSA PRIVATE KEY-----
-    EOF
-
-Change the file permissions to ensure security.
-
-.. code-block:: bash
-
-    chmod 0600 ~/github.pem
-
-Now the initial\_stage.yml playbook can be run, as shown below:
-
-.. code-block:: bash
-
-    ansible-playbook initial_stage.yml --extra-vars "github_key_file=~/github.pem"
+    ansible-playbook initial_stage.yml
 
 Now that the DCAF project has been retrieved it can be used to install the remaining
 support packages. Change into the DCAF project directory.
@@ -237,7 +201,6 @@ following variables in the :code:`inventory/group_vars/all.yml` file.
     # Required User Variables
     rhn_user:
     rhn_pass:
-    github_key_file: (location of the github.pem file created above)
 
 Run the stage_resources.yml play:
 
