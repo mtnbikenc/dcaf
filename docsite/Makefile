@@ -231,5 +231,5 @@ gh-pages:
 	rm -rf $(GH_PAGES_SOURCES) && \
 	git add --all && \
 	git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`" && \
-	git push origin gh-pages && \
+	git push upstream gh-pages && \
 	git checkout master
