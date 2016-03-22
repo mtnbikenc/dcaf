@@ -1,0 +1,113 @@
+---
+- name: Initialize KVM host(s)
+  hosts: kvmhosts
+  gather_facts: true
+  roles:
+    - common-physical
+    - ovs
+
+- name: Setup base VM 
+  hosts: kvmhosts[0]
+  gather_facts: true
+  roles:
+    - create-vm
+
+- name: Discover Base VM via DHCP
+  hosts: auto_deploy_node
+  gather_facts: false
+  tasks:
+    - yum:
+        state: latest
+        name: '{{ item }}'
+      with_items:
+        - nmap
+        - net-tools
+    - shell: nmap -sP 172.17.16.0/24
+    - shell: arp -na | grep '\s52' | awk -F '[()]' '{print $2}'
+      register: basevm_ip
+      failed_when: "'172' not in basevm_ip.stdout"
+    - shell: echo "{{ basevm_ip.stdout }}  basevm" >> /etc/hosts
+
+- name: Update base VM 
+  hosts: basevm
+  gather_facts: true
+  roles:
+    - basevm-prep
+  tags:
+    - baseprep
+
+# One-off tasks to distribute the base VM
+- name: Clean and clone base VM
+  hosts: kvmhosts[0]
+  gather_facts: true
+  roles:
+    - basevm-clean
+  tags:
+    - clean
+
+- name: Copy base VM to ansible host
+  hosts: kvmhosts[0]
+  tasks:
+    - fetch:
+        src: /var/lib/libvirt/images/basevm.qcow2
+        dest: /tmp/basevm.qcow2
+        flat: yes
+
+- name: Copy base VM to all KVM hosts
+  hosts: localhost
+  tasks:
+    - shell: "scp /tmp/basevm.qcow2 {{ hostvars[item]['ansible_ssh_host']['address'] }}:/var/lib/libvirt/images/"
+      with_items: groups['kvmhosts'][1:]
+
+- name: Copy base VM XML to ansible host
+  hosts: kvmhosts[0]
+  tasks:
+    - fetch:
+        src: /etc/libvirt/qemu/basevm.xml
+        dest: /tmp/basevm.xml
+        flat: yes
+
+- name: Sanitize base VM XML
+  hosts: auto_deploy_node
+  tasks:
+    - lineinfile:
+        dest: /tmp/basevm.xml
+        regexp: "mac address"
+        state: absent
+
+- name: Define base VM on all KVM hosts
+  hosts: kvmhosts
+  tasks:
+    - virt:
+        name: basevm
+        command: define
+        xml: "{{ lookup('template', '/tmp/basevm.xml') }}"
+        uri: qemu:///system
+      ignore_errors: true
+
+### End of base VM distribution tasks
+
+- name: Configure static DHCP leases
+  hosts: auto_deploy_node 
+  gather_facts: false
+  roles:
+    - dhcpd
+  tags:
+    - dhcpd
+
+- name: Create and initialize clones
+  hosts: kvmhosts
+  gather_facts: false
+  roles:
+    - vm-initialization
+  tags:
+    - initialization
+
+- name: Configure clones
+  hosts: nodes
+  gather_facts: True
+  roles:
+    - common-virtual
+    - vm-vlans
+  tags:
+    - config-clone

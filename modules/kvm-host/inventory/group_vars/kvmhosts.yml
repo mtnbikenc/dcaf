@@ -1,0 +1,60 @@
+---
+
+rhsm_user:
+rhsm_pass:
+rhsm_pool: '^Red Hat Enterprise Linux OpenStack'
+
+virt_rpms:
+  - qemu-kvm
+  - libvirt
+  - libguestfs
+  - libguestfs-tools
+  - libvirt-client
+  - libvirt-python
+  - openvswitch
+  - virt-install
+  - nmap
+  - rsync
+  - net-tools
+
+yum_repos: 
+  - rhel-7-server-openstack-6.0-rpms
+  - rhel-7-server-rpms
+  - rhel-7-server-optional-rpms
+
+ovs_bridges:
+  - name: ovsbr1801
+    port: bond0.1801
+  
+  - name: ovsbr1802
+    port: bond0.1802
+
+  - name: ovsbr1803
+    port: bond0.1803
+
+  - name: ovsbr1804
+    port: bond0.1804
+
+  - name: ovsbr1805
+    port: bond0.1805
+
+libvirt_networks:
+  - name: lvnet1801
+    bridge: ovsbr1801
+    address: 172.17.17.1
+
+  - name: lvnet1802
+    bridge: ovsbr1802
+    address: 172.17.18.1
+
+  - name: lvnet1803
+    bridge: ovsbr1803
+    address: 172.17.19.1
+
+  - name: lvnet1804
+    bridge: ovsbr1804
+    address: 172.17.20.1
+
+  - name: lvnet1805
+    bridge: ovsbr1805
+    address: 172.17.21.1

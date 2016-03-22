@@ -1,0 +1,18 @@
+---
+
+- name: Wait for VM to shutdown
+  pause: 
+    seconds: 20
+
+- name: Shutdown base VM 
+  virt: 
+    command: destroy
+    name: '{{ vm_name }}'
+    uri: qemu:///system
+  register: basevm_destroy
+  ignore_errors: True
+
+- name: Run virt-sysprep against base VM
+  shell: virt-sysprep -d {{ vm_name }} --enable logfiles,net-hwaddr,tmp-files,udev-persistent-net,yum-uuid,dhcp-client-state,bash-history,rh-subscription-manager --verbose -c qemu:///system
+  register: basevm_sysprep
+

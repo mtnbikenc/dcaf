@@ -1,0 +1,157 @@
+---
+# Backup ifcfg file
+- name: Backing up ifcfg file for em3
+  shell: cp /etc/sysconfig/network-scripts/ifcfg-em3 /etc/sysconfig/network-scripts/orig-ifcfg-em3
+  tags:
+    - mgmt_bridge
+
+# Copy ifcfg-em3 file to br0
+- name: Convert ifcfg file for bridge config
+  shell: mv /etc/sysconfig/network-scripts/ifcfg-em3 /etc/sysconfig/network-scripts/ifcfg-br0
+  tags:
+    - mgmt_bridge
+
+- name: Change device name in ifcfg file
+  lineinfile:
+    dest: /etc/sysconfig/network-scripts/ifcfg-br0
+    regexp: '^DEVICE='
+    line: 'DEVICE=br0'
+  tags:
+    - mgmt_bridge
+
+# Copy over purged ifcfg-em3 file
+- name: Copy ifcfg file for em3
+  copy:
+    src: ifcfg-em3
+    dest: /etc/sysconfig/network-scripts/ifcfg-em3
+  tags:
+    - mgmt_bridge
+
+- name: Restart interfaces 
+  shell: ifdown em3 ; ifup em3 ; ifup br0
+  tags:
+    - mgmt_bridge
+
+# Check to see if all needed interfaces exist
+- name: Check for all needed VLAN-tagged interfaces
+  shell: ip link show {{ item.port }}
+  with_items: '{{ ovs_bridges }}'
+  register: iplink_output
+  failed_when: "'does not exist' in iplink_output.stderr"
+
+- name: Backup all bond0.180* files
+  shell: 'cp /etc/sysconfig/network-scripts/ifcfg-{{ item.port }} /etc/sysconfig/network-scripts/orig-ifcfg-{{ item.port }}'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Update TYPE in ifcfg for VLAN-tagged interfaces
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    regexp: '^TYPE='
+    line: 'TYPE=OVSPort'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Add DEVICETYPE to ifcfg files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    insertafter: EOF
+    line: 'DEVICETYPE=ovs'
+    state: present
+  with_items: '{{ ovs_bridges }}'
+
+- name: Add OVS_BRIDGE to ifcfg files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    insertafter: EOF
+    line: 'OVS_BRIDGE={{ item.name }}'
+    state: present
+  with_items: '{{ ovs_bridges}}'
+
+- name: Create OVS bridges
+  openvswitch_bridge:
+    bridge: '{{ item.name }}'
+    state: present
+  with_items: '{{ ovs_bridges }}'
+
+- name: Removing GATEWAY in ifcfg files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    regexp: '^GATEWAY='
+    state: absent
+  with_items: '{{ ovs_bridges }}'
+
+- name: Removing NETMASK in ifcfg files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    regexp: '^NETMASK='
+    state: absent
+  with_items: '{{ ovs_bridges }}'
+
+- name: Removing DEFROUTE in ifcfg files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    regexp: '^DEFROUTE='
+    state: absent
+  with_items: '{{ ovs_bridges }}'
+
+- name: Removing DNS in ifcfg files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    regexp: '^DNS'
+    state: absent
+  with_items: '{{ ovs_bridges }}'
+
+- name: Copy ifcfg-ovsbr template
+  template:
+    src: ifcfg-ovsbr.j2
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Pull static IP from bond0.180* interface and attach to ovsbr180* interface
+  shell: 'cat /etc/sysconfig/network-scripts/ifcfg-{{ item.port}} | grep IPADDR >> /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Uncomment IPADDR from ifcfg-ovsbr180* files
+  shell: 'sed -i "s/^#IPADDR/IPADDR/" /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Removing IPADDR from bond0.180* files
+  lineinfile:
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
+    regexp: '^IPADDR'
+    state: absent
+  with_items: '{{ ovs_bridges }}'
+
+- name: Restart bond0 interfaces
+  shell: 'ifdown {{ item.port }} ; ifup {{ item.port }}'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Bring up ovsbr bridges
+  command: 'ifup {{ item.name }}'
+  with_items: '{{ ovs_bridges }}'
+
+- name: Check for libvirt networks
+  command: virsh net-info {{ item.name }}
+  with_items: "{{ libvirt_networks }}"
+  ignore_errors: true
+  register: libvirt_check
+
+- name: Create libvirt network XML files
+  template:
+    src: lvnet.xml.j2
+    dest: /tmp/{{ item.name }}.xml
+  with_items: '{{ libvirt_networks }}'
+  when: libvirt_check|failed
+
+- name: Define libvirt networks on OVS bridges
+  command: virsh net-define /tmp/{{ item.name }}.xml
+  with_items: '{{ libvirt_networks }}'
+  when: libvirt_check|failed
+
+- name: Start new libvirt networks
+  command: virsh net-start {{ item.name }}
+  with_items: '{{ libvirt_networks }}'
+
+- name: Enable auto-start for libvirt networks
+  command: virsh net-autostart {{ item.name }}
+  with_items: '{{ libvirt_networks }}'
+  when: libvirt_check|failed
