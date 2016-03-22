@@ -13,7 +13,6 @@ Contents:
 
     overview
     quickstart
-    projects
     requirements
     config_autodeploy_node
     offline_autodeploy_node
