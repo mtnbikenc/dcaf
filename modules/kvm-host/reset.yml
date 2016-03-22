@@ -1,0 +1,71 @@
+---
+- name: Stop and undefine all VMs on all hosts
+  hosts: kvmhosts
+  tasks:
+    - shell: for i in $(virsh list --all | grep '^ [0-9a-z\-]' | awk '{print $2}'); do virsh destroy $i; virsh undefine $i; done
+
+- name: Delete all qcow images
+  hosts: kvmhosts
+  tasks:
+    - file:
+        path: /var/lib/libvirt/images/*.qcow2
+        state: absent
+      ignore_errors: yes
+
+- name: Stop and undefine all libvirt networks
+  hosts: kvmhosts
+  tasks:
+    - shell: virsh net-destroy {{ item.name }} ; virsh net-undefine {{ item.name }}
+      with_items: "{{ libvirt_networks }}"
+      ignore_errors: yes
+
+- name: Delete all OVS bridges
+  hosts: kvmhosts
+  tasks:
+    - shell: ovs-vsctl del-br {{ item.name }}
+      with_items: "{{ ovs_bridges }}"
+      ignore_errors: yes
+
+- name: Delete mgmt bridge ifcfg file
+  hosts: kvmhosts
+  tasks:
+    - file:
+        path: /etc/sysconfig/network-scripts/ifcfg-br0
+        state: absent
+      ignore_errors: yes
+
+- name: Reset em3
+  hosts: kvmhosts
+  tasks:
+    - command: mv /etc/sysconfig/network-scripts/orig-ifcfg-em3 /etc/sysconfig/network-scripts/ifcfg-em3
+
+- name: Restart interfaces 
+  hosts: kvmhosts
+  tasks:
+    - shell: ifdown br0 ; ifdown em3 ; ifup em3
+
+- name: Remove basevm entry in /etc/hosts
+  hosts: localhost
+  tasks:
+    - lineinfile:
+        dest: /etc/hosts
+        state: absent
+        regexp: "^172.*$"
+
+- name: Gather all VM MAC addresses in MAC table and remove them
+  hosts: localhost
+  tasks:
+    - shell: arp -na | grep '\s52' | awk -F '[()]' '{print $2}' | cut -f4 -d'.'
+      register: arp_macs
+    - shell: for i in {{ arp_macs.stdout_lines }} ; do arp -d 172.17.16.$i ; done
+      ignore_errors: true
+
+- name: Remove tempoary files from Ansible host
+  hosts: localhost
+  tasks:
+    - file:
+        path: /tmp/{{ item }}
+        state: absent
+      with_items:
+        - basevm.qcow2
+        - basevm.xml

@@ -1,0 +1,57 @@
+---
+
+- name: Register host to RHSM
+  redhat_subscription: 
+    state: present
+    username: '{{ rhsm_user }}'
+    password: '{{ rhsm_pass }}'
+    pool: '{{ rhsm_pool }}'
+  tags:
+    - rhsm
+
+- name: Enable OpenStack repos
+  command: subscription-manager repos --enable {{ item }}
+  with_items: "{{ yum_repos }}"
+  tags:
+    - rhsm 
+
+- name: Update host packages
+  yum:
+    state: latest
+    name: '*'
+  tags:
+    - yum
+
+- name: Install virtualization packages
+  yum:
+    state: latest
+    name: '{{ item }}'
+  with_items: '{{ virt_rpms }}'
+
+- name: Enable IPv4 forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Enable and start OVS service
+  service:
+    name: openvswitch
+    state: started
+    enabled: yes
+
+- name: Enable and start libvirt service
+  service:
+    name: libvirtd
+    state: started
+    enabled: yes
+
+# Added only for testing purposes to not run out of subscriptions
+#- name: Unregister from RSHM
+#  command: subscription-manager unregister
+
+#- name: Clean all RHSM attachments
+#  command: subscription-manager clean
+# ####

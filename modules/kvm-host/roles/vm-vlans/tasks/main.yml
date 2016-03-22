@@ -1,0 +1,21 @@
+---
+- name: Copy ifcfg template
+  template:
+    src: ifcfg-lvnet.j2
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.1.name }}" 
+  with_subelements:
+    - nodes
+    - vnics
+  when: "'{{ item.0.hostname }}' == '{{ ansible_hostname }}'"
+
+- name: Set eth1 to default route
+  lineinfile:
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth1
+    state: present
+    insertafter: EOF
+    line: "DEFROUTE=yes"
+
+- name: Restart all interfaces
+  service:
+    name: network.service
+    state: restarted

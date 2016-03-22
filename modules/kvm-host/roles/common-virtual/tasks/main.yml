@@ -1,0 +1,36 @@
+---
+
+- name: Register node to RHSM
+  redhat_subscription: 
+    state: present
+    username: '{{ rhsm_user }}'
+    password: '{{ rhsm_pass }}'
+#    pool: '{{ rhsm_pool }}'
+    autosubscribe: yes
+  tags:
+    - rhsm
+
+- name: Enable RHEL repos
+  command: subscription-manager repos --enable {{ item }}
+  with_items: "{{ yum_repos }}"
+  tags:
+    - rhsm
+
+- name: Update host packages
+  yum:
+    state: latest
+    name: '*'
+  tags:
+    - yum
+
+- name: Update node hostname
+  hostname:
+    name: '{{ inventory_hostname }}'
+
+# Added only for testing purposes to not run out of subscriptions
+- name: Unregister from RSHM
+  command: subscription-manager unregister
+
+- name: Clean all RHSM attachments
+  command: subscription-manager clean
+

@@ -1,0 +1,9 @@
+DEVICE={{ item.name }}
+ONBOOT=yes
+DEVICETYPE=ovs
+TYPE=OVSBridge
+BOOTPROTO=static
+GATEWAY={{ item.gateway }}
+NETMASK=255.255.255.0
+HOTPLUG=no
+DEFROUTE={{item.defroute}}
