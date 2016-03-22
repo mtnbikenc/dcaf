@@ -18,7 +18,7 @@ installation.
 On the installation summary page, you may see different selections with yellow
 exclamation or warning marks. These are areas that require some setup:
 
-.. code-block::
+.. code-block:: none
 
     Date & Time : Current Date / Time ? Time Zone
     Installation Source : Local Media

@@ -188,6 +188,9 @@ example was <code class="code docutils literal"><span class="pre">sdb</span></co
 </pre></div>
 </div>
 <p>Now run the mount command and mount the drive:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mount /dev/sdb /mnt/sdb
+</pre></div>
+</div>
 <p>Leave the USB drive connected until all the automation resources have been
 downloaded at the end of the following section.</p>
 </div>
@@ -311,6 +314,9 @@ was <code class="code docutils literal"><span class="pre">sdb</span></code></p>
 </pre></div>
 </div>
 <p>Now run the mount command and mount the drive:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mount /dev/sdb /mnt/sdb
+</pre></div>
+</div>
 <p>Next copy the automation resources from the USB drive to the <code class="code docutils literal"><span class="pre">/opt/</span></code> directory.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>cp -r /mnt/sdb1/autodeploy* /opt
 chown -R autodeploy /opt/autodeploy/
@@ -347,6 +353,10 @@ the rpm file created in the staging process found in the offline repository.</p>
 <h3>Run the DCAF Base Playbooks<a class="headerlink" href="#run-the-dcaf-base-playbooks" title="Permalink to this headline">¶</a></h3>
 <p>Now that the variables have been configured, run the following playbooks to
 finish the AutoDeployNode deployment.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/autodeploy/projects/dcaf/modules/autodeploynode
+ansible-playbook main.yml
+</pre></div>
+</div>
 <p>The <code class="code docutils literal"><span class="pre">main.yml</span></code> playbook will also run the <code class="code docutils literal"><span class="pre">site_docker.yml</span></code> and
 <code class="code docutils literal"><span class="pre">site_discovery.yml</span></code> playbooks.</p>
 <p>The <code class="code docutils literal"><span class="pre">site_docker.yml</span></code> playbook will start the Hanlon Docker environment.
