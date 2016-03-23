@@ -1,9 +1,4 @@
 ---
-
-- name: Debug variables
-  debug:
-    var: nodes 
-
 - name: Add host reservations to dhcpd.conf
   lineinfile:
     dest: /etc/dhcp/dhcpd.conf

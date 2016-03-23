@@ -1,9 +1,15 @@
-DEVICE={{ item.name }}
+DEVICE=ovsbr{{ item.value['vlan'] }}
 ONBOOT=yes
 DEVICETYPE=ovs
 TYPE=OVSBridge
 BOOTPROTO=static
-GATEWAY={{ item.gateway }}
-NETMASK=255.255.255.0
+IPADDR={{ item.value['ipaddr'] }}
+{% if item.value['gateway'] is defined %}
+GATEWAY={{ item.value['gateway'] }}
+{% endif %}
+NETMASK={{ item.value['netmask'] }}
 HOTPLUG=no
-DEFROUTE={{item.defroute}}
+DEFROUTE=no
+{% if mtu is defined %}
+MTU={{ mtu }}
+{% endif %}
