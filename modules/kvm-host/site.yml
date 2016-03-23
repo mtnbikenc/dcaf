@@ -16,7 +16,8 @@
   hosts: auto_deploy_node
   gather_facts: false
   tasks:
-    - yum:
+    - name: install nmap and net-tools
+      yum:
         state: latest
         name: '{{ item }}'
       with_items:
@@ -27,6 +28,17 @@
       register: basevm_ip
       failed_when: "'172' not in basevm_ip.stdout"
     - shell: echo "{{ basevm_ip.stdout }}  basevm" >> /etc/hosts
+
+- name: wait for basevm
+  hosts: auto_deploy_node
+  gather_facts: false
+  tasks:
+   - name: wait for clones to come up
+     wait_for:
+       host: basevm
+       state: started
+       port: 22
+       delay: 0
 
 - name: Update base VM 
   hosts: basevm
@@ -48,16 +60,19 @@
 - name: Copy base VM to ansible host
   hosts: kvmhosts[0]
   tasks:
-    - fetch:
+    - name: get qcow2 image from kvmhost0
+      fetch:
         src: /var/lib/libvirt/images/basevm.qcow2
         dest: /tmp/basevm.qcow2
         flat: yes
 
 - name: Copy base VM to all KVM hosts
-  hosts: localhost
+  hosts: kvmhosts[1:]
   tasks:
-    - shell: "scp /tmp/basevm.qcow2 {{ hostvars[item]['ansible_ssh_host']['address'] }}:/var/lib/libvirt/images/"
-      with_items: groups['kvmhosts'][1:]
+    - name: copy qcow2 image to kvmhosts
+      copy:
+        src: /tmp/basevm.qcow2
+        dest: /var/lib/libvirt/images/basevm.qcow2
 
 - name: Copy base VM XML to ansible host
   hosts: kvmhosts[0]
@@ -102,6 +117,18 @@
     - vm-initialization
   tags:
     - initialization
+
+- name: wait for clones
+  hosts: auto_deploy_node
+  gather_facts: false
+  tasks:
+   - name: wait for clones to come up
+     wait_for: 
+       host: "{{hostvars[item]['ansible_ssh_host']}}"
+       state: started 
+       port: 22
+       delay: 0
+     with_items: groups['nodes']
 
 - name: Configure clones
   hosts: nodes

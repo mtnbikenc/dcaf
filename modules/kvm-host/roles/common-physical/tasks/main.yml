@@ -1,5 +1,4 @@
 ---
-
 - name: Register host to RHSM
   redhat_subscription: 
     state: present
@@ -47,11 +46,3 @@
     name: libvirtd
     state: started
     enabled: yes
-
-# Added only for testing purposes to not run out of subscriptions
-#- name: Unregister from RSHM
-#  command: subscription-manager unregister
-
-#- name: Clean all RHSM attachments
-#  command: subscription-manager clean
-# ####

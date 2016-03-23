@@ -1,6 +1,6 @@
 ---
 
-- name: Register node to RHSM
+- name: Register node to RHSM virt
   redhat_subscription: 
     state: present
     username: '{{ rhsm_user }}'
