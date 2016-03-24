@@ -61,6 +61,7 @@ or other application using the libvirt API.
       <source bridge='br0'/>
       <model type='virtio'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+      <mac address='{{basevm_mac}}'/>
     </interface>
     <serial type='pty'>
       <target port='0'/>
