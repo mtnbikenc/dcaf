@@ -1,26 +1,4 @@
 ---
-- name: Register host to RHSM
-  redhat_subscription: 
-    state: present
-    username: '{{ rhsm_user }}'
-    password: '{{ rhsm_pass }}'
-    pool: '{{ rhsm_pool }}'
-  tags:
-    - rhsm
-
-- name: Enable OpenStack repos
-  command: subscription-manager repos --enable {{ item }}
-  with_items: "{{ yum_repos }}"
-  tags:
-    - rhsm 
-
-- name: Update host packages
-  yum:
-    state: latest
-    name: '*'
-  tags:
-    - yum
-
 - name: Install virtualization packages
   yum:
     state: latest
