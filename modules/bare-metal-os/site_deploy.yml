@@ -198,14 +198,14 @@
         state: stopped
         enabled: no
 
-#- name: Create network bonds
-#  hosts: deploy
-#  max_fail_percentage: 0
-#  gather_facts: True
-#
-#  vars:
-#    ansible_ssh_pass: "{{ site_password }}"
-#
-#  roles:
-#    - { role: bonds, device: "{{ bond_device }}", when: configure_network_bond }
-#    - { role: iface, device: "{{ vlan_interface }}", when: configure_vlan_interfaces }
+- name: Create network bonds
+  hosts: deploy
+  max_fail_percentage: 0
+  gather_facts: True
+
+  vars:
+    ansible_ssh_pass: "{{ site_password }}"
+
+  roles:
+    - { role: bonds, device: "{{ bond_device }}", when: configure_network_bond }
+    - { role: iface, device: "{{ vlan_interface }}", when: configure_vlan_interfaces }
