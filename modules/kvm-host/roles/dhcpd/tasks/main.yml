@@ -3,10 +3,11 @@
   lineinfile:
     dest: /etc/dhcp/dhcpd.conf
     state: present
-    insertafter: EOF
+    regexp: '{{item.mgmt_mac}}'
+    #insertafter: EOF
     line: 'host {{ item.hostname }} { hardware ethernet {{ item.mgmt_mac }}; fixed-address {{ item.mgmt_ip }}; }'
   with_items:
-    - "{{ nodes }}"
+    - "{{ dhcpd_hosts }}"
 
 - name: Restart dhcpd 
   service:
