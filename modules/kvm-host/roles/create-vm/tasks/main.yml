@@ -23,10 +23,6 @@
     state: running
     uri: qemu:///system
 
-- pause: 
-    prompt: "Waiting for VM to finish booting"
-    seconds: 60
-
 - name: Get BaseVM MAC
   shell: virsh domiflist {{ vm_name }} | grep -i '52.*$'
   register: basevm_mac

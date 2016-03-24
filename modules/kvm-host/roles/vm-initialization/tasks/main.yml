@@ -23,17 +23,6 @@
      - "{{ nodes }}"
   when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
 
-- name: Pausing to let all clones come online
-  pause: 
-    seconds: 60
-
-- name: Debug VLAN interfaces
-  debug:
-    msg: "Attaching network {{ item.1 }} to {{ item.0.hostname }}"
-  with_subelements:
-    - nodes
-    - vnics
-
 - name: Add VLAN interfaces to VMs
   shell: "virsh attach-interface {{ item.0.hostname }} network {{ item.1.network }} --model virtio --mac {{ item.1.mac_addr }} --live --persistent"
   with_subelements:
