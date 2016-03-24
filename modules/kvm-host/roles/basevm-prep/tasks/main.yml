@@ -1,26 +1,6 @@
 ---
 # This role is used for updating the base vm before cloning
 
-- name: Checking variable presence
-  debug:
-    msg: "RHSM user is {{ rhsm_user }}"
-
-- name: Register to RHSM
-  redhat_subscription: 
-    state: present
-    username: '{{ rhsm_user }}'
-    password: '{{ rhsm_pass }}'
-    pool: '{{ rhsm_pool }}'
-  tags:
-    - rhsm
-
-- name: Running yum update
-  yum: 
-    name: '*'
-    state: latest
-  tags:
-    - yum
-
 - name: Disable NetworkManager
   service:
     name: NetworkManager

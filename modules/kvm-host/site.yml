@@ -3,6 +3,7 @@
   hosts: kvmhosts
   gather_facts: true
   roles:
+    - rhsm
     - common-physical
     - ovs
 
@@ -42,6 +43,7 @@
     ansible_ssh_host: "{{basevm_static_ip}}"
   gather_facts: true
   roles:
+    - rhsm
     - basevm-prep
   tags:
     - baseprep
@@ -133,6 +135,7 @@
   hosts: nodes
   gather_facts: True
   roles:
+    - rhsm
     - common-virtual
     - vm-vlans
   tags:
