@@ -58,93 +58,12 @@
     dest: /etc/sysconfig/network-scripts/ifcfg-{{item.port}}
   with_items: '{{ovs_bridges}}'
 
-#- name: Backup all bond0.180* files
-#  shell: 'cp /etc/sysconfig/network-scripts/ifcfg-{{ item.port }} /etc/sysconfig/network-scripts/orig-ifcfg-{{ item.port }}'
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Update TYPE in ifcfg for VLAN-tagged interfaces
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    regexp: '^TYPE='
-#    line: 'TYPE=OVSPort'
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Add DEVICETYPE to ifcfg files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    insertafter: EOF
-#    line: 'DEVICETYPE=ovs'
-#    state: present
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Add OVS_BRIDGE to ifcfg files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    insertafter: EOF
-#    line: 'OVS_BRIDGE={{ item.name }}'
-#    state: present
-#  with_items: '{{ ovs_bridges}}'
-
-#- name: Create OVS bridges
-#  openvswitch_bridge:
-#    bridge: '{{ item.name }}'
-#    state: present
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Removing GATEWAY in ifcfg files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    regexp: '^GATEWAY='
-#    state: absent
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Removing NETMASK in ifcfg files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    regexp: '^NETMASK='
-#    state: absent
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Removing DEFROUTE in ifcfg files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    regexp: '^DEFROUTE='
-#    state: absent
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Removing DNS in ifcfg files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    regexp: '^DNS'
-#    state: absent
-#  with_items: '{{ ovs_bridges }}'
 
 - name: Copy ifcfg-ovsbr template
   template:
     src: ifcfg-ovsbr.j2
     dest: /etc/sysconfig/network-scripts/ifcfg-ovsbr{{ item.value['vlan'] }}
   with_dict: '{{ vlan_interface }}'
-
-#- name: Copy ifcfg-ovsbr template
-#  template:
-#    src: ifcfg-ovsbr.j2
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}'
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Pull static IP from bond0.180* interface and attach to ovsbr180* interface
-#  shell: 'cat /etc/sysconfig/network-scripts/ifcfg-{{ item.port}} | grep IPADDR >> /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}'
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Uncomment IPADDR from ifcfg-ovsbr180* files
-#  shell: 'sed -i "s/^#IPADDR/IPADDR/" /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}'
-#  with_items: '{{ ovs_bridges }}'
-#
-#- name: Removing IPADDR from bond0.180* files
-#  lineinfile:
-#    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ item.port }}'
-#    regexp: '^IPADDR'
-#    state: absent
-#  with_items: '{{ ovs_bridges }}'
 
 - name: Restart bond0 interfaces
   shell: 'ifdown {{ item.port }} ; ifup {{ item.port }}'

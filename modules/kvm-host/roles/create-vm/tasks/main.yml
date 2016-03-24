@@ -23,6 +23,3 @@
     state: running
     uri: qemu:///system
 
-- name: Get BaseVM MAC
-  shell: virsh domiflist {{ vm_name }} | grep -i '52.*$'
-  register: basevm_mac
