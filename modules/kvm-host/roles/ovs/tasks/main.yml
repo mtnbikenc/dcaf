@@ -1,13 +1,13 @@
 ---
 # Backup ifcfg file
-- name: Backing up ifcfg file for em3
-  shell: cp /etc/sysconfig/network-scripts/ifcfg-em3 /etc/sysconfig/network-scripts/orig-ifcfg-em3
+- name: Backing up ifcfg file for mgmt_nic
+  shell: cp /etc/sysconfig/network-scripts/ifcfg-{{mgmt_nic}} /etc/sysconfig/network-scripts/orig-ifcfg-{{mgmt_nic}}
   tags:
     - mgmt_bridge
 
 # Copy ifcfg-em3 file to br0
 - name: Convert ifcfg file for bridge config
-  shell: mv /etc/sysconfig/network-scripts/ifcfg-em3 /etc/sysconfig/network-scripts/ifcfg-br0
+  shell: mv /etc/sysconfig/network-scripts/ifcfg-{{mgmt_nic}} /etc/sysconfig/network-scripts/ifcfg-br0
   tags:
     - mgmt_bridge
 
@@ -29,15 +29,15 @@
 
 
 # Copy over purged ifcfg-em3 file
-- name: Copy ifcfg file for em3
+- name: Copy ifcfg file for mgmt_nic
   template:
     src: ifcfg-em3.j2
-    dest: /etc/sysconfig/network-scripts/ifcfg-em3
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{mgmt_nic}}
   tags:
     - mgmt_bridge
 
 - name: Restart interfaces 
-  shell: ifdown em3 ; ifup em3 ; ifup br0
+  shell: ifdown {{mgmt_nic}} ; ifup {{mgmt_nic}} ; ifup br0
   tags:
     - mgmt_bridge
 
@@ -48,11 +48,11 @@
   register: iplink_output
   failed_when: "'does not exist' in iplink_output.stderr"
 
-- name: Backup all bond0.180* files
+- name: Backup all bond vlan files
   shell: 'cp /etc/sysconfig/network-scripts/ifcfg-{{ item.port }} /etc/sysconfig/network-scripts/orig-ifcfg-{{ item.port }}'
   with_items: '{{ ovs_bridges }}'
 
-- name: update all bond0 vlans files
+- name: update all bond vlans files
   template: 
     src: ifcfg-bond.j2
     dest: /etc/sysconfig/network-scripts/ifcfg-{{item.port}}
