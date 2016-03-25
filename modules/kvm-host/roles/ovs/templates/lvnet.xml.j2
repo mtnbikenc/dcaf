@@ -1,7 +1,7 @@
 <network>
-  <name>{{ item.name }}</name>
-  <uuid>{{ item.name | to_uuid }}</uuid>
-  <bridge name="{{ item.bridge }}" />
+  <name>lvnet{{ item.value['vlan'] }}</name>
+  <uuid>{{  item.value['vlan'] | to_uuid }}</uuid>
+  <bridge name="ovsbr{{ item.value['vlan'] }}" />
   <forward mode="bridge" />
   <virtualport type="openvswitch"/>
 </network>

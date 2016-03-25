@@ -1,6 +1,6 @@
-DEVICE=em3
+DEVICE={{mgmt_nic}}
 BOOTPROTO=static
-HWADDR={{ansible_default_ipv4.macaddress}}
+HWADDR={{hostvars[inventory_hostname][ 'ansible_' + mgmt_nic ].macaddress}}
 ONBOOT=yes
 NETMASK=
 GATEWAY=
