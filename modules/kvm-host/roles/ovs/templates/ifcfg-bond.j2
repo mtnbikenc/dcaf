@@ -1,11 +1,13 @@
-DEVICE={{ item.port }}
-MASTER=bond0
+DEVICE={{ item.value['bond'] }}.{{ item.value['vlan'] }}
+MASTER={{ item.value['bond'] }}
 VLAN=yes
 ONBOOT=yes
 DEVICETYPE=ovs
 TYPE=OVSPort
-OVS_BRIDGE={{item.name}}
+OVS_BRIDGE=ovsbr{{ item.value['vlan'] }}
 BOOTPROTO=none
 {% if mtu is defined %}
 MTU={{ mtu }}
 {% endif %}
+
+

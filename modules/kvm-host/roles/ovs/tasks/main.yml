@@ -27,7 +27,6 @@
   tags:
    - mgmt_bridge
 
-
 # Copy over purged ifcfg-em3 file
 - name: Copy ifcfg file for mgmt_nic
   template:
@@ -42,22 +41,25 @@
     - mgmt_bridge
 
 # Check to see if all needed interfaces exist
+##TODO create module to get ip network info
 - name: Check for all needed VLAN-tagged interfaces
-  shell: ip link show {{ item.port }}
-  with_items: '{{ ovs_bridges }}'
+  shell: ip link show {{item.value['bond']}}.{{ item.value['vlan'] }}
+  with_dict: '{{ vlan_interface }}'
   register: iplink_output
   failed_when: "'does not exist' in iplink_output.stderr"
 
-- name: Backup all bond vlan files
-  shell: 'cp /etc/sysconfig/network-scripts/ifcfg-{{ item.port }} /etc/sysconfig/network-scripts/orig-ifcfg-{{ item.port }}'
-  with_items: '{{ ovs_bridges }}'
+- name: Backup all bond0.180* files
+  copy:
+    remote_src: true
+    src: "/etc/sysconfig/network-scripts/ifcfg-{{item.value['bond']}}.{{ item.value['vlan'] }}"
+    dest:  "/etc/sysconfig/network-scripts/orig-ifcfg-{{item.value['bond']}}.{{ item.value['vlan'] }}"
+  with_dict: '{{vlan_interface}}'
 
 - name: update all bond vlans files
   template: 
     src: ifcfg-bond.j2
-    dest: /etc/sysconfig/network-scripts/ifcfg-{{item.port}}
-  with_items: '{{ovs_bridges}}'
-
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item.value['bond']}}.{{ item.value['vlan'] }}
+  with_dict: '{{vlan_interface}}'
 
 - name: Copy ifcfg-ovsbr template
   template:
@@ -65,37 +67,39 @@
     dest: /etc/sysconfig/network-scripts/ifcfg-ovsbr{{ item.value['vlan'] }}
   with_dict: '{{ vlan_interface }}'
 
-- name: Restart bond0 interfaces
-  shell: 'ifdown {{ item.port }} ; ifup {{ item.port }}'
-  with_items: '{{ ovs_bridges }}'
+- name: Restart the network bond interfaces with new config
+  shell: ifdown {{ item.value['bond'] }}.{{ item.value['vlan'] }} && ifup {{ item.value['bond'] }}.{{ item.value['vlan'] }}
+  ignore_errors: yes
+  with_dict: "{{ vlan_interface }}"
 
-- name: Bring up ovsbr bridges
-  command: 'ifup {{ item.name }}'
-  with_items: '{{ ovs_bridges }}'
+- name: Restart the ovsbr interfaces with new config
+  shell: ifdown ovsbr{{ item.value['vlan'] }} && ifup ovsbr{{ item.value['vlan'] }}
+  ignore_errors: yes
+  with_dict: "{{ vlan_interface }}"
 
-- name: Check for libvirt networks
-  command: virsh net-info {{ item.name }}
-  with_items: "{{ libvirt_networks }}"
+- name: check for libvirt networks
+  command: virsh net-info lvnet{{ item.value['vlan'] }}
+  with_dict:  "{{ vlan_interface }}"
   ignore_errors: true
   register: libvirt_check
 
 - name: Create libvirt network XML files
   template:
     src: lvnet.xml.j2
-    dest: /tmp/{{ item.name }}.xml
-  with_items: '{{ libvirt_networks }}'
+    dest: /tmp/lvnet{{ item.value['vlan'] }}.xml
+  with_dict:  "{{ vlan_interface }}"
   when: libvirt_check|failed
 
 - name: Define libvirt networks on OVS bridges
-  command: virsh net-define /tmp/{{ item.name }}.xml
-  with_items: '{{ libvirt_networks }}'
+  command: virsh net-define /tmp/lvnet{{ item.value['vlan']  }}.xml
+  with_dict:  "{{ vlan_interface }}"
   when: libvirt_check|failed
 
 - name: Start new libvirt networks
-  command: virsh net-start {{ item.name }}
-  with_items: '{{ libvirt_networks }}'
+  command: virsh net-start lvnet{{ item.value['vlan']  }}
+  with_dict:  "{{ vlan_interface }}"
 
 - name: Enable auto-start for libvirt networks
-  command: virsh net-autostart {{ item.name }}
-  with_items: '{{ libvirt_networks }}'
+  command: virsh net-autostart lvnet{{ item.value['vlan']  }}
+  with_dict:  "{{ vlan_interface }}"
   when: libvirt_check|failed
