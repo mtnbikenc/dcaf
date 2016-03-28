@@ -1,15 +1,16 @@
 CSC DCAF Automation Quick Start Guide
 =====================================
 
-This quick start guide describes how to use the following CSC DCAF Automation
-projects:
+This quick start guide describes how to use the following Automation projects:
 
-- **DCAF Modules**
-  - **Base** Provisions a CSC DCAF AutoDeployNode which is used as the
-  basis for all DCAF automation. The AutoDeployNode contains all the automation
-  resources and is used to perform all automation tasks.
+- **CSC DCAF Modules**
+
+  - **AutoDeployNode** Provisions a CSC DCAF AutoDeployNode which is used as the
+    basis for all DCAF automation. The AutoDeployNode contains all the
+    automation resources and is used to perform all automation tasks.
   - **Bare-Metal-OS** - Provides an automated bare-metal deployment of the
-  Red Hat Enterprise Linux OS using Hanlon.
+    Red Hat Enterprise Linux OS using Hanlon.
+
 - **Hanlon** - Hanlon is an advanced provisioning platform which can provision
   both bare-metal and virtual systems.
 - **Slimer** - Slimer is a fork of abrezhnev/slimer to deploy the Red Hat
