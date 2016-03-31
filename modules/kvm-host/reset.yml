@@ -1,4 +1,16 @@
 ---
+- name: unsubscribe
+  hosts: openstack
+  tasks:
+
+    - name: Unregister from RSHM
+      command: subscription-manager unregister
+      ignore_errors: yes
+
+    - name: Clean all RHSM attachments
+      command: subscription-manager clean
+      ignore_errors: yes
+
 - name: reset libvirt and network on kvmhosts
   hosts: kvmhosts
   tasks:

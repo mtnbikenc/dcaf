@@ -67,15 +67,20 @@
     dest: /etc/sysconfig/network-scripts/ifcfg-ovsbr{{ item.value['vlan'] }}
   with_dict: '{{ vlan_interface }}'
 
+- name: Restart the ovsbr interfaces with new config
+  shell: ifdown ovsbr{{ item.value['vlan'] }} && ifup ovsbr{{ item.value['vlan'] }}
+  ignore_errors: yes
+  with_dict: "{{ vlan_interface }}"
+
 - name: Restart the network bond interfaces with new config
   shell: ifdown {{ item.value['bond'] }}.{{ item.value['vlan'] }} && ifup {{ item.value['bond'] }}.{{ item.value['vlan'] }}
   ignore_errors: yes
   with_dict: "{{ vlan_interface }}"
 
-- name: Restart the ovsbr interfaces with new config
-  shell: ifdown ovsbr{{ item.value['vlan'] }} && ifup ovsbr{{ item.value['vlan'] }}
-  ignore_errors: yes
-  with_dict: "{{ vlan_interface }}"
+#- name: Restart the ovsbr interfaces with new config
+#  shell: ifdown ovsbr{{ item.value['vlan'] }} && ifup ovsbr{{ item.value['vlan'] }}
+#  ignore_errors: yes
+#  with_dict: "{{ vlan_interface }}"
 
 - name: check for libvirt networks
   command: virsh net-info lvnet{{ item.value['vlan'] }}
