@@ -12,6 +12,7 @@
   lineinfile:
     dest: /etc/sysconfig/network-scripts/ifcfg-eth1
     state: present
+    regexp: "^DEFROUTE"
     insertafter: EOF
     line: "DEFROUTE=yes"
 

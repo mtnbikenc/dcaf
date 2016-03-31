@@ -1,0 +1,70 @@
+---
+- name: resize virt disks
+  hosts: kvmhosts
+  gather_facts: true
+  vars:
+    - new_size: 30G
+    - physical_disk: /dev/sdb1
+    - virt_disk: vdb
+  tasks:
+    - name: add disk to swift
+      command: virsh attach-disk {{item.hostname}} {{physical_disk}} {{virt_disk}}
+      with_items:
+        - "{{ nodes }}"
+      when:  item.kvm_host  == inventory_hostname and 'swift' in item.hostname
+      tags: swift
+
+    - name: resize qemu disk size
+      command: virsh blockresize {{item.hostname}} --path vda {{new_size}}
+      with_items:
+        - "{{ nodes }}"
+      when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
+
+- name: resize filesystem in virt
+  hosts: nodes
+  gather_facts: true
+  vars:
+    - disk: vda
+  tasks:
+     - name: resize primary partition table
+       shell: (echo d; echo n; echo p; echo 1; echo ; echo; echo w) | fdisk /dev/{{disk}}      
+       tags: fdisk
+       register: fdiskout
+       failed_when: '"The partition table has been altered!" not in fdiskout.stdout'
+       ignore_errors: true
+
+- name: reboot nodes
+  hosts: kvmhosts
+  gather_facts: false 
+  tasks:
+    - name: reboot guest 
+      command: virsh reboot {{item.hostname}} 
+      with_items:
+        - "{{ nodes }}"
+      when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
+ 
+    - name: wait for guest to reboot
+      delegate_to: 127.0.0.1
+      wait_for:
+        host: '{{hostvars[item].ansible_ssh_host}}'
+        state: started
+        port: 22
+        delay: 0
+        timeout: 300
+      with_items: groups['nodes']
+
+- name: resize filesystem in virt
+  hosts: nodes
+  gather_facts: false
+  tasks:
+    - name: wait for guest to reboot
+      wait_for:
+        host: '{{ansible_ssh_host}}'
+        state: started
+        port: 22
+        delay: 10
+        timeout: 300
+
+    - name: resizefs
+      command: xfs_growfs /dev/vda1   
+

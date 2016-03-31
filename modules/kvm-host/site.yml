@@ -135,8 +135,8 @@
   hosts: nodes
   gather_facts: True
   roles:
-    - rhsm
     - common-virtual
+    - rhsm
     - vm-vlans
   tags:
     - config-clone
