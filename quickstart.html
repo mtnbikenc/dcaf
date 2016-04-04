@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
-        <link rel="next" title="Projects" href="projects.html"/>
+        <link rel="next" title="Requirements &amp; Dependencies" href="requirements.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
   
@@ -105,7 +105,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="projects.html">Projects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="offline_autodeploy_node.html">AutoDeployNode Creation - Offline Mode</a></li>
@@ -157,15 +156,16 @@
             
   <div class="section" id="csc-dcaf-automation-quick-start-guide">
 <h1>CSC DCAF Automation Quick Start Guide<a class="headerlink" href="#csc-dcaf-automation-quick-start-guide" title="Permalink to this headline">¶</a></h1>
-<p>This quick start guide describes how to use the following CSC DCAF Automation
-projects:</p>
+<p>This quick start guide describes how to use the following Automation projects:</p>
 <ul class="simple">
-<li><strong>DCAF Modules</strong>
-- <strong>Base</strong> Provisions a CSC DCAF AutoDeployNode which is used as the
-basis for all DCAF automation. The AutoDeployNode contains all the automation
-resources and is used to perform all automation tasks.
-- <strong>Bare-Metal-OS</strong> - Provides an automated bare-metal deployment of the
+<li><strong>CSC DCAF Modules</strong><ul>
+<li><strong>AutoDeployNode</strong> Provisions a CSC DCAF AutoDeployNode which is used as the
+basis for all DCAF automation. The AutoDeployNode contains all the
+automation resources and is used to perform all automation tasks.</li>
+<li><strong>Bare-Metal-OS</strong> - Provides an automated bare-metal deployment of the
 Red Hat Enterprise Linux OS using Hanlon.</li>
+</ul>
+</li>
 <li><strong>Hanlon</strong> - Hanlon is an advanced provisioning platform which can provision
 both bare-metal and virtual systems.</li>
 <li><strong>Slimer</strong> - Slimer is a fork of abrezhnev/slimer to deploy the Red Hat
@@ -183,7 +183,6 @@ capabilities to the Red Hat OpenStack Platform.</li>
 <p>To retrieve the automation resources from their online repositories you will
 need the following:</p>
 <ul class="simple">
-<li>A valid github.com user account with access to the CSC Git repositories.</li>
 <li>A Red Hat user account with a valid subscription associated with it.</li>
 </ul>
 </div>
@@ -243,29 +242,13 @@ guide using the command line interface</a>.</p>
 after a few environment variables have been defined. The build script provisions
 and configures the AutoDeployNode. Review the script for more details of all the
 steps which are performed.</p>
-<p>Set the environment variables for Red Hat Subscription Manage credentials:
-​</p>
+<p>Set the environment variables for Red Hat Subscription Manage credentials:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">RHN_USER</span><span class="o">=</span><span class="s2">&quot;username&quot;</span>
 <span class="nb">export</span> <span class="nv">RHN_PASS</span><span class="o">=</span><span class="s2">&quot;password&quot;</span>    <span class="c1"># escape dollar signs (\$)</span>
 <span class="nb">export</span> <span class="nv">RHN_POOL</span><span class="o">=</span><span class="s2">&quot;pool_id&quot;</span>     <span class="c1"># 32-char pool ID</span>
 </pre></div>
 </div>
-<p>Create a ssh key file for GitHub access.  Put the text for a private key which
-has access to the GitHub repositories in the lines below:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; ~/github.pem</span>
-<span class="s">-----BEGIN RSA PRIVATE KEY-----</span>
-<span class="s">&lt;insert_key_file_text_here&gt;</span>
-<span class="s">-----END RSA PRIVATE KEY-----</span>
-<span class="s">EOF</span>
-</pre></div>
-</div>
-<p>Change the file permissions to ensure security.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>chmod <span class="m">0600</span> ~/github.pem
-</pre></div>
-</div>
-<p>With the environment variables defined and the ssh key file created, the build
-script can be launched:
-​</p>
+<p>With the environment variables defined, the build script can be launched:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/build.sh <span class="p">|</span> bash​
 </pre></div>
 </div>
@@ -345,7 +328,7 @@ Ansible-ScaleIO to deploy EMC ScaleIO.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="projects.html" class="btn btn-neutral float-right" title="Projects" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements &amp; Dependencies" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

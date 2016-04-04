@@ -84,7 +84,6 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">CSC DCAF Automation Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="projects.html">Projects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">AutoDeployNode Creation - Online Mode</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#install-the-rhel-os">Install the RHEL OS</a><ul>
@@ -213,21 +212,7 @@ Environment variables for Red Hat Subscription credentials should be defined:</p
 <span class="nb">export</span> <span class="nv">RHN_POOL</span><span class="o">=</span><span class="s2">&quot;pool_id&quot;</span> <span class="c1"># 32-char pool ID</span>
 </pre></div>
 </div>
-<p>Next, an ssh key file should be created for GitHub access. Put the text for a
-private key which has access to the GitHub repositories in the lines below:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; ~/github.pem</span>
-<span class="s">-----BEGIN RSA PRIVATE KEY-----</span>
-<span class="s">&lt;insert_key_file_text_here&gt;</span>
-<span class="s">-----END RSA PRIVATE KEY-----</span>
-<span class="s">EOF</span>
-</pre></div>
-</div>
-<p>Change the file permissions to ensure security.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>chmod <span class="m">0600</span> ~/github.pem
-</pre></div>
-</div>
-<p>With the environment variables defined and the ssh key file created, the build
-script can be launched:</p>
+<p>With the environment variables defined, the build script can be launched:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/build.sh <span class="p">|</span> bash
 </pre></div>
 </div>
@@ -300,22 +285,8 @@ play from the <code class="code docutils literal"><span class="pre">dcaf</span><
 <div class="highlight-bash"><div class="highlight"><pre><span></span>wget https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/initial_stage.yml
 </pre></div>
 </div>
-<p>In order to download the projects from GitHub, a keyfile must be created. Put the
-text for a private key which has access to the GitHub repositories in the lines
-below:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; ~/github.pem</span>
-<span class="s">-----BEGIN RSA PRIVATE KEY-----</span>
-<span class="s">&lt;insert_key_file_text_here&gt;</span>
-<span class="s">-----END RSA PRIVATE KEY-----</span>
-<span class="s">EOF</span>
-</pre></div>
-</div>
-<p>Change the file permissions to ensure security.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>chmod <span class="m">0600</span> ~/github.pem
-</pre></div>
-</div>
 <p>Now the initial_stage.yml playbook can be run, as shown below:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook initial_stage.yml --extra-vars <span class="s2">&quot;github_key_file=~/github.pem&quot;</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook initial_stage.yml
 </pre></div>
 </div>
 <p>Now that the DCAF project has been retrieved it can be used to install the remaining
@@ -332,7 +303,6 @@ following variables in the <code class="code docutils literal"><span class="pre"
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="c1"># Required User Variables</span>
 <span class="l l-Scalar l-Scalar-Plain">rhn_user</span><span class="p p-Indicator">:</span>
 <span class="l l-Scalar l-Scalar-Plain">rhn_pass</span><span class="p p-Indicator">:</span>
-<span class="l l-Scalar l-Scalar-Plain">github_key_file</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">(location of the github.pem file created above)</span>
 </pre></div>
 </div>
 <p>Run the stage_resources.yml play:</p>

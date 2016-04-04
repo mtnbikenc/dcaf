@@ -64,25 +64,7 @@ Set the environment variables for Red Hat Subscription Manage credentials:
     export RHN_PASS="password"    # escape dollar signs (\$)
     export RHN_POOL="pool_id"     # 32-char pool ID
 
-Create a ssh key file for GitHub access.  Put the text for a private key which
-has access to the GitHub repositories in the lines below:
-
-.. code-block:: bash
-
-    cat << EOF > ~/github.pem
-    -----BEGIN RSA PRIVATE KEY-----
-    <insert_key_file_text_here>
-    -----END RSA PRIVATE KEY-----
-    EOF
-
-Change the file permissions to ensure security.
-
-.. code-block:: bash
-
-    chmod 0600 ~/github.pem
-
-With the environment variables defined and the ssh key file created, the build
-script can be launched:
+With the environment variables defined, the build script can be launched:
 ​
 
 .. code-block:: bash
