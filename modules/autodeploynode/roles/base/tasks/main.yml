@@ -23,6 +23,15 @@
   when: offline
   with_fileglob: "../../files/*pip-requirements*"
 
+- name: Create the inventory directories
+  file:
+    path: "{{ projects_base_path }}/{{ item }}"
+    state: directory
+  with_items:
+    - inventory
+    - inventory/host_vars
+    - inventory/group_vars
+
 - name: Create the .ssh directory
   file:
     path: /root/.ssh/
