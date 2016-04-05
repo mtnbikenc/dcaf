@@ -12,7 +12,6 @@ haproxy_ctrl_if:
   ipaddr: 192.168.101.11
   netmask: 255.255.255.0
 
-
 keepalived_if:
   ipaddr: 172.16.27.3
   netmask: 255.255.255.0

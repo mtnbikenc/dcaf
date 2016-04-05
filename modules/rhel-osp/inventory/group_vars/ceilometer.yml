@@ -1,4 +1,7 @@
 ---
+## The variables in this file should not need to be changed unless there is a specific need.
+## These are all defaults within the role.
+
 # the interface the api commands will route through. If the api interface is different between compute and control,
 # create a new group_vars file for ['ceilomter-controller' and 'compute'] and specify different NICs
 
