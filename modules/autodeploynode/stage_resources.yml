@@ -92,9 +92,10 @@
       when: not (rhel_iso.stat.exists)
       tags: iso
 
-    - name: Check if Red Hat KVM Guest image file exists in /opt/autodeploy/resources/ISO
-      stat:
-        path: "{{ iso_path }}/{{ kvm_guest_image }}"
+    - name: Check if Red Hat KVM Guest image file exists
+      find:
+        path: "{{ iso_path }}"
+        pattern: "rhel-guest-image*.qcow2"
       register: kvm_guest
       tags: iso
 
@@ -106,16 +107,16 @@
         password: "{{ rhn_pass }}"
         username_element_id: username
         password_element_id: password
-        xpath: '//*[contains(@href,"{{ kvm_guest_image }}")]'
+        xpath: '//*[contains(@href,"rhel-guest-image")]'
       register: kvm_get_url
-      when: not (kvm_guest.stat.exists)
+      when: kvm_guest.matched == 0
       tags: iso
 
     - name: Download the KVM Guest Image file to /opt/autodeploy/resources/ISO
       get_url:
         url: "{{ kvm_get_url.url }}"
         dest: "{{ iso_path }}"
-      when: not (kvm_guest.stat.exists)
+      when: kvm_guest.matched == 0
       tags: iso
 
     - name: Download the EPEL RPMs to /opt/autodeploy/resources/rpms when offline
