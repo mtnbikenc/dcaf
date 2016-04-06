@@ -2,3 +2,10 @@
 - name: Update node hostname
   hostname:
     name: '{{ inventory_hostname }}'
+
+- name: resize primary partition table
+  shell: (echo d; echo n; echo p; echo 1; echo ; echo; echo w) | fdisk /dev/{{disk}}
+  tags: fdisk
+  register: fdiskout
+  failed_when: '"The partition table has been altered!" not in fdiskout.stdout'
+  ignore_errors: true

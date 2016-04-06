@@ -140,3 +140,49 @@
     - vm-vlans
   tags:
     - config-clone
+
+- name: Resize qcow2 disks
+  hosts: kvmhosts
+  gather_facts: true
+  tasks:
+    - name: run virsh blockresize
+      vars:
+      - new_size: 30G
+      command: virsh blockresize {{item.hostname}} --path vda {{new_size}}
+      with_items:
+        - "{{ nodes }}"
+      when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
+  tags:
+    - disk-resize
+
+# shut down the clones so we can update the VM XML while offline
+#- name: Shutdown VMs before updating hardware
+#  hosts: nodes
+#  tasks:
+#    - name: run shutdown
+#      shell: shutdown -h now
+#    - name: pause while clones shutdown
+#      pause:
+#        seconds: 15
+
+# update the VMs, bring VMs online at the end
+#- name: Update VM XML with additional hardware
+#  hosts: kvmhosts
+#  gather_facts: true
+#  roles:
+#    - vm-hardware
+
+- name: Restart updated clones
+  hosts: nodes
+  gather_facts: true
+  tasks:
+    - name: wait for guest to start
+      wait_for:
+        host: '{{ansible_ssh_host}}'
+        state: started
+        port: 22
+        delay: 10
+        timeout: 300
+
+    - name: resize guest filesystem
+      command: xfs_growfs /dev/vda1
