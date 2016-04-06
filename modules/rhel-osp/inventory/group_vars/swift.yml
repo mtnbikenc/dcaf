@@ -1,3 +1,5 @@
+
+
 # part_power = 2 ^ partition power = partition count. ( The partition is rounded up after calculation.)
 part_power: 18
 #replica couunt =  The number of times that your data will be replicated in the cluster.

@@ -1,2 +1,5 @@
 ---
+## The variables in this file should not need to be changed unless there is a specific need.
+## These are all defaults within the role.
+
 # haproxy_admin_password: test
