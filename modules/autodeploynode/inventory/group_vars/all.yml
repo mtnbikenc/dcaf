@@ -29,7 +29,6 @@ hnl_rhel_min_image: rhel-server-7.2-x86_64-dvd-hnl.iso
 hnl_mk_source: https://github.com/csc/Hanlon-Microkernel/releases/download/v2.0.1/
 hnl_mk_local_path: /opt/hanlon/image/
 hnl_mk_path: /home/hanlon/image/{{ hnl_mk_image }}
-kvm_guest_image: rhel-guest-image-7.2-20160301.0.x86_64.qcow2
 rhel_iso_image: rhel-server-7.2-x86_64-dvd.iso
 
 # Offline Staging vars
@@ -71,12 +70,6 @@ autodeploy_support_pkgs:
 source_projects:
   - ansible-scaleio
   - slimer
-
-iso_files:
-  - "{{ hnl_mk_image }}"
-  - "{{ rhel_iso_image }}"
-  - "{{ hnl_rhel_min_image }}"
-  - "{{ kvm_guest_image }}"
 
 docker_images:
   - { name: hanlon-mongo, image: mongo, tar_file: mongo.tar }
