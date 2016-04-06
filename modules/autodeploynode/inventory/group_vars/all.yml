@@ -7,7 +7,7 @@ rhn_pass:
 offline: false
 usb_hdd: /mnt/sdb
 use_scaleio: true
-use_bare-metal-os: true
+use_bare_metal_os: true
 
 # Autodeploy common vars
 autodeploy_base_path: /opt/autodeploy
