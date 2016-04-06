@@ -220,7 +220,7 @@ environment. Configure these variables accordingly by editing the variables in t
 .. code-block:: yaml
 
     use_scaleio:
-    use_bare-metal-os:
+    use_bare_metal_os:
 
 There are basic variables that apply to all deployments that will need to be
 modified before deployment.

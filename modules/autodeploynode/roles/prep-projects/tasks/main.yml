@@ -5,5 +5,5 @@
 
 - include: scaleio.yml
   when: use_scaleio
-- include: bare-metal-os.yml
-  when: use_bare-metal-os
+- include: bare_metal_os.yml
+  when: use_bare_metal_os
