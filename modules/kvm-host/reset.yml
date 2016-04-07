@@ -24,13 +24,13 @@
       ignore_errors: yes
 
     - name: Stop and undefine all libvirt networks
-      shell: virsh net-destroy {{ item.name }} ; virsh net-undefine {{ item.name }}
-      with_items: "{{ libvirt_networks }}"
+      shell: virsh net-destroy lvnet{{ item.value['vlan'] }} ; virsh net-undefine lvnet{{ item.value['vlan'] }}
+      with_dict:  "{{ vlan_interface }}"
       ignore_errors: yes
 
     - name: Delete all OVS bridges
-      shell: ovs-vsctl del-br {{ item.name }}
-      with_items: "{{ ovs_bridges }}"
+      shell: ovs-vsctl del-br ovsbr{{ item.value['vlan'] }}
+      with_dict: '{{vlan_interface}}'
       ignore_errors: yes
 
     - name: Delete mgmt bridge ifcfg file
@@ -44,14 +44,15 @@
 
     - name: delete ovsbridge ifcfg files
       file:
-        path: /etc/sysconfig/network-scripts/ifcfg-{{item.name}}
+        path: /etc/sysconfig/network-scripts/ifcfg-ovsbr{{ item.value['vlan'] }}
         state: absent
       ignore_errors: yes
-      with_items: "{{ovs_bridges}}"
+      with_dict: '{{ vlan_interface }}'
 
     - name: reset bonds
-      command: mv /etc/sysconfig/network-scripts/orig-ifcfg-{{item.port}} /etc/sysconfig/network-scripts/ifcfg-{{item.port}}
-      with_items: "{{ovs_bridges}}"
+      command: mv /etc/sysconfig/network-scripts/orig-ifcfg-bond.{{ item.value['vlan'] }} /etc/sysconfig/network-scripts/ifcfg-bond0.{{ item.value['vlan'] }}
+      with_dict: '{{ vlan_interface }}'
+
      
     - name: Restart interfaces 
       service:

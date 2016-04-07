@@ -1,15 +1,15 @@
 ---
 - name: Add host reservations to dhcpd.conf
+  delegate_to: 127.0.0.1
   lineinfile:
     dest: /etc/dhcp/dhcpd.conf
     state: present
-    regexp: '{{item.mgmt_mac}}'
+    regexp: '{{mgmt_mac}}'
     #insertafter: EOF
-    line: 'host {{ item.hostname }} { hardware ethernet {{ item.mgmt_mac }}; fixed-address {{ item.mgmt_ip }}; }'
-  with_items:
-    - "{{ dhcpd_hosts }}"
+    line: 'host {{ hostname }} { hardware ethernet {{ mgmt_mac }}; fixed-address {{ mgmt_ip }}; }'
 
 - name: Restart dhcpd 
+  delegate_to: 127.0.0.1
   service:
     name: dhcpd
     state: restarted

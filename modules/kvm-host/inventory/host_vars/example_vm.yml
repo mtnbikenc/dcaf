@@ -1,0 +1,49 @@
+---
+## kvm-host
+ansible_ssh_host: 172.17.16.31
+
+vm_hardware:
+  cpus: 8
+  ram: 32768
+
+hostname: "controller-1"
+
+#Network information for eth0 the ansible network.
+mgmt_mac: "52:54:00:FC:00:10"
+mgmt_ip: "{{ ansible_ssh_host }}"
+
+kvm_host: "kvm_controller-1"
+
+#virtual nic that will be created on the VM
+vnics:
+  network1:
+    network: lvnet1801
+    mac_addr: 52:54:00:FC:00:12
+    ip_addr: 172.17.17.31
+    gateway: 172.17.17.1
+    name: eth1
+  network2:
+    network: lvnet1802
+    ip_addr: 172.17.18.31
+    mac_addr: 52:54:00:FC:00:14
+    gateway: 172.17.18.1
+    name: eth2
+  network3:
+    network: lvnet1803
+    ip_addr: 172.17.19.31
+    mac_addr: 52:54:00:FC:00:16
+    gateway: 172.17.19.1
+    name: eth3
+  network4:
+    network: lvnet1804
+    ip_addr: 172.17.20.31
+    mac_addr: 52:54:00:FC:00:18
+    gateway: 172.17.20.1
+    name: eth4
+  network5:
+    network: lvnet1805
+    ip_addr: 172.17.21.31
+    mac_addr: 52:54:00:FC:00:1A
+    gateway: 172.17.21.1
+    name: eth5
+

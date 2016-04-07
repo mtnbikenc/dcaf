@@ -9,16 +9,31 @@
 
 - name: create vars for basevm dhcp
   hosts: auto_deploy_node
+  gather_facts: false
+  tasks:
+    - name: Add hostnames to inventory
+      add_host: 
+        name: '{{ vm_name }}'
+        group: basevm
+        ansible_ssh_host: '{{ basevm_static_ip }}'
+
+- name: add macaddress to basevm
+  hosts: basevm
+  gather_facts: false
   tasks:
     - name: create vars for basevm dhcp
-      set_fact:
-        base_dhcpd: "{'hostname': '{{vm_name}}', 'mgmt_mac': '{{basevm_mac}}', 'mgmt_ip': '{{basevm_static_ip}}' }"
+      set_fact: 
+        mgmt_ip: '{{ basevm_static_ip }}'
+        mgmt_mac: '{{ basevm_mac }}'
+        hostname: '{{ vm_name }}'
 
 - name: Configure static DHCP leases
-  hosts: auto_deploy_node
+  hosts: 
+    - nodes
+    - basevm
   gather_facts: false
   roles:
-    - { role: dhcpd, dhcpd_hosts: '{{base_dhcpd}}'}
+    - dhcpd
 
 - name: Setup base VM 
   hosts: kvmhosts[0]
@@ -32,7 +47,7 @@
   tasks:
    - name: wait for clones to come up
      wait_for:
-       host: '{{basevm_static_ip}}'
+       host: '{{ basevm_static_ip }}'
        state: started
        port: 22
        delay: 0
@@ -40,7 +55,7 @@
 - name: Update base VM 
   hosts: basevm
   vars:
-    ansible_ssh_host: "{{basevm_static_ip}}"
+    ansible_ssh_host: "{{ basevm_static_ip }}"
   gather_facts: true
   roles:
     - rhsm
@@ -101,16 +116,6 @@
         uri: qemu:///system
       ignore_errors: true
 
-### End of base VM distribution tasks
-
-- name: Configure static DHCP leases
-  hosts: auto_deploy_node 
-  gather_facts: false
-  roles:
-    - { role: dhcpd, dhcpd_hosts: '{{nodes}}'}
-  tags:
-    - dhcpd
-
 - name: Create and initialize clones
   hosts: kvmhosts
   gather_facts: false
@@ -125,15 +130,17 @@
   tasks:
    - name: wait for clones to come up
      wait_for: 
-       host: "{{hostvars[item]['ansible_ssh_host']}}"
+       host: "{{ hostvars[item]['ansible_ssh_host'] }}"
        state: started 
        port: 22
        delay: 0
-     with_items: groups['nodes']
+     with_items: "{{ groups['nodes'] }}"
 
 - name: Configure clones
   hosts: nodes
   gather_facts: True
+  vars:
+    - disk: vda
   roles:
     - common-virtual
     - rhsm
@@ -141,6 +148,7 @@
   tags:
     - config-clone
 
+# this play is a temporary fix until a new play/role is developed to handle the change in size of vcpu/memory/disk
 - name: Resize qcow2 disks
   hosts: kvmhosts
   gather_facts: true
@@ -148,10 +156,10 @@
     - name: run virsh blockresize
       vars:
       - new_size: 30G
-      command: virsh blockresize {{item.hostname}} --path vda {{new_size}}
+      command: virsh blockresize {{ hostvars[item].hostname }} --path vda {{ new_size }}
       with_items:
-        - "{{ nodes }}"
-      when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
+        - "{{ groups['nodes'] }}"
+      when: "'{{ hostvars[item].kvm_host }}' == '{{ inventory_hostname }}'"
   tags:
     - disk-resize
 
@@ -178,11 +186,15 @@
   tasks:
     - name: wait for guest to start
       wait_for:
-        host: '{{ansible_ssh_host}}'
+        host: '{{ ansible_ssh_host }}'
         state: started
         port: 22
         delay: 10
         timeout: 300
 
-    - name: resize guest filesystem
-      command: xfs_growfs /dev/vda1
+    - name: resize guest filesystemi
+      filesystem:
+        dev: /dev/vda1
+        fstype: xfs
+        resizefs: yes
+     # command: xfs_growfs /dev/vda1

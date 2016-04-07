@@ -1,0 +1,34 @@
+---
+ansible_ssh_host: 172.17.16.70
+mgmt_nic: em3
+
+vlan_interface:
+  ext_if:
+    bond: "bond0"
+    dns1: 192.168.70.3
+    gateway: 172.17.21.1
+    ipaddr: 172.17.21.70
+    netmask: 255.255.255.0
+    vlan: '{{ external_vlan }}'
+  int_if:
+    bond: "bond0"
+    dns1: 172.17.10.22
+    gateway: 172.17.17.1
+    ipaddr: 172.17.17.70
+    netmask: 255.255.255.0
+    vlan: '{{ management_vlan }}'
+  storage_if:
+    bond: "bond0"
+    ipaddr: 172.17.19.70
+    netmask: 255.255.255.0
+    vlan: '{{ storage_public_vlan }}'
+  vm_ext_if:
+    bond: "bond0"
+    ipaddr: 172.17.20.70
+    netmask: 255.255.255.0
+    vlan: '{{ storage_cluster_vlan }}'
+  tun_if:
+    bond: "bond0"
+    ipaddr: 172.17.18.70
+    netmask: 255.255.255.0
+    vlan: '{{ tenant_vlan }}'

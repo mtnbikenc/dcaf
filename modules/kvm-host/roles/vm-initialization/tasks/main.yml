@@ -1,31 +1,18 @@
 ---
 # tasks to spin up  VMs based on where they are assigned
 - name: Clone base VM for needed clones
-  shell: virt-clone --auto-clone -o {{ vm_name }} -n {{ item.hostname }} -m {{ item.mgmt_mac }}
+  shell: virt-clone --auto-clone -o {{ vm_name }} -n {{ hostvars[item].hostname }} -m {{ hostvars[item].mgmt_mac }}
   with_items: 
-     - "{{ nodes }}"
-  when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
+     - "{{ groups['nodes'] }}"
+  when: "'{{ hostvars[item].kvm_host }}' == '{{ inventory_hostname }}'"
 
-- name: Add hostnames to inventory
-  add_host: 
-    name: '{{ item.hostname }}'
-    group: '{{ item.type }},nodes'
-    ansible_ssh_host: '{{ item.mgmt_ip }}'
-  with_items:
-     - "{{ nodes }}"
 
 - name: Start all VMs
   virt: 
     command: start
-    name: '{{ item.hostname }}'
+    name: '{{ hostvars[item].hostname }}'
     uri: qemu:///system
   with_items:
-     - "{{ nodes }}"
-  when: "'{{ item.kvm_host }}' == '{{ inventory_hostname }}'"
+     - "{{ groups['nodes'] }}"
+  when: "'{{ hostvars[item].kvm_host }}' == '{{ inventory_hostname }}'"
 
-- name: Add VLAN interfaces to VMs
-  shell: "virsh attach-interface {{ item.0.hostname }} network {{ item.1.network }} --model virtio --mac {{ item.1.mac_addr }} --live --persistent"
-  with_subelements:
-    - nodes
-    - vnics
-  when: "'{{ item.0.kvm_host }}' == '{{ inventory_hostname }}'"
