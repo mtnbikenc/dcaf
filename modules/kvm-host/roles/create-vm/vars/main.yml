@@ -1,0 +1,2 @@
+---
+vm_root_password: "{{ lookup('password', credentials_dir + '/credentials/vm_root_password chars=ascii_letters,digits') }}"

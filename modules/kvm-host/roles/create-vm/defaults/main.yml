@@ -1,9 +1,6 @@
 ---
 # defaults for the create-vm role
-
-qcow_image_name: /root/rhel-guest-image-7.1.qcow2
-vm_root_password: redhat
+credentials_dir: /var/lib/ansible
 vm_ram: 8192
 vm_vcpus: 4
 vm_name: basevm
-kvm_host_pubkey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbx5uZSjbWE85TIw62vr3JmKRWBV41GAbEAtnNGVi9oQTClzudR10B6NBv8QKI/eX6N0iUFeb1v9jW1t0BJFlYIXOyrMcAA1OfClwTQkkuYn3cixMATJ5ozPs2ydrCnSXPAR/L+GeCdvN8wuSQjPwx9Kn2tWpb9S9GT+8+2UkOoPz+wjDzQWeHLPEgspgDGUF7BwUrGzhOxvDkLc7huLZTZ5LpvOQqW15uX441aoncCu1TGTvpWt8iGQSEvHsAhcjv5ZjYBHcKjb8iDgfBBWtU8A1lL87wvGb1tJ5mlpT9EUBwBLjngXQz74tTxQfMpu52vLdcwdMxeYMDAwLUamzf root@compute-1
