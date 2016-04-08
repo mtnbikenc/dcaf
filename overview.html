@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
-        <link rel="next" title="CSC DCAF Automation Quick Start Guide" href="quickstart.html"/>
+        <link rel="next" title="CSC DCAF Quick Start Guides" href="quickstart.html"/>
         <link rel="prev" title="CSC DCAF Documentation" href="index.html"/> 
 
   
@@ -84,7 +84,7 @@
                 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#project-sources">Project Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-autodeploynode">The AutoDeployNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-autodeploynode">The Autodeploynode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#csc-dcaf-modes">CSC DCAF Modes</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#online-mode">Online Mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#offline-mode">Offline Mode</a></li>
@@ -92,7 +92,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">CSC DCAF Automation Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">CSC DCAF Quick Start Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="offline_autodeploy_node.html">AutoDeployNode Creation - Offline Mode</a></li>
@@ -150,37 +150,41 @@ It is comprised of CSC public open source projects, and various community based
 open source projects.</p>
 <div class="section" id="project-sources">
 <h2>Project Sources<a class="headerlink" href="#project-sources" title="Permalink to this headline">¶</a></h2>
-<p>CSC DCAF includes the following CSC projects which are kept under version
-control in a CSC GitHub repository:</p>
+<p><a class="reference external" href="https://github.com/csc/dcaf">CSC DCAF</a> is a collection of resources designed
+to automate various platforms and deployments within the data center. It is kept
+under source control in a GitHub repository and includes the following CSC modules:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://github.com/csc/dcaf">DCAF</a> - The DCAF project sources which contain
-all the automation modules to build the AutoDeployNode and deploy data center
-cloud infrastructures.</li>
-<li><a class="reference external" href="https://github.com/csc/Hanlon">Hanlon</a> - Hanlon is an advanced provisioning
-application which can deploy both bare-metal and virtual systems.</li>
-<li><a class="reference external" href="https://github.com/csc/slimer">Slimer</a> - The CSC Slimer project, a fork of
-<a class="reference external" href="https://github.com/abrezhnev/slimer">abrezhnev/slimer</a>, is used to deploy
-the Red Hat OpenStack Platform with high availability on base RHEL
-installations. For more information see the
-<a class="reference external" href="https://github.com/csc/slimer/wiki">csc/slimer</a> wiki documentation. When
-used with DCAF, the result is a bare metal installation of the RHEL OS and Red
-Hat OpenStack Platform with high availability.</li>
-<li><a class="reference external" href="https://github.com/csc/ansible-scaleio">Ansible-ScaleIO</a> - The CSC
-Ansible-ScaleIO project, a fork of
-<a class="reference external" href="https://github.com/sperreault/ansible-scaleio">sperreault/ansible-scaleio</a>,
-is used to install, configure and manage ScaleIO. For more information see the
-<a class="reference external" href="https://github.com/csc/ansible-scaleio/wiki">csc/ansible-scaleio</a>
-wiki documentation. When used with DCAF, this project adds EMC ScaleIO
-storage capabilities to the Red Hat OpenStack Platform.</li>
+<li><a class="reference external" href="https://github.com/csc/dcaf/autodeploynode">Autodeploynode</a> - Provisions and
+and configures the CSC DCAF Autodeploynode.</li>
+<li><a class="reference external" href="https://github.com/csc/dcaf/bare-metal-os">Bare-metal-OS</a> - An automated
+deployment of an operating system to bare-metal hardware using Hanlon, currently
+the Red Hat Enterprise Linux OS.</li>
+<li><a class="reference external" href="https://github.com/csc/dcaf/kvm-host">Kvm-host</a> - An automated deployment and
+configuration of virtual machines on RHEL KVM hosts.</li>
+<li><a class="reference external" href="https://github.com/csc/dcaf/rhel-osp">Rhel-osp</a> - An automated deployment of
+a Red Hat OpenStack Cluster with high availability.</li>
+<li><a class="reference external" href="https://github.com/csc/dcaf/vmware">Vmware</a> - An automated deployment of
+a VMware Virtual Infrastructure on bare-metal hardware.</li>
 </ul>
+<p>CSC DCAF leverages additional CSC open source projects which are also kept under
+version control in GitHub repositories:</p>
+<p><a class="reference external" href="https://github.com/csc/Hanlon">Hanlon</a> - An advanced provisioning application
+which can deploy both bare-metal and virtual systems.</p>
+<p><a class="reference external" href="https://github.com/csc/slimer">Slimer</a> - The CSC Slimer project, a fork of
+<a class="reference external" href="https://github.com/abrezhnev/slimer">abrezhnev/slimer</a>, is used to deploy
+the Red Hat OpenStack Platform with high availability on base RHEL installations.</p>
+<p><a class="reference external" href="https://github.com/csc/ansible-scaleio">Ansible-ScaleIO</a> - The CSC
+Ansible-ScaleIO project, a fork of <a class="reference external" href="https://github.com/sperreault/ansible-scaleio">sperreault/ansible-scaleio</a>, is used to install, configure and manage ScaleIO.
+When used with DCAF, this project adds EMC ScaleIO storage capabilities to the
+Red Hat OpenStack Platform.</p>
 </div>
 <div class="section" id="the-autodeploynode">
-<h2>The AutoDeployNode<a class="headerlink" href="#the-autodeploynode" title="Permalink to this headline">¶</a></h2>
-<p>The main component of CSC DCAF is the <strong>AutoDeployNode</strong>. This node contains all
+<h2>The Autodeploynode<a class="headerlink" href="#the-autodeploynode" title="Permalink to this headline">¶</a></h2>
+<p>The main component of CSC DCAF is the <strong>Autodeploynode</strong>. This node contains all
 the source files and dependencies to support operation of the framework to:</p>
 <ul class="simple">
 <li><strong>Discover</strong> new nodes that are added to the pod. This process of automated
-discovery is driven by the Hanlon instance that is running on the AutoDeployNode
+discovery is driven by the Hanlon instance that is running on the Autodeploynode
 (and a default, discover-only policy that has been added to that Hanlon instance).</li>
 <li><strong>Provision</strong> new operating systems or hypervisors to those nodes. This process
 of policy-based provisioning is driven using Ansible and Hanlon, with Ansible
@@ -192,9 +196,9 @@ to those nodes. The process of platform deployment is driven using Ansible.</li>
 and the platforms deployed to those nodes. The process of configuration at the
 infrastructure, OS/hypervisor, and platform layer is driven using Ansible.</li>
 </ul>
-<p>As detailed in the documentation, the build of the AutoDeployNode is automated
+<p>As detailed in the documentation, the build of the Autodeploynode is automated
 through scripts and Ansible playbooks.</p>
-<p>The AutoDeployNode can be deployed as a virtual machine or on physical hardware
+<p>The Autodeploynode can be deployed as a virtual machine or on physical hardware
 with Red Hat Enterprise Linux as the base operating system. Docker containers are
 used to stand up the Hanlon instance and it&#8217;s requirements, MongoDB and a TFTP
 server. In order to automatically discover and provision physical hardware, a DHCP
@@ -207,20 +211,20 @@ the automation tool to deploy and configure systems and applications.</p>
 operational modes. The two modes are online and offline and are detailed below.</p>
 <div class="section" id="online-mode">
 <h3>Online Mode<a class="headerlink" href="#online-mode" title="Permalink to this headline">¶</a></h3>
-<p>When CSC DCAF is used in online mode the AutoDeployNode is connected to an external
+<p>When CSC DCAF is used in online mode the Autodeploynode is connected to an external
 network with direct access to automation resources. The CSC Decaf projects are
 stored in source controlled repositories on Github and other resources such as
 RPMs and ISOs are downloaded directly from the Internet.</p>
 </div>
 <div class="section" id="offline-mode">
 <h3>Offline Mode<a class="headerlink" href="#offline-mode" title="Permalink to this headline">¶</a></h3>
-<p>When CSC DCAF is used in offline mode the AutoDeployNode does not have external
+<p>When CSC DCAF is used in offline mode the Autodeploynode does not have external
 network access and cannot get to the automation resources. For this reason
 additional resources are needed and steps must be taken to prepare for an offline
-AutoDeployNode installation.</p>
+Autodeploynode installation.</p>
 <p>In offline mode all automation resources will be retrieved from the Internet by
 a <code class="code docutils literal"><span class="pre">staging</span> <span class="pre">node</span></code> that has Internet access. They will be saved to a USB hard
-drive connected to this node and will later be moved to the offline AutoDeployNode
+drive connected to this node and will later be moved to the offline Autodeploynode
 and used for deployment. Once this is done all projects can be used as documented.
 Keep in mind that the method of retrieving the automation resources will have to
 be repeated in order to obtain any updates.</p>
@@ -235,7 +239,7 @@ be repeated in order to obtain any updates.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="quickstart.html" class="btn btn-neutral float-right" title="CSC DCAF Automation Quick Start Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="CSC DCAF Quick Start Guides" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="CSC DCAF Documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

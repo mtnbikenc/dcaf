@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CSC DCAF Automation Quick Start Guide &mdash; CSC DCAF 1.2 documentation</title>
+  <title>CSC DCAF Quick Start Guides &mdash; CSC DCAF 1.2 documentation</title>
   
 
   
@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
-        <link rel="next" title="Requirements &amp; Dependencies" href="requirements.html"/>
+        <link rel="next" title="Autodeploynode Quick Start Guide" href="quickstart_autodeploynode.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
   
@@ -83,26 +83,8 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">CSC DCAF Automation Quick Start Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#before-you-begin">Before You Begin</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#user-access-requirements">User Access Requirements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#network-requirements">Network Requirements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#physical-hardware">Physical Hardware</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#target-deployment-environment">Target Deployment Environment</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#create-the-autodeploynode">Create the AutoDeployNode</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#install-the-rhel-os">Install the RHEL OS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#configure-the-autodeploynode">Configure the AutoDeployNode</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#run-csc-dcaf-automation">Run CSC DCAF Automation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#create-the-inventory">Create the Inventory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#update-group-variables">Update Group Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#prepare-hosts-for-deployment">Prepare Hosts for Deployment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#run-the-deployment-playbook">Run the Deployment Playbook</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">CSC DCAF Quick Start Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart_autodeploynode.html">Autodeploynode Quick Start Guide</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
@@ -140,7 +122,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>CSC DCAF Automation Quick Start Guide</li>
+    <li>CSC DCAF Quick Start Guides</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -154,170 +136,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="csc-dcaf-automation-quick-start-guide">
-<h1>CSC DCAF Automation Quick Start Guide<a class="headerlink" href="#csc-dcaf-automation-quick-start-guide" title="Permalink to this headline">¶</a></h1>
-<p>This quick start guide describes how to use the following Automation projects:</p>
-<ul class="simple">
-<li><strong>CSC DCAF Modules</strong><ul>
-<li><strong>AutoDeployNode</strong> Provisions a CSC DCAF AutoDeployNode which is used as the
-basis for all DCAF automation. The AutoDeployNode contains all the
-automation resources and is used to perform all automation tasks.</li>
-<li><strong>Bare-Metal-OS</strong> - Provides an automated bare-metal deployment of the
-Red Hat Enterprise Linux OS using Hanlon.</li>
+  <div class="section" id="csc-dcaf-quick-start-guides">
+<h1>CSC DCAF Quick Start Guides<a class="headerlink" href="#csc-dcaf-quick-start-guides" title="Permalink to this headline">¶</a></h1>
+<p>The CSC Data Center Automation Framework (DCAF) is a collection of resources
+designed to automate various platforms and deployments within the data center.
+It is comprised of CSC public open source projects, and various community based
+open source projects.</p>
+<p>The series of guides listed below provides the steps to take to start using CSC
+DCAF relatively quickly. See the requirements section in each guide to ensure you
+have the correct setup to perform the steps as they’re provided.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart_autodeploynode.html">Autodeploynode Quick Start Guide</a></li>
 </ul>
-</li>
-<li><strong>Hanlon</strong> - Hanlon is an advanced provisioning platform which can provision
-both bare-metal and virtual systems.</li>
-<li><strong>Slimer</strong> - Slimer is a fork of abrezhnev/slimer to deploy the Red Hat
-OpenStack Platform with high availability DCAF provisioned RHEL
-installations.</li>
-<li><strong>Ansible-ScaleIO</strong> - Ansible-ScaleIO is a fork of sperreault/ansible-scaleio
-to install, configure and manage ScaleIO. ScaleIO provides additional storage
-capabilities to the Red Hat OpenStack Platform.</li>
-</ul>
-<div class="section" id="before-you-begin">
-<h2>Before You Begin<a class="headerlink" href="#before-you-begin" title="Permalink to this headline">¶</a></h2>
-<p>Ensure that the following requirements are met:</p>
-<div class="section" id="user-access-requirements">
-<h3>User Access Requirements<a class="headerlink" href="#user-access-requirements" title="Permalink to this headline">¶</a></h3>
-<p>To retrieve the automation resources from their online repositories you will
-need the following:</p>
-<ul class="simple">
-<li>A Red Hat user account with a valid subscription associated with it.</li>
-</ul>
-</div>
-<div class="section" id="network-requirements">
-<h3>Network Requirements<a class="headerlink" href="#network-requirements" title="Permalink to this headline">¶</a></h3>
-<p>There are several network requirements for the deployment.</p>
-<ul class="simple">
-<li>DNS server IP addresses need to be provided</li>
-<li>NTP server IP address needs to be provided</li>
-<li>The following VLANS are required:
-- Out-of-band management (IPMI)
-- PXE Network</li>
-<li>Out-of-band Network IP address for each node</li>
-<li>Management IP address for each node.</li>
-<li>The AutoDeployNode has internet access and DNS</li>
-</ul>
-</div>
-<div class="section" id="physical-hardware">
-<h3>Physical Hardware<a class="headerlink" href="#physical-hardware" title="Permalink to this headline">¶</a></h3>
-<p>CSC DCAF was developed and tested with the following hardware</p>
-<ul class="simple">
-<li>DELL PowerEdge 630 | PowerEdge 730</li>
-<li>DELL PERC H730 RAID Controller</li>
-</ul>
-</div>
-<div class="section" id="target-deployment-environment">
-<h3>Target Deployment Environment<a class="headerlink" href="#target-deployment-environment" title="Permalink to this headline">¶</a></h3>
-<p>The target deployment environment consists of all nodes that will participate in
-the deployment.</p>
-<ul class="simple">
-<li>The physical hardware has been installed and connected to the network</li>
-<li>A 1GB connection for OOB management on the management switch</li>
-<li>2 10GbE connections to the 10GbE network switches</li>
-<li>The upstream and management network have already been configured</li>
-<li>An on-site resource to configure the out-of-band management IP addresses.</li>
-</ul>
-</div>
-</div>
-<div class="section" id="create-the-autodeploynode">
-<h2>Create the AutoDeployNode<a class="headerlink" href="#create-the-autodeploynode" title="Permalink to this headline">¶</a></h2>
-<p>The AutoDeployNode is the central location for all CSC DCAF automation projects.
-Once an OS has been installed, DCAF will be used to provision and configure the
-rest of the DCAF Automation resources.</p>
-<div class="section" id="install-the-rhel-os">
-<h3>Install the RHEL OS<a class="headerlink" href="#install-the-rhel-os" title="Permalink to this headline">¶</a></h3>
-<p>Install the desired version of RHEL OS. This can be on a physical or virtual
-machine as long as all requirements are met. Be sure to set the hostname and
-static ip address.</p>
-<p>For information on how to install Red Hat refer to the <a class="reference external" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Installation_Guide/sect-installation-graphical-mode-x86.html">Red Hat Enterprise Linux
-Installation Guide</a>.</p>
-<p>For more information on setting a static ip address refer to the <a class="reference external" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/sec-Using_the_Command_Line_Interface.html">networking
-guide using the command line interface</a>.</p>
-</div>
-<div class="section" id="configure-the-autodeploynode">
-<h3>Configure the AutoDeployNode<a class="headerlink" href="#configure-the-autodeploynode" title="Permalink to this headline">¶</a></h3>
-<p>The remainder of the AutoDeployNode configuration is scripted and can be run
-after a few environment variables have been defined. The build script provisions
-and configures the AutoDeployNode. Review the script for more details of all the
-steps which are performed.</p>
-<p>Set the environment variables for Red Hat Subscription Manage credentials:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">RHN_USER</span><span class="o">=</span><span class="s2">&quot;username&quot;</span>
-<span class="nb">export</span> <span class="nv">RHN_PASS</span><span class="o">=</span><span class="s2">&quot;password&quot;</span>    <span class="c1"># escape dollar signs (\$)</span>
-<span class="nb">export</span> <span class="nv">RHN_POOL</span><span class="o">=</span><span class="s2">&quot;pool_id&quot;</span>     <span class="c1"># 32-char pool ID</span>
-</pre></div>
-</div>
-<p>With the environment variables defined, the build script can be launched:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/build.sh <span class="p">|</span> bash​
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The build.sh script will perform a complete configuration of the AutoDeployNode
-using all project defaults. If there are changes required for your environment,
-a manual installation should be performed. Refer to the DCAF project
-documentation for more details.</p>
-</div>
-<p>At this point the AutoDeployNode has been deployed and is ready to start using
-for automation.</p>
-</div>
-</div>
-<div class="section" id="run-csc-dcaf-automation">
-<h2>Run CSC DCAF Automation<a class="headerlink" href="#run-csc-dcaf-automation" title="Permalink to this headline">¶</a></h2>
-<p>The current CSC DCAF Automation is run from the bare-metal-os module and is
-configured to use Slimer and Ansible-ScaleIO. This will deploy Red Hat OpenStack
-with HA and ScaleIO on a base RHEL OS as follows:</p>
-<ul class="simple">
-<li>3 - Controller nodes</li>
-<li>1 - Compute node</li>
-<li>3 - Swift nodes</li>
-<li>3 - ScaleIO nodes</li>
-</ul>
-<p>Before the automation can be used the source configuration needs to be sanitized
-and configured for the deployment environment.</p>
-<div class="section" id="create-the-inventory">
-<h3>Create the Inventory<a class="headerlink" href="#create-the-inventory" title="Permalink to this headline">¶</a></h3>
-<p>There are two parts to the inventory, the <code class="code docutils literal"><span class="pre">hosts.ini`</span></code> and the <code class="code docutils literal"><span class="pre">host.yml</span></code>.
-For more information and an example <code class="code docutils literal"><span class="pre">host.yml</span></code> file see the DCAF project
-documentation.</p>
-<ul class="simple">
-<li><strong>hosts.ini</strong> - edit the <code class="code docutils literal"><span class="pre">dcaf/modules/bare-metal-os/inventory/hosts.ini</span></code> file. There are
-existing [group] sections based on the role that the host should have.</li>
-<li><strong>hostname.yml</strong> - There should be a <code class="code docutils literal"><span class="pre">dcaf/modules/bare-metal-os/inventory/host_vars/hostname.yml</span></code>
-for each host in the hosts.ini file. Use the <code class="code docutils literal"><span class="pre">dcaf/modules/bare-metal-os/inventory/host_vars/example_host.yml</span></code>
-as a template and change values as needed.</li>
-</ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Each <code class="docutils literal"><span class="pre">host.yml</span></code> file must include the host hardware <code class="docutils literal"><span class="pre">smbios-uuid</span></code>.
-This can be done using the hosts vendor management tools. Refer to the vendor
-documentation for more information.</p>
-</div>
-</div>
-<div class="section" id="update-group-variables">
-<h3>Update Group Variables<a class="headerlink" href="#update-group-variables" title="Permalink to this headline">¶</a></h3>
-<p>Review the <code class="code docutils literal"><span class="pre">dcaf/modules/bare-metal-os/inventory/group_vars/all.yml</span></code> file
-and modify as needed. It defines variables used deployment-wide.</p>
-</div>
-<div class="section" id="prepare-hosts-for-deployment">
-<h3>Prepare Hosts for Deployment<a class="headerlink" href="#prepare-hosts-for-deployment" title="Permalink to this headline">¶</a></h3>
-<p>Run the <code class="code docutils literal"><span class="pre">dcaf/modules/bare-metal-os/site_reset.yml</span></code> playbook to power
-cycle the hosts and have them discovered by Hanlon:
-​</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook site_reset.yml
-</pre></div>
-</div>
-</div>
-<div class="section" id="run-the-deployment-playbook">
-<h3>Run the Deployment Playbook<a class="headerlink" href="#run-the-deployment-playbook" title="Permalink to this headline">¶</a></h3>
-<p>Run the <code class="code docutils literal"><span class="pre">dcaf/modules/bare-metal-os/site.yml</span></code> playbook. This will deploy
-the RHEL OS, run Slimer to deploy Red Hat OpenStack with HA and run
-Ansible-ScaleIO to deploy EMC ScaleIO.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook site.yml
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 
@@ -328,7 +159,7 @@ Ansible-ScaleIO to deploy EMC ScaleIO.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements &amp; Dependencies" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quickstart_autodeploynode.html" class="btn btn-neutral float-right" title="Autodeploynode Quick Start Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

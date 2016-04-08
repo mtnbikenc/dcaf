@@ -9,41 +9,49 @@ open source projects.
 Project Sources
 ---------------
 
-CSC DCAF includes the following CSC projects which are kept under version
-control in a CSC GitHub repository:
+`CSC DCAF <https://github.com/csc/dcaf>`_ is a collection of resources designed
+to automate various platforms and deployments within the data center. It is kept
+under source control in a GitHub repository and includes the following CSC modules:
 
-- `DCAF <https://github.com/csc/dcaf>`_ - The DCAF project sources which contain
-  all the automation modules to build the AutoDeployNode and deploy data center
-  cloud infrastructures.
+- `Autodeploynode <https://github.com/csc/dcaf/autodeploynode>`_ - Provisions and
+  and configures the CSC DCAF Autodeploynode.
 
-- `Hanlon <https://github.com/csc/Hanlon>`_ - Hanlon is an advanced provisioning
-  application which can deploy both bare-metal and virtual systems.
+- `Bare-metal-OS <https://github.com/csc/dcaf/bare-metal-os>`_ - An automated
+  deployment of an operating system to bare-metal hardware using Hanlon, currently
+  the Red Hat Enterprise Linux OS.
 
-- `Slimer <https://github.com/csc/slimer>`_ - The CSC Slimer project, a fork of
-  `abrezhnev/slimer <https://github.com/abrezhnev/slimer>`_, is used to deploy
-  the Red Hat OpenStack Platform with high availability on base RHEL
-  installations. For more information see the
-  `csc/slimer <https://github.com/csc/slimer/wiki>`_ wiki documentation. When
-  used with DCAF, the result is a bare metal installation of the RHEL OS and Red
-  Hat OpenStack Platform with high availability.
+- `Kvm-host <https://github.com/csc/dcaf/kvm-host>`_ - An automated deployment and
+  configuration of virtual machines on RHEL KVM hosts.
 
-- `Ansible-ScaleIO <https://github.com/csc/ansible-scaleio>`_ - The CSC
-  Ansible-ScaleIO project, a fork of
-  `sperreault/ansible-scaleio <https://github.com/sperreault/ansible-scaleio>`_,
-  is used to install, configure and manage ScaleIO. For more information see the
-  `csc/ansible-scaleio <https://github.com/csc/ansible-scaleio/wiki>`_
-  wiki documentation. When used with DCAF, this project adds EMC ScaleIO
-  storage capabilities to the Red Hat OpenStack Platform.
+- `Rhel-osp <https://github.com/csc/dcaf/rhel-osp>`_ - An automated deployment of
+  a Red Hat OpenStack Cluster with high availability.
 
+- `Vmware <https://github.com/csc/dcaf/vmware>`_ - An automated deployment of
+  a VMware Virtual Infrastructure on bare-metal hardware.
 
-The AutoDeployNode
+CSC DCAF leverages additional CSC open source projects which are also kept under
+version control in GitHub repositories:
+
+`Hanlon <https://github.com/csc/Hanlon>`_ - An advanced provisioning application
+which can deploy both bare-metal and virtual systems.
+
+`Slimer <https://github.com/csc/slimer>`_ - The CSC Slimer project, a fork of
+`abrezhnev/slimer <https://github.com/abrezhnev/slimer>`_, is used to deploy
+the Red Hat OpenStack Platform with high availability on base RHEL installations.
+
+`Ansible-ScaleIO <https://github.com/csc/ansible-scaleio>`_ - The CSC
+Ansible-ScaleIO project, a fork of `sperreault/ansible-scaleio <https://github.com/sperreault/ansible-scaleio>`_, is used to install, configure and manage ScaleIO.
+When used with DCAF, this project adds EMC ScaleIO storage capabilities to the
+Red Hat OpenStack Platform.
+
+The Autodeploynode
 ------------------
 
-The main component of CSC DCAF is the **AutoDeployNode**. This node contains all
+The main component of CSC DCAF is the **Autodeploynode**. This node contains all
 the source files and dependencies to support operation of the framework to:
 
 * **Discover** new nodes that are added to the pod. This process of automated
-  discovery is driven by the Hanlon instance that is running on the AutoDeployNode
+  discovery is driven by the Hanlon instance that is running on the Autodeploynode
   (and a default, discover-only policy that has been added to that Hanlon instance).
 * **Provision** new operating systems or hypervisors to those nodes. This process
   of policy-based provisioning is driven using Ansible and Hanlon, with Ansible
@@ -55,10 +63,10 @@ the source files and dependencies to support operation of the framework to:
   and the platforms deployed to those nodes. The process of configuration at the
   infrastructure, OS/hypervisor, and platform layer is driven using Ansible.
 
-As detailed in the documentation, the build of the AutoDeployNode is automated
+As detailed in the documentation, the build of the Autodeploynode is automated
 through scripts and Ansible playbooks.
 
-The AutoDeployNode can be deployed as a virtual machine or on physical hardware
+The Autodeploynode can be deployed as a virtual machine or on physical hardware
 with Red Hat Enterprise Linux as the base operating system. Docker containers are
 used to stand up the Hanlon instance and it's requirements, MongoDB and a TFTP
 server. In order to automatically discover and provision physical hardware, a DHCP
@@ -74,7 +82,7 @@ operational modes. The two modes are online and offline and are detailed below.
 Online Mode
 ~~~~~~~~~~~
 
-When CSC DCAF is used in online mode the AutoDeployNode is connected to an external
+When CSC DCAF is used in online mode the Autodeploynode is connected to an external
 network with direct access to automation resources. The CSC Decaf projects are
 stored in source controlled repositories on Github and other resources such as
 RPMs and ISOs are downloaded directly from the Internet.
@@ -82,14 +90,14 @@ RPMs and ISOs are downloaded directly from the Internet.
 Offline Mode
 ~~~~~~~~~~~~
 
-When CSC DCAF is used in offline mode the AutoDeployNode does not have external
+When CSC DCAF is used in offline mode the Autodeploynode does not have external
 network access and cannot get to the automation resources. For this reason
 additional resources are needed and steps must be taken to prepare for an offline
-AutoDeployNode installation.
+Autodeploynode installation.
 
 In offline mode all automation resources will be retrieved from the Internet by
 a :code:`staging node` that has Internet access. They will be saved to a USB hard
-drive connected to this node and will later be moved to the offline AutoDeployNode
+drive connected to this node and will later be moved to the offline Autodeploynode
 and used for deployment. Once this is done all projects can be used as documented.
 Keep in mind that the method of retrieving the automation resources will have to
 be repeated in order to obtain any updates.
