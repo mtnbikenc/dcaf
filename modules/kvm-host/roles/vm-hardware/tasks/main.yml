@@ -1,0 +1,30 @@
+---
+- name: Update vCPU count
+  delegate_to: "{{ kvm_host }}"
+  lineinfile:
+    dest: "/etc/libvirt/qemu/{{ hostname }}.xml"
+    regexp: "vcpu"
+    line: "<vcpu>{{ vm_hardware['cpus'] }}</vcpu>"
+    state: present
+  when:  vm_hardware['cpus'] is defined
+
+- name: Update RAM amount for each node
+  delegate_to: "{{ kvm_host }}"
+  lineinfile:
+    dest: "/etc/libvirt/qemu/{{ hostname }}.xml"
+    regexp: "memory"
+    line: "<memory unit='MB'>{{ vm_hardware['ram'] }}</memory>"
+    state: present
+  when:  vm_hardware['ram'] is defined
+
+- name: Add any additional disks to nodes
+  delegate_to: "{{ kvm_host }}"
+  shell: "virsh attach-disk {{ hostname }} /dev/{{ vm_hardware['host_passthrough_disk'] }} vdb --config --type disk --persistent"
+  when: vm_hardware['host_passthrough_disk'] is defined
+
+- name: Power on clones
+  delegate_to: "{{ kvm_host }}"
+  virt:
+    name: "{{ hostname }}"
+    command: start
+    uri: qemu:///system
