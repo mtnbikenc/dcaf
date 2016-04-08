@@ -34,6 +34,15 @@
   gather_facts: false
   roles:
     - dhcpd
+  
+- name: restart dhcpd
+  hosts: auto_deploy_node
+  gather_facts: false
+  tasks:
+    - name: Restart dhcpd
+      service:
+        name: dhcpd
+        state: restarted
 
 - name: Setup base VM 
   hosts: kvmhosts[0]

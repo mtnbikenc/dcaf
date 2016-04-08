@@ -1,9 +1,8 @@
-DEVICE={{ item.value.name }}
-IPADDR={{ item.value.ip_addr }}
-MACADDR={{ item.value.mac_addr }}
-GATEWAY={{ item.value.gateway }}
+DEVICE={{vnics[item]['name']}}
+IPADDR={{vnics[item]['ip_addr']}}
+HWADDR={{ vnics[item]['mac_addr'] }}
+GATEWAY={{ vnics[item]['gateway'] }}
 NETMASK=255.255.255.0
-DNS1=192.168.70.3
-DNS2=8.8.8.8
+DNS1={{dns1}}
 ONBOOT=yes
 DEFROUTE=no

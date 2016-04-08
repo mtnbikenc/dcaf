@@ -50,7 +50,7 @@
       with_dict: '{{ vlan_interface }}'
 
     - name: reset bonds
-      command: mv /etc/sysconfig/network-scripts/orig-ifcfg-bond.{{ item.value['vlan'] }} /etc/sysconfig/network-scripts/ifcfg-bond0.{{ item.value['vlan'] }}
+      command: mv /etc/sysconfig/network-scripts/orig-ifcfg-bond0.{{ item.value['vlan'] }} /etc/sysconfig/network-scripts/ifcfg-bond0.{{ item.value['vlan'] }}
       with_dict: '{{ vlan_interface }}'
 
      
