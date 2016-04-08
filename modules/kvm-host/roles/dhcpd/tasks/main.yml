@@ -8,8 +8,8 @@
     #insertafter: EOF
     line: 'host {{ hostname }} { hardware ethernet {{ mgmt_mac }}; fixed-address {{ mgmt_ip }}; }'
 
-- name: Restart dhcpd 
-  delegate_to: 127.0.0.1
-  service:
-    name: dhcpd
-    state: restarted
+#- name: Restart dhcpd 
+#  delegate_to: 127.0.0.1
+#  service:
+#    name: dhcpd
+#    state: restarted

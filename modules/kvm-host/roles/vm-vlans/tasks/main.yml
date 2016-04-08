@@ -1,14 +1,14 @@
 ---
 - name: Add VLAN interfaces to VMs
   delegate_to: "{{kvm_host}}"
-  command: virsh attach-interface {{ hostname }} network {{ item.value.network }} --model virtio --mac {{ item.value.mac_addr }} --live --persistent
-  with_dict: vnics
+  command: virsh attach-interface {{ hostname }} network {{ vnics[item]['network'] }} --model virtio --mac {{ vnics[item]['mac_addr'] }} --live --persistent
+  with_items: vnics.keys()|sort
 
 - name: Copy ifcfg template
   template:
     src: ifcfg-lvnet.j2
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.value.name }}" 
-  with_dict: vnics 
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{vnics[item]['name']}}" 
+  with_items: vnics.keys()|sort 
 
 - name: Set eth1 to default route
   lineinfile:
