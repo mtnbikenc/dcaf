@@ -54,7 +54,7 @@
   hosts: auto_deploy_node
   gather_facts: false
   tasks:
-   - name: wait for clones to come up
+   - name: wait for basevm to come up
      wait_for:
        host: '{{ basevm_static_ip }}'
        state: started
@@ -137,7 +137,7 @@
   hosts: auto_deploy_node
   gather_facts: false
   tasks:
-   - name: wait for clones to come up
+   - name: wait for clones to come up after creation
      wait_for: 
        host: "{{ hostvars[item]['ansible_ssh_host'] }}"
        state: started 
@@ -198,7 +198,7 @@
   hosts: auto_deploy_node
   gather_facts: false
   tasks:
-   - name: wait for clones to come up
+   - name: wait for clones to come up after hardware configuration 
      wait_for:
        host: "{{ hostvars[item]['ansible_ssh_host'] }}"
        state: started

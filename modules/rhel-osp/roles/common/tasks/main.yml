@@ -25,7 +25,7 @@
   lineinfile:
     dest: /etc/hosts 
     regexp: '.*{{ item }}$'
-    line: "{{ hostvars[item]['ansible_'+control_if.device]['ipv4']['address'] }} {{item}}"
+    line: "{{ hostvars[item]['ansible_'+hostvars[item]['control_if'].device]['ipv4']['address'] }} {{item}}"
     state: present
   with_items: "{{groups[group]}}"
 

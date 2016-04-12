@@ -241,16 +241,18 @@ backend swift
   server {{ hostvars[node]['ansible_hostname']}} {{ hostvars[node]['control_if']['ipaddr']  }}:8080 check inter 1s
 {% endfor %}
 
-#frontend vip-scaleio-int
-#    bind {{ scaleio_vip }}:8443
-#    mode tcp
-#    default_backend scaleio
-#
-#backend scaleio
-#   mode tcp
-#  balance roundrobin
-#  stick-table type ip size 200k expire 30m
-#  stick on src
-#{% for node in groups['controller'] %}
-#    server {{ node }} {{ hostvars[node]['control_if']['ipaddr'] }}:8443 check inter 1s
-#{% endfor %}
+{% if scaleio_vip is defined%}
+frontend vip-scaleio-int
+    bind {{ scaleio_vip }}:8443
+    mode tcp
+    default_backend scaleio
+
+backend scaleio
+   mode tcp
+  balance roundrobin
+  stick-table type ip size 200k expire 30m
+  stick on src
+{% for node in groups['scaleio-mgmt'] %}
+    server {{ node }} {{ hostvars[node]['control_if']['ipaddr'] }}:8443 check inter 1s
+{% endfor %}
+{% endif %}
