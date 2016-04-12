@@ -215,19 +215,6 @@
       when: offline and not (item.stat.exists)
       tags: docker
 
-    - name: Check if ScaleIO files exist in /opt/autodeploy/resources/scaleio
-      stat:
-        path: "{{ scaleio_path }}/{{ scaleio_source_zip }}"
-      register: scaleio_zip
-      tags: scaleio
-
-    - name: Download ScaleIO files for ansible-scaleio to /opt/autodeploy/resources/scaleio
-      get_url:
-        url: "{{ scaleio_source_url }}"
-        dest: "{{ scaleio_path }}"
-      when: not (scaleio_zip.stat.exists)
-      tags: scaleio
-
     - name: Copy the downloaded projects to the usb drive when offline
       copy:
         src: "{{ projects_base_path }}/{{ item }}"

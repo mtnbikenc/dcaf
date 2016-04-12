@@ -3,7 +3,5 @@
 # has been deployed. It includes project based .yml files as needed based on a `use_project`
 # variable found in the /group_vars/all.yml.
 
-- include: scaleio.yml
-  when: use_scaleio
 - include: bare_metal_os.yml
   when: use_bare_metal_os
