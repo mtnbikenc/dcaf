@@ -1,4 +1,5 @@
 ---
+# This playbook will prepare the hosts with Hanlon for deployment.
 
 - name: Rediscover nodes
   hosts: deploy

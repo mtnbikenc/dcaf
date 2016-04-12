@@ -1,13 +1,26 @@
 # CSC DCAF Bare Metal OS Deployment Automation
 
-This project deploys RHEL 7 to bare metal nodes using Hanlon and Ansible.
+The Bare-Metal_OS module is an automated deployment of an operating system on
+bare-metal hardware using Hanlon, currently the Red Hat Enterprise Linux OS. Though
+it is an automated process there are a few things tha need to be in place before
+you begin.
 
-* Create an inventory CSV file using inventory/example_inventory.csv as an
-example
-* Update inventory/group_vars/all.yml as needed
-* Run ansible-playbook site_inventory.yml to create the Ansible Inventory
-* Run ansible-playbook site_inventory.yml a second time to make sure the SMBIOS
-UUIDs are updated in the host_vars files
-* Run ansible-playbook site_reset.yml to ensure the hosts are discovered and
-ready for deployment
-* Run ansible-playbook site_deploy.yml to deploy RHEL
+## Before You Begin
+
+* Create the /opt/autodeploy/projects/inventory/hosts.ini file to include each
+  host being deployed to.
+* Create the /opt/autodeploy/projects/inventory/host_vars/host_name.yml file for 
+  each host being deployed to.
+* Create the /opt/autodeploy/projects/inventory/group_vars/bare-metal-os.yml file
+  with the appropriate values for the deployment.
+  
+Refer to the CSC DCAF Documentation for more details and what is included in these
+files.
+
+## Run the Bare-Metal_OS Automation
+
+Now that the inventory and variables have been created the automation can be used.
+
+* Run the site_reset.yml playbook to ensure the hosts are discovered and ready for
+  deployment.
+* Run the site_deploy.yml playbook to deploy the RHEL OS.
