@@ -124,7 +124,7 @@
     regexp: "(^#|^){{ item.regexp }}"
     line: "{{ item.line }}"
   with_items:
-    - { regexp: 'inventory', line: 'inventory = "{{ projects_base_path }}/inventory/hosts.ini"' }
+    - { regexp: 'inventory', line: 'inventory = {{ projects_base_path }}/inventory/hosts.ini' }
     - { regexp: 'forks', line: 'forks = 20' }
     - { regexp: 'host_key_checking', line: 'host_key_checking = False' }
     - { regexp: 'log_path', line: 'log_path = ./ansible.log' }
