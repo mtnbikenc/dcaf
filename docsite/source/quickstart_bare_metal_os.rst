@@ -68,18 +68,17 @@ and examples of this file refer to the CSC DCAF project documentation.
 .. note::
 
   The :code:`hosts.ini` will contain :code:`[group]` headings that correspond to
-  a module or the role the host will have within the module. Each :code:[group] name
+  a module or the role the host will have within the module. Each :code:`[group]` name
   should match the corresponding ``inventory/group_vars/groupname.yml`` group variable
   file. If editing this file append to it and ensure there is no duplication. All
   hosts listed should be under a :code:`group` heading.
 
-.. code-block::
+.. code-block:: yaml
 
-  Example:
-  [bare_metal_os] ``(name of the module group variable file)``
-  hostname1
-  hostname2
-  ...
+    [bare_metal_os] ``(name of the module group variable file)``
+    hostname1
+    hostname2
+    ...
 
 Modify Host & Module Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,9 +88,9 @@ This module uses multiple variables that are managed in two separate files. The
 ``inventory/group_vars/bare_metal_os.yml`` file contains module specific variables.
 
 - **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
-for each host in the hosts.ini file. Create or edit these files by copying the contents
-of the ``opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini``
-and modifying as needed.
+  for each host in the hosts.ini file. Create or edit these files by copying the contents
+  of the ``opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini``
+  and modifying as needed.
 
 .. note::
 
@@ -100,7 +99,7 @@ and modifying as needed.
   documentation for more information.
 
 - **bare_metal_os.yml** - Copy the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/group_vars/bare_metal_os.yml`` file to the ``/opt/autodeploy/projects/inventory/group_vars/``
-folder and modify as needed per the environment.
+  folder and modify as needed per the environment.
 
 Prepare Hosts for Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

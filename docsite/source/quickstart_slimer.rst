@@ -6,8 +6,8 @@ Hat OpenStack Platform with high availability on base RHEL installations. It use
 the following resources:
 
 - `Slimer <https://github.com/csc/slimer>`_ - The CSC Slimer project, a fork of
-`abrezhnev/slimer <https://github.com/abrezhnev/slimer>`_, is used to deploy
-the Red Hat OpenStack Platform with high availability on base RHEL installations.
+  `abrezhnev/slimer <https://github.com/abrezhnev/slimer>`_, is used to deploy
+  the Red Hat OpenStack Platform with high availability on base RHEL installations.
 
 The Slimer project is intended to be utilized with after the CSC DCAF Bare-Metal-OS
 module.
@@ -79,16 +79,15 @@ Edit the inventory to reflect your environment.
   file. If editing this file append to it and ensure there is no duplication. All
   hosts listed should be under a :code:`group` heading.
 
-.. code-block::
+.. code-block:: yaml
 
-  Example:
-  [controller]
-  controller1
-  ...
+    [controller]
+    controller1
+    ...
 
-  [compute]
-  compute1
-  ...
+    [compute]
+    compute1
+    ...
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,9 +97,9 @@ This project uses multiple variables that are managed in two separate files. The
 file contains project specific variables.
 
 - **host_name.yml** - There should be a ``/opt/autodeploy/projects/slimer/inventory/host_vars/host_name.yml``
-for each host in the hosts.ini file. Create or edit these files by copying the contents
-of the ``/opt/autodeploy/projects/slimer/inventory/host_vars/example_host.yml``
-and modifying as needed.
+  for each host in the hosts.ini file. Create or edit these files by copying the contents
+  of the ``/opt/autodeploy/projects/slimer/inventory/host_vars/example_host.yml``
+  and modifying as needed.
 
 - **slimer.yml** - Copy the ``/opt/autodeploy/projects/slimer/inventory/group_vars/slimer.yml``
   file to the ``/opt/autodeploy/projects/inventory/group_vars/`` folder and modify
