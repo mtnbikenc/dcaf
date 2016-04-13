@@ -219,10 +219,16 @@ contain the DNS resolvable names of the hosts being deployed to.</li>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The <code class="code docutils literal"><span class="pre">hosts.ini</span></code> will contain <code class="code docutils literal"><span class="pre">[group]</span></code> headings that correspond to
-a module or the role the host will have within the module. Each :code:[group] name
+a module or the role the host will have within the module. Each <code class="code docutils literal"><span class="pre">[group]</span></code> name
 should match the corresponding <code class="docutils literal"><span class="pre">inventory/group_vars/groupname.yml</span></code> group variable
 file. If editing this file append to it and ensure there is no duplication. All
 hosts listed should be under a <code class="code docutils literal"><span class="pre">group</span></code> heading.</p>
+</div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span>[bare_metal_os] ``(name of the module group variable file)``
+hostname1
+hostname2
+...
+</pre></div>
 </div>
 </div>
 <div class="section" id="modify-host-module-variables">
@@ -231,11 +237,11 @@ hosts listed should be under a <code class="code docutils literal"><span class="
 <code class="docutils literal"><span class="pre">inventory/host_vars/host_name.yml</span></code> file contains host specific variables and the
 <code class="docutils literal"><span class="pre">inventory/group_vars/bare_metal_os.yml</span></code> file contains module specific variables.</p>
 <ul class="simple">
-<li><strong>host_name.yml</strong> - There should be a <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/host_vars/host_name.yml</span></code></li>
-</ul>
-<p>for each host in the hosts.ini file. Create or edit these files by copying the contents
+<li><strong>host_name.yml</strong> - There should be a <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/host_vars/host_name.yml</span></code>
+for each host in the hosts.ini file. Create or edit these files by copying the contents
 of the <code class="docutils literal"><span class="pre">opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini</span></code>
-and modifying as needed.</p>
+and modifying as needed.</li>
+</ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Each <code class="code docutils literal"><span class="pre">host.yml</span></code> file must include the host hardware <code class="code docutils literal"><span class="pre">smbios-uuid</span></code>.
@@ -243,9 +249,9 @@ This can be found using the hosts vendor management tools. Refer to the vendor
 documentation for more information.</p>
 </div>
 <ul class="simple">
-<li><strong>bare_metal_os.yml</strong> - Copy the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/group_vars/bare_metal_os.yml</span></code> file to the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/group_vars/</span></code></li>
+<li><strong>bare_metal_os.yml</strong> - Copy the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/group_vars/bare_metal_os.yml</span></code> file to the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/group_vars/</span></code>
+folder and modify as needed per the environment.</li>
 </ul>
-<p>folder and modify as needed per the environment.</p>
 </div>
 <div class="section" id="prepare-hosts-for-deployment">
 <h3>Prepare Hosts for Deployment<a class="headerlink" href="#prepare-hosts-for-deployment" title="Permalink to this headline">¶</a></h3>

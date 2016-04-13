@@ -156,10 +156,10 @@
 Hat OpenStack Platform with high availability on base RHEL installations. It uses
 the following resources:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://github.com/csc/slimer">Slimer</a> - The CSC Slimer project, a fork of</li>
+<li><a class="reference external" href="https://github.com/csc/slimer">Slimer</a> - The CSC Slimer project, a fork of
+<a class="reference external" href="https://github.com/abrezhnev/slimer">abrezhnev/slimer</a>, is used to deploy
+the Red Hat OpenStack Platform with high availability on base RHEL installations.</li>
 </ul>
-<p><a class="reference external" href="https://github.com/abrezhnev/slimer">abrezhnev/slimer</a>, is used to deploy
-the Red Hat OpenStack Platform with high availability on base RHEL installations.</p>
 <p>The Slimer project is intended to be utilized with after the CSC DCAF Bare-Metal-OS
 module.</p>
 <div class="section" id="before-you-begin">
@@ -223,6 +223,15 @@ should match the corresponding <code class="docutils literal"><span class="pre">
 file. If editing this file append to it and ensure there is no duplication. All
 hosts listed should be under a <code class="code docutils literal"><span class="pre">group</span></code> heading.</p>
 </div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="nv">controller</span><span class="p p-Indicator">]</span>
+<span class="l l-Scalar l-Scalar-Plain">controller1</span>
+<span class="nn">...</span>
+
+<span class="p p-Indicator">[</span><span class="nv">compute</span><span class="p p-Indicator">]</span>
+<span class="l l-Scalar l-Scalar-Plain">compute1</span>
+<span class="nn">...</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="modify-host-project-variables">
 <h3>Modify Host &amp; Project Variables<a class="headerlink" href="#modify-host-project-variables" title="Permalink to this headline">¶</a></h3>
@@ -230,12 +239,10 @@ hosts listed should be under a <code class="code docutils literal"><span class="
 <code class="docutils literal"><span class="pre">host_vars/host_name.yml</span></code> file contains host specific variables and the <code class="docutils literal"><span class="pre">group_vars/all.yml</span></code>
 file contains project specific variables.</p>
 <ul class="simple">
-<li><strong>host_name.yml</strong> - There should be a <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/host_vars/host_name.yml</span></code></li>
-</ul>
-<p>for each host in the hosts.ini file. Create or edit these files by copying the contents
+<li><strong>host_name.yml</strong> - There should be a <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/host_vars/host_name.yml</span></code>
+for each host in the hosts.ini file. Create or edit these files by copying the contents
 of the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/host_vars/example_host.yml</span></code>
-and modifying as needed.</p>
-<ul class="simple">
+and modifying as needed.</li>
 <li><strong>slimer.yml</strong> - Copy the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/group_vars/slimer.yml</span></code>
 file to the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/group_vars/</span></code> folder and modify
 as needed per the environment.</li>
