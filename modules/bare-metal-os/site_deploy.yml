@@ -1,4 +1,5 @@
 ---
+# This playbook will prepare Hanlon and the nodes for a bare-metal deployment.
 
 - name: Configure Hanlon with RHEL image, model and policies
   hosts: auto-deploy-node
