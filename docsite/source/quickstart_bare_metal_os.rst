@@ -1,0 +1,127 @@
+Bare-metal-OS Quick Start Guide
+===============================
+
+This Quick Start Guide describes how to use CSC DCAF Automation to provision an
+OS on bare-metal hardware, currently RHEL OS. It uses the following resources:
+
+- `dcaf/bare-metal-os <https://github.com/csc/dcaf/bare-metal-os>`_ - An
+  automated deployment of an operating system to bare-metal hardware using Hanlon,
+  currently the Red Hat Enterprise Linux OS.
+
+- `Hanlon <https://github.com/csc/Hanlon>`_ - As an advanced provisioning
+  platform which can provision both bare-metal and virtual systems.
+
+Before You Begin
+----------------
+
+Ensure that the following requirements are met:
+
+Physical Hardware
+~~~~~~~~~~~~~~~~~
+
+DCAF was developed and tested with the following hardware:
+
+- DELL PowerEdge 630 | PowerEdge 730
+- DELL PERC H730 RAID Controller
+
+The physical hardware being deployed to meet the following:
+
+- The physical hardware has been installed and connected to the network
+- A 1GB connection for OOB management on the management switch
+- 2 10GbE connections to the 10GbE network switches
+- The upstream and management network are pre-configured
+- The out-of-band management IP addresses are pre-configured
+- IPMI is enabled on each host
+
+Network Requirements
+~~~~~~~~~~~~~~~~~~~~
+
+There are several network requirements for the deployment.
+
+- DNS server IP addresses need to be provided
+- NTP server IP address needs to be provided
+- The following VLANS are required:
+
+  - Out-of-band management (IPMI)
+  - PXE Network
+
+- Out-of-band Network IP address for each node
+- Management IP address for each node
+
+Run Bare-metal-OS Automation
+----------------------------
+
+The Bare-metal-OS module will deploy an operating system on bare-metal hardware.
+This module requires a base inventory.
+
+Create the Inventory
+~~~~~~~~~~~~~~~~~~~~
+
+The inventory is managed by the :code:`hosts.ini` file. The format and contents of
+this file will vary depending on the what automation is being used. For more information
+and examples of this file refer to the CSC DCAF project documentation.
+
+- **hosts.ini** - Create or edit the ``/opt/autodeploy/projects/inventory/hosts.ini``
+  file by copying the contents of the ``opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini`` and modifying as needed. This file should
+  contain the DNS resolvable names of the hosts being deployed to.
+
+.. note::
+
+  The :code:`hosts.ini` will contain :code:`[group]` headings that correspond to
+  a module or the role the host will have within the module. Each :code:[group] name
+  should match the corresponding ``inventory/group_vars/groupname.yml`` group variable
+  file. If editing this file append to it and ensure there is no duplication. All
+  hosts listed should be under a :code:`group` heading.
+
+.. code-block::
+
+  Example:
+  [bare_metal_os] ``(name of the module group variable file)``
+  hostname1
+  hostname2
+  ...
+
+Modify Host & Module Variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module uses multiple variables that are managed in two separate files. The
+``inventory/host_vars/host_name.yml`` file contains host specific variables and the
+``inventory/group_vars/bare_metal_os.yml`` file contains module specific variables.
+
+- **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
+for each host in the hosts.ini file. Create or edit these files by copying the contents
+of the ``opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini``
+and modifying as needed.
+
+.. note::
+
+  Each :code:`host.yml` file must include the host hardware :code:`smbios-uuid`.
+  This can be found using the hosts vendor management tools. Refer to the vendor
+  documentation for more information.
+
+- **bare_metal_os.yml** - Copy the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/group_vars/bare_metal_os.yml`` file to the ``/opt/autodeploy/projects/inventory/group_vars/``
+folder and modify as needed per the environment.
+
+Prepare Hosts for Deployment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Run the ``bare-metal-os/site_reset.yml`` playbook to power cycle the hosts and have
+them discovered by Hanlon: ​
+
+.. code-block:: bash
+
+    cd /opt/autodeploy/projects/dcaf/modules/bare-metal-os
+    ansible-playbook site_reset.yml
+
+Deploy the OS
+~~~~~~~~~~~~~
+
+Next run the ``bare-metal-os/site_deploy.yml`` playbook to deploy the RHEL OS to
+the hosts in inventory:
+
+.. code-block:: bash
+
+    ansible-playbook site_deploy.yml
+
+At this point the RHEL OS has been installed and configured on all hosts listed
+in the ``/opt/autodeploy/projects/inventory/hosts.ini``.
