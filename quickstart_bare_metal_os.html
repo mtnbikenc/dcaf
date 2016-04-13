@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Bare-metal-OS Quick Start Guide &mdash; CSC DCAF 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
+        <link rel="up" title="CSC DCAF Quick Start Guides" href="quickstart.html"/>
+        <link rel="next" title="Slimer Quick Start Guide" href="quickstart_slimer.html"/>
+        <link rel="prev" title="Autodeploynode Quick Start Guide" href="quickstart_autodeploynode.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CSC DCAF
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="quickstart.html">CSC DCAF Quick Start Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quickstart_autodeploynode.html">Autodeploynode Quick Start Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Bare-metal-OS Quick Start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#before-you-begin">Before You Begin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#physical-hardware">Physical Hardware</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#network-requirements">Network Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#run-bare-metal-os-automation">Run Bare-metal-OS Automation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#create-the-inventory">Create the Inventory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#modify-host-module-variables">Modify Host &amp; Module Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prepare-hosts-for-deployment">Prepare Hosts for Deployment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deploy-the-os">Deploy the OS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart_slimer.html">Slimer Quick Start Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline_autodeploy_node.html">AutoDeployNode Creation - Offline Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bare_metal_os.html">Bare Metal OS Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues and Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">CSC DCAF</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="quickstart.html">CSC DCAF Quick Start Guides</a> &raquo;</li>
+      
+    <li>Bare-metal-OS Quick Start Guide</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/quickstart_bare_metal_os.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="bare-metal-os-quick-start-guide">
+<h1>Bare-metal-OS Quick Start Guide<a class="headerlink" href="#bare-metal-os-quick-start-guide" title="Permalink to this headline">¶</a></h1>
+<p>This Quick Start Guide describes how to use CSC DCAF Automation to provision an
+OS on bare-metal hardware, currently RHEL OS. It uses the following resources:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/csc/dcaf/bare-metal-os">dcaf/bare-metal-os</a> - An
+automated deployment of an operating system to bare-metal hardware using Hanlon,
+currently the Red Hat Enterprise Linux OS.</li>
+<li><a class="reference external" href="https://github.com/csc/Hanlon">Hanlon</a> - As an advanced provisioning
+platform which can provision both bare-metal and virtual systems.</li>
+</ul>
+<div class="section" id="before-you-begin">
+<h2>Before You Begin<a class="headerlink" href="#before-you-begin" title="Permalink to this headline">¶</a></h2>
+<p>Ensure that the following requirements are met:</p>
+<div class="section" id="physical-hardware">
+<h3>Physical Hardware<a class="headerlink" href="#physical-hardware" title="Permalink to this headline">¶</a></h3>
+<p>DCAF was developed and tested with the following hardware:</p>
+<ul class="simple">
+<li>DELL PowerEdge 630 | PowerEdge 730</li>
+<li>DELL PERC H730 RAID Controller</li>
+</ul>
+<p>The physical hardware being deployed to meet the following:</p>
+<ul class="simple">
+<li>The physical hardware has been installed and connected to the network</li>
+<li>A 1GB connection for OOB management on the management switch</li>
+<li>2 10GbE connections to the 10GbE network switches</li>
+<li>The upstream and management network are pre-configured</li>
+<li>The out-of-band management IP addresses are pre-configured</li>
+<li>IPMI is enabled on each host</li>
+</ul>
+</div>
+<div class="section" id="network-requirements">
+<h3>Network Requirements<a class="headerlink" href="#network-requirements" title="Permalink to this headline">¶</a></h3>
+<p>There are several network requirements for the deployment.</p>
+<ul class="simple">
+<li>DNS server IP addresses need to be provided</li>
+<li>NTP server IP address needs to be provided</li>
+<li>The following VLANS are required:<ul>
+<li>Out-of-band management (IPMI)</li>
+<li>PXE Network</li>
+</ul>
+</li>
+<li>Out-of-band Network IP address for each node</li>
+<li>Management IP address for each node</li>
+</ul>
+</div>
+</div>
+<div class="section" id="run-bare-metal-os-automation">
+<h2>Run Bare-metal-OS Automation<a class="headerlink" href="#run-bare-metal-os-automation" title="Permalink to this headline">¶</a></h2>
+<p>The Bare-metal-OS module will deploy an operating system on bare-metal hardware.
+This module requires a base inventory.</p>
+<div class="section" id="create-the-inventory">
+<h3>Create the Inventory<a class="headerlink" href="#create-the-inventory" title="Permalink to this headline">¶</a></h3>
+<p>The inventory is managed by the <code class="code docutils literal"><span class="pre">hosts.ini</span></code> file. The format and contents of
+this file will vary depending on the what automation is being used. For more information
+and examples of this file refer to the CSC DCAF project documentation.</p>
+<ul class="simple">
+<li><strong>hosts.ini</strong> - Create or edit the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/hosts.ini</span></code>
+file by copying the contents of the <code class="docutils literal"><span class="pre">opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini</span></code> and modifying as needed. This file should
+contain the DNS resolvable names of the hosts being deployed to.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="code docutils literal"><span class="pre">hosts.ini</span></code> will contain <code class="code docutils literal"><span class="pre">[group]</span></code> headings that correspond to
+a module or the role the host will have within the module. Each :code:[group] name
+should match the corresponding <code class="docutils literal"><span class="pre">inventory/group_vars/groupname.yml</span></code> group variable
+file. If editing this file append to it and ensure there is no duplication. All
+hosts listed should be under a <code class="code docutils literal"><span class="pre">group</span></code> heading.</p>
+</div>
+</div>
+<div class="section" id="modify-host-module-variables">
+<h3>Modify Host &amp; Module Variables<a class="headerlink" href="#modify-host-module-variables" title="Permalink to this headline">¶</a></h3>
+<p>This module uses multiple variables that are managed in two separate files. The
+<code class="docutils literal"><span class="pre">inventory/host_vars/host_name.yml</span></code> file contains host specific variables and the
+<code class="docutils literal"><span class="pre">inventory/group_vars/bare_metal_os.yml</span></code> file contains module specific variables.</p>
+<ul class="simple">
+<li><strong>host_name.yml</strong> - There should be a <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/host_vars/host_name.yml</span></code></li>
+</ul>
+<p>for each host in the hosts.ini file. Create or edit these files by copying the contents
+of the <code class="docutils literal"><span class="pre">opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini</span></code>
+and modifying as needed.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Each <code class="code docutils literal"><span class="pre">host.yml</span></code> file must include the host hardware <code class="code docutils literal"><span class="pre">smbios-uuid</span></code>.
+This can be found using the hosts vendor management tools. Refer to the vendor
+documentation for more information.</p>
+</div>
+<ul class="simple">
+<li><strong>bare_metal_os.yml</strong> - Copy the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/group_vars/bare_metal_os.yml</span></code> file to the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/group_vars/</span></code></li>
+</ul>
+<p>folder and modify as needed per the environment.</p>
+</div>
+<div class="section" id="prepare-hosts-for-deployment">
+<h3>Prepare Hosts for Deployment<a class="headerlink" href="#prepare-hosts-for-deployment" title="Permalink to this headline">¶</a></h3>
+<p>Run the <code class="docutils literal"><span class="pre">bare-metal-os/site_reset.yml</span></code> playbook to power cycle the hosts and have
+them discovered by Hanlon: ​</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/autodeploy/projects/dcaf/modules/bare-metal-os
+ansible-playbook site_reset.yml
+</pre></div>
+</div>
+</div>
+<div class="section" id="deploy-the-os">
+<h3>Deploy the OS<a class="headerlink" href="#deploy-the-os" title="Permalink to this headline">¶</a></h3>
+<p>Next run the <code class="docutils literal"><span class="pre">bare-metal-os/site_deploy.yml</span></code> playbook to deploy the RHEL OS to
+the hosts in inventory:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ansible-playbook site_deploy.yml
+</pre></div>
+</div>
+<p>At this point the RHEL OS has been installed and configured on all hosts listed
+in the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/hosts.ini</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="quickstart_slimer.html" class="btn btn-neutral float-right" title="Slimer Quick Start Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="quickstart_autodeploynode.html" class="btn btn-neutral" title="Autodeploynode Quick Start Guide" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, CSC.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

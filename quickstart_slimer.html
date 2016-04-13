@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Slimer Quick Start Guide &mdash; CSC DCAF 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CSC DCAF 1.2 documentation" href="index.html"/>
+        <link rel="up" title="CSC DCAF Quick Start Guides" href="quickstart.html"/>
+        <link rel="next" title="Requirements &amp; Dependencies" href="requirements.html"/>
+        <link rel="prev" title="Bare-metal-OS Quick Start Guide" href="quickstart_bare_metal_os.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CSC DCAF
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="quickstart.html">CSC DCAF Quick Start Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quickstart_autodeploynode.html">Autodeploynode Quick Start Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart_bare_metal_os.html">Bare-metal-OS Quick Start Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Slimer Quick Start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#before-you-begin">Before You Begin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-the-slimer-automation">Run the Slimer Automation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#modify-the-inventory">Modify the Inventory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#modify-host-project-variables">Modify Host &amp; Project Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deploy-the-red-hat-openstack-platform">Deploy the Red Hat OpenStack Platform</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements &amp; Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config_autodeploy_node.html">AutoDeployNode Creation - Online Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline_autodeploy_node.html">AutoDeployNode Creation - Offline Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bare_metal_os.html">Bare Metal OS Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues and Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">CSC DCAF</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="quickstart.html">CSC DCAF Quick Start Guides</a> &raquo;</li>
+      
+    <li>Slimer Quick Start Guide</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/quickstart_slimer.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="slimer-quick-start-guide">
+<h1>Slimer Quick Start Guide<a class="headerlink" href="#slimer-quick-start-guide" title="Permalink to this headline">¶</a></h1>
+<p>This Quick Start Guide describes how to use CSC DCAF Automation to deploy the Red
+Hat OpenStack Platform with high availability on base RHEL installations. It uses
+the following resources:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/csc/slimer">Slimer</a> - The CSC Slimer project, a fork of</li>
+</ul>
+<p><a class="reference external" href="https://github.com/abrezhnev/slimer">abrezhnev/slimer</a>, is used to deploy
+the Red Hat OpenStack Platform with high availability on base RHEL installations.</p>
+<p>The Slimer project is intended to be utilized with after the CSC DCAF Bare-Metal-OS
+module.</p>
+<div class="section" id="before-you-begin">
+<h2>Before You Begin<a class="headerlink" href="#before-you-begin" title="Permalink to this headline">¶</a></h2>
+<p>Ensure that the following requirements are met to use the Slimer project:</p>
+<p>Internal virtual IPs</p>
+<ul class="simple">
+<li>ceilometer_vip</li>
+<li>cinder_vip</li>
+<li>glance_vip</li>
+<li>heat_vip</li>
+<li>horizon_vip</li>
+<li>keystone_vip</li>
+<li>lb_db_vip</li>
+<li>neutron_vip</li>
+<li>nova_vip</li>
+<li>rabbit_vip</li>
+<li>scaleio_vip</li>
+<li>swift_vip</li>
+</ul>
+<p>Public virtual IPs</p>
+<ul class="simple">
+<li>vip_ceilometer_pub</li>
+<li>vip_cinder_pub</li>
+<li>vip_glance_pub</li>
+<li>vip_heat_pub</li>
+<li>vip_horizon_pub</li>
+<li>vip_keystone_pub</li>
+<li>vip_neutron_pub</li>
+<li>vip_nova_pub</li>
+</ul>
+<p>Horizon</p>
+<ul class="simple">
+<li>horizon_internal_servername</li>
+<li>horizon_public_servername</li>
+</ul>
+</div>
+<div class="section" id="run-the-slimer-automation">
+<h2>Run the Slimer Automation<a class="headerlink" href="#run-the-slimer-automation" title="Permalink to this headline">¶</a></h2>
+<p>The Slimer automation will deploy the Red Hat OpenStack Platform with high availability
+on a base RHEL OS. This project requires modifications to the inventory and variables.</p>
+<div class="section" id="modify-the-inventory">
+<h3>Modify the Inventory<a class="headerlink" href="#modify-the-inventory" title="Permalink to this headline">¶</a></h3>
+<p>The inventory is managed by the <code class="code docutils literal"><span class="pre">hosts.ini</span></code> file. The format and contents of
+this file will vary depending on the what automation is being used. For more information
+and examples of this file refer to the DCAF project documentation.</p>
+<p>The inventory was created by the bare-metal-os module but must be modified to use
+with Slimer.</p>
+<p>Edit the inventory to reflect your environment.</p>
+<ul class="simple">
+<li><strong>hosts.ini</strong> - Modify the <code class="docutils literal"><span class="pre">opt/autodeploy/projects/inventory/hosts.ini</span></code> and
+group the hosts by role. Use the <code class="docutils literal"><span class="pre">opt/autodeploy/projects/slimer/inventory/hosts.ini</span></code>
+as a template and change values as needed. This file should contain the DNS
+resolvable names of the hosts being deployed to.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="code docutils literal"><span class="pre">hosts.ini</span></code> will contain <code class="code docutils literal"><span class="pre">[group]</span></code> headings that correspond to
+a module or the role the host will have within the module. Each :code:[group] name
+should match the corresponding <code class="docutils literal"><span class="pre">inventory/group_vars/group_name.yml</span></code> group variable
+file. If editing this file append to it and ensure there is no duplication. All
+hosts listed should be under a <code class="code docutils literal"><span class="pre">group</span></code> heading.</p>
+</div>
+</div>
+<div class="section" id="modify-host-project-variables">
+<h3>Modify Host &amp; Project Variables<a class="headerlink" href="#modify-host-project-variables" title="Permalink to this headline">¶</a></h3>
+<p>This project uses multiple variables that are managed in two separate files. The
+<code class="docutils literal"><span class="pre">host_vars/host_name.yml</span></code> file contains host specific variables and the <code class="docutils literal"><span class="pre">group_vars/all.yml</span></code>
+file contains project specific variables.</p>
+<ul class="simple">
+<li><strong>host_name.yml</strong> - There should be a <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/host_vars/host_name.yml</span></code></li>
+</ul>
+<p>for each host in the hosts.ini file. Create or edit these files by copying the contents
+of the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/host_vars/example_host.yml</span></code>
+and modifying as needed.</p>
+<ul class="simple">
+<li><strong>slimer.yml</strong> - Copy the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/slimer/inventory/group_vars/slimer.yml</span></code>
+file to the <code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/group_vars/</span></code> folder and modify
+as needed per the environment.</li>
+</ul>
+</div>
+<div class="section" id="deploy-the-red-hat-openstack-platform">
+<h3>Deploy the Red Hat OpenStack Platform<a class="headerlink" href="#deploy-the-red-hat-openstack-platform" title="Permalink to this headline">¶</a></h3>
+<p>Next run the <code class="docutils literal"><span class="pre">slimer/site.yml</span></code> playbook to deploy RHEL OSP to the hosts in inventory:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/autodeploy/projects/slimer
+ansible-playbook site.yml
+</pre></div>
+</div>
+<p>At this point RHEL OSP has been installed and configured on all hosts listed in the
+<code class="docutils literal"><span class="pre">/opt/autodeploy/projects/inventory/hosts.ini</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements &amp; Dependencies" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="quickstart_bare_metal_os.html" class="btn btn-neutral" title="Bare-metal-OS Quick Start Guide" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, CSC.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
