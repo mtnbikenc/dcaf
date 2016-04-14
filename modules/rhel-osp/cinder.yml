@@ -1,8 +1,10 @@
 ---
 - name: gather info
-  hosts: controller
+  hosts: openstack 
   gather_facts: true
-
+  tags: 
+    - cinder
+    - cinder-volume
 - name: base RHEL configuration
   hosts: cinder
   max_fail_percentage: 0
@@ -58,8 +60,7 @@
 
 - name: install cinder volume
   hosts: cinder-volume
-  max_fail_percentage: 0
   roles:
     - cinder-common
     - cinder-volume
-  tags: cinder
+  tags: cinder-volume

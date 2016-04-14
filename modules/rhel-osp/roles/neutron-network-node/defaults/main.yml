@@ -46,7 +46,7 @@ neutron_l3_handle_internal_only_routers: True
 
 # Send this many gratuitous ARPs for HA setup. Set it below or equal to 0
 # # to disable this feature.
-neutron_l3_send_arp_for_ha: True
+neutron_l3_send_arp_for_ha: 2
 
 # router_delete_namespaces, which is false by default, can be set to True if
 # # namespaces can be deleted cleanly on the host running the L3 agent.
@@ -124,7 +124,7 @@ neutron_ml2_mechanism_drivers: openvswitch,l2population
 # Controls if neutron security group is enabled or not.
 # It should be false when you use nova security group.
 # neutron_enable_security_group: True
-neutron_enable_security_group: true
+neutron_enable_security_group: True
 
 # ======vlans======
 # (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples

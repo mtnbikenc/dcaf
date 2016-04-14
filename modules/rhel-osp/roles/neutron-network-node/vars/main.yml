@@ -1,2 +1,7 @@
-neutron_ext_ovs_bridge_mappings: "{{physical_net}}:{{neutron_ovs_bridges.ovs_bridge}}"
+mneutron_ext_ovs_bridge_mappings: "{{physical_net}}:{{neutron_ovs_bridges.ovs_bridge}}"
 neutron_metadata_proxy_shared_secret: "{{ lookup('password', credentials_dir + '/credentials/neutron_metadata_proxy_shared_secret chars=hexdigits') }}"
+nova_private_vip: "{{haproxy_vip}}"
+keystone_admin_vip: "{{haproxy_vip}}"
+keystone_private_vip: "{{haproxy_vip}}"
+neutron_pass: "{{ lookup('password', credentials_dir + '/credentials/neutron_pass chars=ascii_letters,digits') }}"
+

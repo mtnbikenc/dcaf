@@ -229,6 +229,7 @@
     -  {service: "glance", type: "image", desc: "Glance Image Service" }
     -  {service: "cinder", type: "volume", desc: "cinder Volume Service" }
     -  {service: "cinderv2", type: "volumev2", desc: "cinder Volume Service" }
+    -  {service: "cinderv2", type: "volumev2", desc: "cinder Volume Service v2" }
     -  {service: "swift", type: "object-store", desc: "Swift storage Service" }
     -  {service: "compute", type: "compute", desc: "OpenStack Compute Service" }
     -  {service: "neutron", type: "network", desc: "OpenStack Networking Service" }
