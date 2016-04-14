@@ -7,7 +7,14 @@
     - openstack-keystone
     - openstack-utils
     - httpd
+    - openstack-selinux
+    - mod_wsgi
+    - python-openstackclient
   tags: keystone
+
+- name: include configure_wsgi
+  include: configure_wsgi.yml
+
 
 - name: configure the keystone.conf file
   ini_file:
@@ -28,10 +35,70 @@
     - { section: "DEFAULT", option: "public_bind_host", value: "{{ control_ipaddr }}"}
     - { section: "database", option: "connection", value: "mysql://keystone:{{keystone_db_pass}}@{{lb_db_vip}}/keystone"}
     - { section: "database", option: "max_retries", value: "-1"}
-    - { section: "memcache", option: "servers", value: "{{keystone_memcached_servers}}"}
+    #- { section: "memcache", option: "servers", value: "{{keystone_memcached_servers}}"}
     - { section: "token", option: "driver", value: "keystone.token.persistence.backends.sql.Token" }
 
   tags: keystone
+
+- name: chown pki files
+  file:
+    state: directory
+    path: "{{ item }}"
+    recurse: yes
+    owner: keystone
+    group: keystone
+  with_items:
+    - "/etc/keystone/ssl/"
+    - "/var/log/keystone/"
+
+- name: pki_setup
+  command: keystone-manage pki_setup --keystone-user keystone --keystone-group keystone
+  run_once: true
+
+- name: tar ssl files
+  shell: tar cvfz /tmp/keystone_ssl.tgz *
+  args:
+    chdir: /etc/keystone/ssl/
+  run_once: true
+
+- name: fetch tar file
+  fetch:
+    src: /tmp/keystone_ssl.tgz
+    dest: /tmp
+    flat: yes
+  run_once: true
+
+- name: touch keystone.log
+  file:
+    path: /var/log/keystone/keystone.log
+    state: touch
+  when: inventory_hostname not in groups['keystone'][0]
+
+- name: distribute tarfile
+  copy:
+    src: /tmp/keystone_ssl.tgz
+    dest: /tmp/keystone_ssl.tgz
+  when: inventory_hostname not in groups['keystone'][0]
+
+- name: untar files
+  shell: tar xvfz /tmp/keystone_ssl.tgz 
+  args:
+    chdir: /etc/keystone/ssl/
+  when: inventory_hostname not in groups['keystone'][0]
+
+- name: chown pki files
+  file:
+    state: directory
+    path: "{{ item }}"
+    recurse: yes
+    owner: keystone
+    group: keystone
+  with_items:
+    - "/etc/keystone/ssl/"
+    - "/var/log/keystone/"
+
+- name: restore selinux context
+  command: restorecon -R /etc/keystone/ssl
 
 - name: check for tables
   command: mysql -e "select count(*) from information_schema.tables where table_schema='keystone'" -sN
@@ -84,7 +151,7 @@
 
 - name: start keystone if not using pacemaker
   service:
-    name: openstack-keystone 
+    name: httpd
     enabled: yes
     state: restarted
   when: not use_pacemaker
@@ -161,6 +228,7 @@
     -  {service: "keystone", type: "identity", desc: "Keystone Identity Service" }
     -  {service: "glance", type: "image", desc: "Glance Image Service" }
     -  {service: "cinder", type: "volume", desc: "cinder Volume Service" }
+    -  {service: "cinderv2", type: "volumev2", desc: "cinder Volume Service" }
     -  {service: "swift", type: "object-store", desc: "Swift storage Service" }
     -  {service: "compute", type: "compute", desc: "OpenStack Compute Service" }
     -  {service: "neutron", type: "network", desc: "OpenStack Networking Service" }
@@ -176,6 +244,7 @@
     - { service: "keystone", type: "identity", public_url: "http://{{ keystone_public_vip }}:5000/v2.0", admin_url: "http://{{ keystone_admin_vip }}:35357/v2.0", internal_url: "http://{{ keystone_private_vip }}:5000/v2.0" }
     - { service: "glance", type: "image", public_url: "http://{{ glance_public_vip }}:9292", admin_url: "http://{{ glance_admin_vip }}:9292", internal_url: "http://{{ glance_private_vip }}:9292" }
     - { service: "cinder", type: "volume", public_url: 'http://{{ cinder_public_vip }}:8776/v1/\$(tenant_id)s', admin_url: 'http://{{ cinder_admin_vip }}:8776/v1/\$(tenant_id)s', internal_url: 'http://{{ cinder_private_vip }}:8776/v1/\$(tenant_id)s' }
+    - { service: "cinderv2", type: "volume2", public_url: 'http://{{ cinder_public_vip }}:8776/v2/\$(tenant_id)s', admin_url: 'http://{{ cinder_admin_vip }}:8776/v2/\$(tenant_id)s', internal_url: 'http://{{ cinder_private_vip }}:8776/v2/\$(tenant_id)s' }
     - { service: "neutron", type: "network", public_url: "http://{{ neutron_public_vip }}:9696", admin_url: "http://{{ neutron_admin_vip }}:9696", internal_url: "http://{{ neutron_private_vip }}:9696" }
     - { service: "compute", type: "compute", public_url: 'http://{{ nova_public_vip }}:8774/v2/\$(tenant_id)s', admin_url: 'http://{{ nova_admin_vip }}:8774/v2/\$(tenant_id)s', internal_url: 'http://{{ nova_private_vip }}:8774/v2/\$(tenant_id)s' }
     - { service: "heat", type: "orchestration", public_url: "http://{{ heat_public_vip }}:8004/v1/%(tenant_id)s", admin_url: "http://{{ heat_admin_vip }}:8004/v1/%(tenant_id)s", internal_url: "http://{{ heat_private_vip }}:8004/v1/%(tenant_id)s" }

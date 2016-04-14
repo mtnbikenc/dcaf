@@ -1,0 +1,44 @@
+---
+- name: create /var/www/cgi-bin/keystone
+  file:
+    state: directory
+    path: /var/www/cgi-bin/keystone
+    owner: keystone
+    group: keystone
+
+- name: create links for wgsi
+  file:
+    state: link
+    src: /usr/share/keystone/keystone.wsgi
+    path: "{{item}}"
+  with_items:
+    - "/var/www/cgi-bin/keystone/admin"
+    - "/var/www/cgi-bin/keystone/main"
+
+- name: restore selinux context
+  command: restorecon -R /var/www/cgi-bin/keystone /etc/httpd
+
+- name: template keystone_wsgi_admin
+  template:
+    src: "templates/{{item.src}}"
+    dest: "{{item.dest}}"
+  with_items:
+    - { src: "10-keystone_wsgi_admin.conf.j2", dest: "/etc/httpd/conf.d/10-keystone_wsgi_admin.conf" }
+    - { src: "10-keystone_wsgi_main.conf.j2", dest: "/etc/httpd/conf.d/10-keystone_wsgi_main.conf" }
+
+- name: update httpd.conf
+  lineinfile:
+    dest: /etc/httpd/conf/httpd.conf
+    state: present
+    regexp: "^Listen.*80"
+    line: "Listen {{control_ipaddr}}:80"
+
+- name: add 5000 and 35357 to httpd.conf
+  lineinfile:
+    dest: /etc/httpd/conf/httpd.conf
+    state: present
+    line: "Listen {{control_ipaddr}}:{{item}}"
+    insertafter: EOF
+  with_items:
+    - 5000
+    - 35357
