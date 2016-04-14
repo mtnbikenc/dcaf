@@ -108,7 +108,7 @@
   openvswitch_bridge:
     bridge: "{{ item.ovs_bridge }}"
     state: present
-  with_items: neutron_ovs_bridges
+  with_items: "{{ neutron_ovs_bridges }}"
   when: ansible_hostname in groups['neutron-network-node'] 
   tags: neutron
 
@@ -117,7 +117,7 @@
     bridge: "{{ item.ovs_bridge }}"
     port: "{{ item.physical_net }}"
     state: present
-  with_items: neutron_ovs_bridges
+  with_items: "{{ neutron_ovs_bridges }}"
   when: ansible_hostname in groups['neutron-network-node']
   tags: neutron
 

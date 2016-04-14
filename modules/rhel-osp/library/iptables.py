@@ -163,7 +163,7 @@ class Iptables(object):
 
     def build_protocol(self):
         cmd_string = ""
-        if self.protocol is not None:
+        if self.protocol is None:
             cmd_string += " -p tcp"
         else:
             cmd_string += " -p %s" % self.protocol

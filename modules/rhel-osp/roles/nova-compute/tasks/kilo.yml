@@ -67,6 +67,7 @@
   with_items:
     ## ===== [Default] =============
     # Rabbitmq
+    - { section: "oslo_concurrency", option: "lock_path", value: "/var/lib/nova/tmp" }
     - { section: "oslo_messaging_rabbit", option: "rabbit_hosts", value: "{{ rabbit_hosts }}" }
     - { section: "oslo_messaging_rabbit", option: "rabbit_ha_queues", value: "{{rabbitmq_ha_queue}}" }
     - { section: "oslo_messaging_rabbit", option: "rabbit_userid", value: "{{rabbitmq_user}}"}
@@ -96,20 +97,19 @@
     - { section: "DEFAULT", option: "compute_driver", value: "{{nova_compute_driver}}" }
     - { section: "DEFAULT", option: "preallocate_images", value: "{{nova_preallocate_images}}" }
     - { section: "DEFAULT", option: "force_raw_images", value: "{{nova_force_raw_images}}" }
-    - { section: "DEFAULT", option: "vncserver_proxyclient_address", value: "{{ control_if.ipaddr }}"}
+    - { section: "DEFAULT", option: "vncserver_proxyclient_address", value: "{{ control_ipaddr }}"}
     - { section: "DEFAULT", option: "vncserver_listen", value: "0.0.0.0"}
     - { section: "DEFAULT", option: "novncproxy_base_url", value: "http://{{ nova_public_vip }}:6080/vnc_auto.html"}
     - { section: "DEFAULT", option: "vnc_enabled", value: "True" }
-    - { section: "DEFAULT", option: "vnc_keymap", value: "en-US" }
     - { section: "DEFAULT", option: "volume_api_class", value: "nova.volume.cinder.API" }
-    - { section: "DEFAULT", option: "sql_connection", value: "mysql://nova:{{ nova_db_pass }}@{{ lb_db_vip }}/nova" }
+    - { section: "database", option: "connection", value: "mysql://nova:{{ nova_db_pass }}@{{ lb_db_vip }}/nova" }
     - { section: "DEFAULT", option: "image_service", value: "nova.image.glance.GlanceImageService" }
     - { section: "glance", option: "api_servers", value: "{{glance_vip}}:{{glance_port | default(9292)}}" }
     ## [libvirt]
     - { section: "libvirt", option: "virt_type", value: "{{nova_virt_type}}" }
     - { section: "libvirt", option: "inject_password", value: "false" }
     - { section: "libvirt", option: "inject_key", value: "false" }
-    - { section: "libvirt", option: "inject_partition", value: "-2" }
+    - { section: "libvirt", option: "inject_partition", value: "-1" }
     - { section: "libvirt", option: "live_migration_uri", value: "qemu+tcp://nova@%s/system" }
     - { section: "libvirt", option: "vif_driver", value: "nova.virt.libvirt.vif.LibvirtGenericVIFDriver"}
     - { section: "libvirt", option: "live_migration_flag", value: "{{nova_live_migration_flag}}" }
@@ -118,22 +118,19 @@
     - { section: "libvirt", option: "volume_clear", value: "{{nova_volume_clear}}" }
     - { section: "libvirt", option: "volume_clear_size", value: "{{nova_volume_clear_size}}" }
     ## [neutron]
-    - { section: "DEFAULT", option: "neutron_url", value: "http://{{ neutron_vip }}:{{ neutron_port | default(9696) }}/" }
-    - { section: "DEFAULT", option: "neutron_admin_tenant_name", value: "services"}
-    - { section: "DEFAULT", option: "neutron_admin_username", value: "neutron"}
-    - { section: "DEFAULT", option: "neutron_admin_password", value: "{{ neutron_pass }}"}
-    - { section: "DEFAULT", option: "neutron_admin_auth_url", value: "http://{{ keystone_vip }}:{{ keystone_private_port | default(5000) }}/v2.0"}
-    - { section: "DEFAULT", option: "neutron_url_timeout", value: "{{neutron_url_timeout}}" }
-    - { section: "DEFAULT", option: "neutron_region_name", value: "regionOne" }
-    - { section: "DEFAULT", option: "neutron_ovs_bridge", value: "{{neutron_ovs_intergration_bridge}}" }
-    - { section: "DEFAULT", option: "neutron_auth_strategy", value: "keystone" }
-    - { section: "DEFAULT", option: "neutron_extension_sync_interval", value: "" }
-    - { section: "DEFAULT", option: "allow_duplicate_networks", value: "{{neutron_allow_duplicate_networks}}" }
+    - { section: "neutron", option: "url", value: "http://{{ neutron_vip  }}:{{ neutron_port | default(9696) }}/" }
+    - { section: "neutron", option: "admin_tenant_name", value: "services" }
+    - { section: "neutron", option: "admin_username", value: "neutron" }
+    - { section: "neutron", option: "admin_password", value: "{{ neutron_pass }}" }
+    - { section: "neutron", option: "admin_auth_url", value: "http://{{ keystone_vip  }}:{{ keystone_private_port | default(35357) }}/v2.0" }
+    - { section: "neutron", option: "region_name", value: "regionOne" }
+    - { section: "neutron", option: "ovs_bridge", value: "{{neutron_ovs_intergration_bridge}}" }
+  tags: nova-config
 
 - name: start nova-compute services
   service:
     name: openstack-nova-compute
-    state: started
+    state: restarted
     enabled: yes
   tags: nova
 

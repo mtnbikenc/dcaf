@@ -63,8 +63,11 @@
     - { section: "keystone_authtoken", option: "admin_tenant_name", value: "services"}
     - { section: "keystone_authtoken", option: "admin_user", value: "neutron"}
     - { section: "keystone_authtoken", option: "admin_password", value: "{{ neutron_pass }}"}
-    - { section: "keystone_authtoken", option: "auth_uri", value: "{{ keystone_auth_protocol }}://{{ keystone_public_vip}}:{{ keystone_public_port  }}/"}
-    - { section: "keystone_authtoken", option: "identity_uri", value: "{{ keystone_auth_protocol  }}://{{ keystone_admin_vip }}:{{ keystone_auth_port  }}/"}
+    - { section: "keystone_authtoken", option: "identity_uri", value: "{{ keystone_auth_protocol }}://{{ keystone_public_vip}}:{{ keystone_public_port  }}/"}
+    - { section: "keystone_authtoken", option: "auth_uri", value: "{{ keystone_auth_protocol  }}://{{ keystone_admin_vip }}:{{ keystone_auth_port  }}/v2.0/"}
+    - { section: "keystone_authtoken", option: "auth_host", value: "{{ keystone_admin_vip}}"}
+    - { section: "keystone_authtoken", option: "auth_port", value: "{{ keystone_public_port  }}"}
+    - { section: "keystone_authtoken", option: "auth_protocol", value: "{{ keystone_auth_protocol }}"}
     - { section: "database", option: "connection", value: "mysql://neutron:{{ neutron_db_pass }}@{{ lb_db_vip }}/neutron"}
     - { section: "database", option: "max_retries", value: "-1"}
     - { section: "agent", option: "report_interval", value: "{{report_interval}}" }

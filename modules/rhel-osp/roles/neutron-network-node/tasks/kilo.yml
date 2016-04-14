@@ -19,13 +19,13 @@
   with_items:
     - { section: "DEFAULT", option: "verbose", value: "true"}
     - { section: "DEFAULT", option: "auth_strategy", value: "{{ neutron_auth_strategy }}"}
-    - { section: "DEFAULT", option: "auth_url", value: "{{ keystone_private_protocol | default('http') }}://{{ keystone_private_vip | default('localhost') }}:{{ keystone_private_port | default (35357) }}/v2.0"}
-    - { section: "DEFAULT", option: "auth_host", value: "{{ keystone_admin_vip | default('127.0.0.1') }}"}
+    - { section: "DEFAULT", option: "auth_url", value: "{{ keystone_private_protocol | default('http') }}://{{ keystone_private_vip  }}:{{ keystone_private_port | default (35357) }}/v2.0"}
+    - { section: "DEFAULT", option: "auth_host", value: "{{ keystone_admin_vip }}"}
     - { section: "DEFAULT", option: "auth_region", value: "{{ nova_region_name | default('regionOne') }}"}
     - { section: "DEFAULT", option: "admin_tenant_name", value: "services"}
     - { section: "DEFAULT", option: "admin_user", value: "neutron"}
     - { section: "DEFAULT", option: "admin_password", value: "{{ neutron_pass }}"}
-    - { section: "DEFAULT", option: "nova_metadata_ip", value: "{{ nova_private_vip | default('127.0.0.1') }}"}
+    - { section: "DEFAULT", option: "nova_metadata_ip", value: "{{ nova_private_vip }}"}
     - { section: "DEFAULT", option: "nova_metadata_port", value: "{{ nova_metadata_port | default (8775) }}"}
     - { section: "DEFAULT", option: "metadata_proxy_shared_secret", value: "{{ neutron_metadata_proxy_shared_secret }}"}
     - { section: "DEFAULT", option: "metadata_workers", value: "{{ neutron_metadata_workers }}"}
@@ -74,7 +74,7 @@
     - { section: "DEFAULT", option: "handle_internal_only_routers", value: "{{ neutron_l3_handle_internal_only_routers }}"}
     - { section: "DEFAULT", option: "send_arp_for_ha", value: "{{ neutron_l3_send_arp_for_ha }}"}
     - { section: "DEFAULT", option: "router_delete_namespaces", value: "{{ neutron_l3_router_delete_namespaces }}"}
-    - { section: "DEFAULT", option: "metadata_ip", value: "{{ nova_private_vip | default('127.0.0.1') }}"}
+    - { section: "DEFAULT", option: "metadata_ip", value: "{{ nova_private_vip }}"}
     - { section: "DEFAULT", option: "external_network_bridge", value: "{{ neutron_external_network_bridge }}"}
   tags: neutron
 
@@ -128,7 +128,7 @@
 - name: enable neutron lbaas services
   service:
     name: "{{ item }}"
-    state: started
+    state: restarted
     enabled: yes
   with_items:
     - neutron-lbaas-agent

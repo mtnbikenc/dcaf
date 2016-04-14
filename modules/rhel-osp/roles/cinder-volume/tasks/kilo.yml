@@ -1,0 +1,87 @@
+---
+# Setting up cinder using nfs until a different driver is supplied
+- name: Update configure cinder nfs driver
+  ini_file:
+    dest: /etc/cinder/cinder.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: "DEFAULT", option: "verbose", value: "true"}
+    - { section: "DEFAULT", option: "nfs_shares_config", value: "/etc/cinder/nfs_exports"}
+    - { section: "DEFAULT", option: "nfs_sparsed_volumes", value: "true"}
+    - { section: "DEFAULT", option: "nfs_mount_options", value: "v3"}
+    - { section: "DEFAULT", option: "volume_driver", value: "cinder.volume.drivers.nfs.NfsDriver"}
+  tags: cinder
+
+- name: create nfs export directory
+  file:
+    state: directory
+    path: "{{nfs_path}}/cinder"
+    owner: root
+    group: cinder
+    mode: 0640
+  when: use_cinder_nfs_volume_driver
+  tags: cinder
+
+- name: create cinder nfs export file
+  template:
+    src: nfs_exports.j2
+    dest: /etc/cinder/nfs_exports
+    owner: root
+    group: cinder
+    mode: 0640
+  when: use_cinder_nfs_volume_driver
+  tags: cinder
+
+- name: enable nfs support services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items:
+    - rpcbind
+    - nfslock
+  when: use_cinder_nfs_volume_driver
+  tags: cinder
+
+- name: enable cinder services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - openstack-cinder-volume
+  tags: cinder
+  when: not use_pacemaker
+
+# commenting out pacemaker tasks
+#- name: disable cinder services
+#  service:
+#    name: "{{ item }}"
+#    enabled: no
+#  with_items:
+#    - openstack-cinder-volume
+#  tags: cinder
+#  when: use_pacemaker
+#
+#- name: create pacemaker resource for cinder-volume
+#  pcs_resource: command=create name=cinder-volume type=systemd:openstack-cinder-volume
+#  args:
+#    operations:
+#      - action: monitor
+#        options:
+#          start-delay: 10s
+#  run_once: true
+#  tags: cinder
+#  when: use_pacemaker
+#
+#- name: create pacemaker constraints for cinder
+#  shell: "pcs constraint list --full | grep id:{{ item.id }} || pcs constraint {{ item.cmd }}"
+#  with_items:
+#    - { id: order-cinder-scheduler-clone-cinder-volume-mandatory, cmd: "order start cinder-scheduler-clone then cinder-volume" }
+#  run_once: true
+#  register: cmd
+#  changed_when: "'{{ item.id }}' not in cmd.stdout"
+#  tags: cinder
+#  when: use_pacemaker

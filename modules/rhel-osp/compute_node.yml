@@ -17,16 +17,14 @@
     - compute
   max_fail_percentage: 0
   tasks:
-  - name: iptable rules for nova-compute
+  - name: iptable rules for nova-compute 1
     iptables:
       port: "{{ item.port }}"
       protocol: "{{ item.protocol}}"
       comment: "{{item.comment}}"
-      position: 4
+      position: 2 
     with_items:
     - { port: ["5900:5999"], protocol: tcp, comment: "vnc incoming" }
-    - { port: 4789, protocol: tcp, comment: "neutron tunnel" }
-    - { port: 4789, protocol: udp, comment: "neutron tunnels"}
     - { port: ["16509", "49152:49215"], protocol: tcp, comment: "nova qemu incoming" }
     tags:
       - iptables
@@ -42,7 +40,7 @@
       port: "{{ item.port }}"
       protocol: "{{ item.protocol}}"
       comment: "{{item.comment}}"
-      position: 4
+      position: 2
     with_items:
     - { port: 67, protocol: udp, comment: "dhcp incoming" }
     - { port: 68, protocol: udp, comment: "dhcp incoming" }

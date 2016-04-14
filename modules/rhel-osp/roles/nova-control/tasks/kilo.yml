@@ -50,11 +50,11 @@
     - { section: "oslo_messaging_rabbit", option: "rabbit_password", value: "{{rabbitmq_pass}}"}
     - { section: "neutron", option: "service_metadata_proxy", value: "True" }
     - { section: "neutron", option: "metadata_proxy_shared_secret", value: "{{ neutron_metadata_proxy_shared_secret }}" }
-    - { section: "DEFAULT", option: "neutron_url", value: "http://{{ neutron_private_vip | default('127.0.0.1') }}:{{ neutron_port | default(9696) }}/" }
-    - { section: "DEFAULT", option: "neutron_admin_tenant_name", value: "services" }
-    - { section: "DEFAULT", option: "neutron_admin_username", value: "neutron" }
-    - { section: "DEFAULT", option: "neutron_admin_password", value: "{{ neutron_pass }}" }
-    - { section: "DEFAULT", option: "neutron_admin_auth_url", value: "http://{{ keystone_private_vip | default('127.0.0.1') }}:{{ keystone_private_port | default(35357) }}/v2.0" }
+    - { section: "neutron", option: "url", value: "http://{{ neutron_private_vip  }}:{{ neutron_port | default(9696) }}/" }
+    - { section: "neutron", option: "admin_tenant_name", value: "services" }
+    - { section: "neutron", option: "admin_username", value: "neutron" }
+    - { section: "neutron", option: "admin_password", value: "{{ neutron_pass }}" }
+    - { section: "neutron", option: "admin_auth_url", value: "http://{{ keystone_private_vip  }}:{{ keystone_private_port | default(35357) }}/v2.0" }
     - { section: "DEFAULT", option: "ovs_bridge", value: "br-int" }
     - { section: "DEFAULT", option: "auth_strategy", value: "keystone" }
     - { section: "conductor", option: "use_local", value: "false" }
