@@ -1,0 +1,14 @@
+#cloud-config
+#vim:syntax=yaml
+debug: True
+ssh_pwauth: True
+disable_root: false
+chpasswd:
+  list: |
+    root: {{image_root_password}}
+    centos: centOS
+    cloud-user: cloud
+  expire: false
+runcmd:
+- sed -i'.orig' -e's/without-password/yes/' /etc/ssh/sshd_config
+- service sshd restart

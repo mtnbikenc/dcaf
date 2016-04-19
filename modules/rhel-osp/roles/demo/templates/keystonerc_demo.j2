@@ -1,0 +1,7 @@
+export OS_USERNAME={{demo_user}}
+export OS_TENANT_NAME={{demo_tenant}}
+export OS_PROJECT_NAME={{demo_tenant}}
+export OS_REGION_NAME={{region | default("regionOne")}}
+export OS_PASSWORD={{ demo_pass }}
+export OS_AUTH_URL=http://{{ keystone_vip }}:35357/v2.0/
+export PS1='[\u@\h \W(keystone_demo)]\$ '

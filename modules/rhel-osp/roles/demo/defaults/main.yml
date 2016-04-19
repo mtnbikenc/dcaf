@@ -1,0 +1,19 @@
+#keystone_auth_protocol: http
+#keystone_auth_port: 35357
+admin_user: admin
+admin_tenant: admin
+demo_user: admin
+demo_tenant: demo
+ext_net_name: external
+int_net_name: internal_net
+router_name: demo_router-1
+copy_image: True
+image_name: cirros-0.3.4-x86_64-disk.img
+image_disk_format: qcow2
+image_short_name: cirros
+image_root_password: "cubswin:)"
+
+#boot options
+nova_boot_flavor: m1.tiny
+nova_boot_name: test_vm
+
