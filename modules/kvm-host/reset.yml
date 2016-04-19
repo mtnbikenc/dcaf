@@ -53,31 +53,31 @@
       command: mv /etc/sysconfig/network-scripts/orig-ifcfg-bond0.{{ item.value['vlan'] }} /etc/sysconfig/network-scripts/ifcfg-bond0.{{ item.value['vlan'] }}
       with_dict: '{{ vlan_interface }}'
 
-     
-    - name: Restart interfaces 
+
+    - name: Restart interfaces
       service:
         name: network
-        state: restarted 
+        state: restarted
 
     - name: Unregister from RSHM
       command: subscription-manager unregister
-    
+
     - name: Clean all RHSM attachments
       command: subscription-manager clean
 
 - name: clean up autodeploy for next run
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   tasks:
     - name: Remove basevm entry in /etc/hosts
       lineinfile:
         dest: /etc/hosts
         state: absent
         regexp: "^172.*$"
-    
+
     - name: Gather all VM MAC addresses in MAC table
       shell: arp -na | grep '\s52' | awk -F '[()]' '{print $2}' | cut -f4 -d'.'
       register: arp_macs
-    
+
     - name: remove vm mac address from arp table
       shell: for i in {{ arp_macs.stdout_lines }} ; do arp -d 172.17.16.$i ; done
       ignore_errors: true

@@ -2,7 +2,7 @@
 # This playbook will prepare Hanlon and the nodes for a bare-metal deployment.
 
 - name: Configure Hanlon with RHEL image, model and policies
-  hosts: auto-deploy-node
+  hosts: autodeploynode
   max_fail_percentage: 0
   gather_facts: False
 
@@ -147,7 +147,7 @@
     - name: Retrieve deployment node public key
       shell: cat /root/.ssh/id_rsa.pub
       register: pub_key
-      delegate_to: auto-deploy-node
+      delegate_to: autodeploynode
       changed_when: False
 
     - name: Add deployment node SSH key to node authorized users

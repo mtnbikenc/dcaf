@@ -8,11 +8,11 @@
     - ovs
 
 - name: create vars for basevm dhcp
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   gather_facts: false
   tasks:
     - name: Add hostnames to inventory
-      add_host: 
+      add_host:
         name: '{{ vm_name }}'
         group: basevm
         ansible_ssh_host: '{{ basevm_static_ip }}'
@@ -22,21 +22,21 @@
   gather_facts: false
   tasks:
     - name: create vars for basevm dhcp
-      set_fact: 
+      set_fact:
         mgmt_ip: '{{ basevm_static_ip }}'
         mgmt_mac: '{{ basevm_mac }}'
         hostname: '{{ vm_name }}'
 
 - name: Configure static DHCP leases
-  hosts: 
+  hosts:
     - nodes
     - basevm
   gather_facts: false
   roles:
     - dhcpd
-  
+
 - name: restart dhcpd
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   gather_facts: false
   tasks:
     - name: Restart dhcpd
@@ -44,14 +44,14 @@
         name: dhcpd
         state: restarted
 
-- name: Setup base VM 
+- name: Setup base VM
   hosts: kvmhosts[0]
   gather_facts: true
   roles:
     - create-vm
 
 - name: wait for basevm
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   gather_facts: false
   tasks:
    - name: wait for basevm to come up
@@ -61,7 +61,7 @@
        port: 22
        delay: 0
 
-- name: Update base VM 
+- name: Update base VM
   hosts: basevm
   vars:
     ansible_ssh_host: "{{ basevm_static_ip }}"
@@ -108,7 +108,7 @@
         flat: yes
 
 - name: Sanitize base VM XML
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   tasks:
     - lineinfile:
         dest: /tmp/basevm.xml
@@ -134,13 +134,13 @@
     - initialization
 
 - name: wait for clones
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   gather_facts: false
   tasks:
    - name: wait for clones to come up after creation
-     wait_for: 
+     wait_for:
        host: "{{ hostvars[item]['ansible_ssh_host'] }}"
-       state: started 
+       state: started
        port: 22
        delay: 0
      with_items: "{{ groups['nodes'] }}"
@@ -188,17 +188,17 @@
 # update the VMs, bring VMs online at the end
 - name: Update VM XML with additional hardware
   hosts: nodes
-  gather_facts: false 
+  gather_facts: false
   roles:
     - vm-hardware
   tags:
     - vm-hardware
 
 - name: wait for clones to come back up
-  hosts: auto_deploy_node
+  hosts: autodeploynode
   gather_facts: false
   tasks:
-   - name: wait for clones to come up after hardware configuration 
+   - name: wait for clones to come up after hardware configuration
      wait_for:
        host: "{{ hostvars[item]['ansible_ssh_host'] }}"
        state: started

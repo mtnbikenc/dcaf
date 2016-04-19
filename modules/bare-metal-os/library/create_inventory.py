@@ -128,10 +128,10 @@ def main():
         except Exception as e:
             module.fail_json(msg=str(e))
 
-    # Create the auto_deploy_node.yml host_vars file
-    deploy_node_host_var = {'ansible_ssh_host': '{{ auto_deploy_node }}'}
+    # Create the autodeploynode.yml host_vars file
+    deploy_node_host_var = {'ansible_ssh_host': '{{ autodeploynode }}'}
     try:
-        with open(dest_folder + "/host_vars/auto-deploy-node.yml", 'w') as f:
+        with open(dest_folder + "/host_vars/autodeploynode.yml", 'w') as f:
             yaml.safe_dump(deploy_node_host_var, f,
                            default_flow_style=False,
                            explicit_start=True)
@@ -140,8 +140,8 @@ def main():
         module.fail_json(msg=str(e))
 
     # Add the default sections to hosts.ini
-    hosts_ini.add_section('auto_deploy_node')
-    hosts_ini.set('auto_deploy_node', 'auto-deploy-node')
+    hosts_ini.add_section('autodeploynode')
+    hosts_ini.set('autodeploynode', 'autodeploynode')
 
     hosts_ini.add_section('mongodb:children')
     hosts_ini.set('mongodb:children', 'controller')

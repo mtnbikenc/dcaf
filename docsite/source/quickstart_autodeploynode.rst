@@ -23,10 +23,9 @@ User Access Requirements
 To retrieve the automation resources from their online locations you will need
 the following:
 
-A user account on the vendor websites with access to the desired resources.
+A user account on the vendor websites with access to download the desired resources.
 
-- `Red Hat <https://access.redhat.com/downloads>`_ with a valid subscription
-- `VMware <https://my.vmware.com/web/vmware/downloads>`_ with an active license
+- Red Hat account with a valid subscription
 
 Network Requirements
 ~~~~~~~~~~~~~~~~~~~~
@@ -81,13 +80,12 @@ Configure the Autodeploynode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The remainder of the Autodeploynode configuration is scripted and can be run
-after a few environment variables have been set. The build script provisions
-and configures the Autodeploynode. Review the script for more details of all the
+after a few environment variables have been set. The build script stages and
+configures the Autodeploynode. Review the script for more details of all the
 steps which are performed.
 
 Set the environment variables for Red Hat Subscription Manage credentials:
 ​
-
 .. code-block:: bash
 
     export RHN_USER="username"
@@ -103,11 +101,10 @@ With the environment variables defined the build script can be launched:
 
 .. note::
 
-    The build.sh script will perform a complete configuration of the AutoDeployNode
+    The build.sh script will perform a complete configuration of the Autodeploynode
     using all project defaults. If there are changes required for your environment,
-    a manual installation should be performed. Refer to the DCAF project
+    a manual installation should be performed. Refer to the CSC DCAF project
     documentation for more details.
 
 At this point the Autodeploynode has been deployed and is ready to start using
 for automation.
-
