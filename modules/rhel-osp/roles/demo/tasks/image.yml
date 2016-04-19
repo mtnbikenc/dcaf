@@ -1,0 +1,33 @@
+---
+- name: copy image to controller1
+  get_url:
+    url:  http://download.cirros-cloud.net/0.3.4/{{image_name}}
+    dest: /root/{{image_name}}
+  tags: demo
+  run_once: true
+
+- name: add image to glance
+  command: >
+    glance {{os_admin_auth}} image-create
+    --name {{image_short_name}}
+    --file /root/{{image_name}}
+    --disk-format {{image_disk_format}}
+    --container-format bare
+    --is-public true
+  run_once: true
+  tags: demo
+
+- name: copy cloud-init demo
+  template: src=cloud_cfg_demo.txt.j2 dest=/root/cloud_cfg_demo.txt
+  tags: demo
+
+- name: launch an instance
+  command: >
+    nova {{os_demo_auth}} boot
+    --flavor {{nova_boot_flavor}}
+    {{nova_boot_name}}
+    --user-data /root/cloud_cfg_demo.txt
+    --security-groups ssh-icmp
+    --image {{image_short_name}}
+  run_once: true
+  tags: demo

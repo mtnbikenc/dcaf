@@ -1,0 +1,6 @@
+---
+- name: Controller Demo Configuration
+  hosts: controller
+  roles:
+    - { role: demo, when: run_demo }
+

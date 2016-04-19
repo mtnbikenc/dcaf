@@ -1,0 +1,187 @@
+---
+# setups up test network for demo
+- name: deploy the keystonerc_demo file
+  template: src=keystonerc_demo.j2
+            dest=/root/keystonerc_demo
+            mode=0750 owner=root group=root
+  tags: demo
+
+- name: create demo project
+  keystone_user:
+    login_password: "{{admin_pass}}"
+    endpoint: "{{keystone_adminurl}}"
+    login_user: "{{admin_user}}"
+    login_tenant_name: "{{admin_tenant}}"
+    tenant: "{{demo_tenant}}"
+    tenant_description: "demo tenant"
+  run_once: true
+  tags: demo
+
+- name: add admin to demo tenant
+  keystone_user:
+    login_password: "{{admin_pass}}"
+    endpoint: "{{keystone_adminurl}}"
+    login_user: "{{admin_user}}"
+    login_tenant_name: "{{admin_tenant}}"
+    tenant: "{{demo_tenant}}"
+    user: "{{demo_user}}"
+    role: "_member_"
+  run_once: true
+  tags: demo
+
+- name: create demo user
+  keystone_user:
+    login_password: "{{admin_pass}}"
+    endpoint: "{{keystone_adminurl}}"
+    login_user: "{{admin_user}}"
+    login_tenant_name: "{{admin_tenant}}"
+    user: "{{demo_user}}"
+    password: "{{demo_pass}}"
+    tenant: "{{demo_tenant}}"
+    role: "_member_"
+  run_once: true
+  tags: demo
+
+- name: check for external network
+  command: neutron {{os_admin_auth}} net-list
+  register: cmd
+  run_once: true
+  tags: demo
+
+
+- name: create External Network.
+  command: >
+    neutron {{os_admin_auth}}
+    net-create {{ext_net_name}}
+    --router:external=True
+  run_once: true
+  when: "'{{ext_net_name}}' not in cmd.stdout"
+  tags: demo
+
+- name: create external Subnet.
+  command: >
+    neutron
+    {{os_admin_auth}}
+    subnet-create 
+    --gateway {{ext_gateway}}
+    --allocation-pool start={{start_ext_allocation}},end={{end_ext_allocation}}
+    --disable-dhcp
+    {{ext_net_name}}
+    {{demo_ext_network}}
+  when: '"{{demo_ext_network}}" not in cmd.stdout'
+  run_once: true
+  tags: demo
+
+- name: get external network ID
+  shell: neutron {{os_admin_auth}}  net-list | grep {{ext_net_name}} | gawk -F' ' '{print $2}'
+  register: external_id
+  run_once: true
+  tags: demo
+
+
+- name: create internal Network.
+  command: >
+    neutron
+    {{os_demo_auth}}
+    net-create {{int_net_name}}
+  when: '"{{int_net_name}}" not in cmd.stdout'
+  run_once: true
+  tags: demo
+
+- name: create internal Subnet.
+  command: >
+    neutron
+    {{os_demo_auth}}
+    subnet-create
+    {{int_net_name}} {{demo_int_network}}
+  run_once: true
+  when: '"{{demo_int_network}}" not in cmd.stdout'
+  tags: demo
+
+- name: get internal network ID
+  shell: neutron {{os_demo_auth}} net-list | grep {{int_net_name}} | gawk -F" " ' {print $6} '
+  register: internal_id
+  run_once: true
+  tags: demo
+
+- name: check for router
+  command: neutron {{os_demo_auth}} router-list
+  run_once: true
+  register: cmd
+  tags: demo
+
+- name: create router
+  command: >
+    neutron
+    {{os_demo_auth}}
+    router-create {{router_name}}
+  when: '"{{router_name}}" not in cmd.stdout'
+  run_once: true
+  tags: demo
+
+
+- name: check to see if gateway is set
+  command: neutron {{os_demo_auth}} router-show {{router_name}}
+  register: cmd
+  tags: demo
+  run_once: true
+
+- name: set router-gateway
+  command: neutron {{os_demo_auth}} router-gateway-set {{router_name}} {{external_id.stdout}}
+  run_once: true
+  when: '"{{external_id.stdout}}" not in cmd.stdout'
+  tags: demo
+
+- name: check to see if interface is added
+  command: neutron {{os_demo_auth}} router-port-list {{router_name}}
+  run_once: true
+  register: cmd
+  tags: demo
+
+- name: set internal router inteface in demo
+  command: neutron {{os_demo_auth}} router-interface-add {{router_name}} {{internal_id.stdout}}
+  run_once: true
+  when: '"{{internal_id.stdout}}" not in cmd.stdout'
+  tags: demo
+
+### create security group
+- name: get tenant ID for demo
+  shell: keystone {{os_admin_auth}} tenant-list | grep {{demo_tenant}} | gawk -F' ' '{print $2}'
+  register: tenant_id
+  run_once: true
+  tags: demo
+
+- name: create security group
+  shell: neutron {{os_demo_auth}} security-group-create ssh-icmp --description "ssh and icmp allowed" --tenant_id {{tenant_id.stdout}}| grep "| id " | gawk -F' ' '{print $4}'
+  run_once: true
+  register: sec_uuid
+  tags: demo
+
+
+
+- name: create ssh inbound rule
+  command: >
+    neutron {{os_demo_auth}}
+    security-group-rule-create
+    --direction ingress
+    --protocol tcp
+    --port-range-min 22
+    --port-range-max 22
+    {{ sec_uuid.stdout }}
+  run_once: true
+  tags: demo
+
+- name: create ssh inbound rule
+  command: >
+    neutron {{os_demo_auth}}
+    security-group-rule-create
+    --direction ingress
+    --protocol icmp
+    {{ sec_uuid.stdout }}
+  run_once: true
+  tags: demo
+
+- name: start image task
+  include: image.yml
+  when: copy_image
+  tags: demo
