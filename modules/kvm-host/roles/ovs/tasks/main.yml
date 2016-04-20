@@ -19,6 +19,14 @@
   tags:
     - mgmt_bridge
 
+- name: add DNS lines to ifcfg-br0
+  lineinfile:
+    dest: /etc/sysconfig/network-scripts/ifcfg-br0
+    regexp: '^DNS1'
+    line: 'DNS1={{dns1}}'
+  tags:
+    - mgmt_bridge
+    
 - name: remove HW address from ifcfg-br0
   lineinfile:
     dest: /etc/sysconfig/network-scripts/ifcfg-br0
