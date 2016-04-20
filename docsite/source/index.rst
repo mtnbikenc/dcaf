@@ -15,6 +15,6 @@ Contents:
     quickstart
     requirements
     autodeploynode_module
-    bare_metal_os
+    bare_metal_os_module
     known_issues
     rhel_osp_module
