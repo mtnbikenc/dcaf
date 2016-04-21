@@ -16,14 +16,6 @@
       with_items: "{{ autodeploy_support_pkgs }}"
       tags: pkgs
 
-    - name: Install required pip-based support packages
-      pip:
-        requirements: "{{ item }}"
-        state: present
-        extra_args: "--upgrade"
-      tags: pkgs
-      with_fileglob: "files/*pip-requirements*"
-
     - name: Create the staging directories in /opt/autodeploy
       file:
         path: "{{ item }}"
@@ -134,25 +126,3 @@
       command: createrepo "{{ rpm_path }}"
       when: offline
       tags: repo
-
-    - name: Check if files exist in packages folder
-      find:
-        path: "{{ packages_path }}"
-      register: packages_files
-      when: offline
-
-    - name: Mirror pip dependencies to /opt/autodeploy/resources/packages when offline
-      command: pip2tgz {{ packages_path }} -r {{ item }}
-      when: offline and packages_files.matched == 0
-      with_fileglob: "files/*pip-requirements*"
-
-    - name: Check if PyPi-compatible "simple" package exists in /opt/autodeploy/resources/packages
-      stat:
-        path: "{{ packages_path }}/simple"
-      register: simple
-      tags: docker
-
-    - name: Create the PyPi-compatible "simple" package in /opt/autodeploy/resources/packages when offline
-      command: dir2pi "{{ packages_path }}"
-      when: offline and not (simple.stat.isdir is defined and simple.stat.isdir)
-      tags: docker

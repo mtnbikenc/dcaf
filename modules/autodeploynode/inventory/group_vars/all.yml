@@ -12,7 +12,6 @@ autodeploy_base_path: /opt/autodeploy
 docker_api_version: "1.20"
 docker_path: "{{ resources_base_path }}/docker/"
 iso_path: "{{ resources_base_path }}/ISO/"
-packages_path: "{{ resources_base_path }}/packages/"
 projects_base_path: "{{ autodeploy_base_path }}/projects"
 resources_base_path: "{{ autodeploy_base_path }}/resources"
 epel_rpm_file: "{{ projects_base_path }}/dcaf/modules/autodeploynode/files/epel_rpm_packages.txt"
@@ -63,6 +62,5 @@ source_projects:
 
 resource_dirs:
   - ISO
-  - packages
   - rpms
   - scaleio
