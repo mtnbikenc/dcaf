@@ -87,7 +87,7 @@ def create_argument_spec():
         password_element_id=dict(required=True, type='str'),
         xpath=dict(required=False, type='str'),
         download_directory=dict(required=False, type='str'),
-        click_link=dict(required=False, default=False, choices=BOOLEANS),
+        click_link=dict(required=False, default=False, type='bool'),
         time_to_download=dict(required=False, default=10, type='int'),
     )
     return argument_spec
