@@ -92,33 +92,6 @@
       when: not (rhel_iso.stat.exists)
       tags: iso
 
-    - name: Check if Red Hat KVM Guest image file exists
-      find:
-        path: "{{ iso_path }}"
-        pattern: "rhel-guest-image*.qcow2"
-      register: kvm_guest
-      tags: iso
-
-# There two separate selenium downloads here because the authtoken on the link will time out
-    - name: Find the Red Hat KVM Guest Image file url
-      selenium:
-        url: "{{ rhel_download_url }}"
-        username: "{{ rhn_user }}"
-        password: "{{ rhn_pass }}"
-        username_element_id: username
-        password_element_id: password
-        xpath: '//*[contains(@href,"rhel-guest-image")]'
-      register: kvm_get_url
-      when: kvm_guest.matched == 0
-      tags: iso
-
-    - name: Download the KVM Guest Image file to /opt/autodeploy/resources/ISO
-      get_url:
-        url: "{{ kvm_get_url.url }}"
-        dest: "{{ iso_path }}"
-      when: kvm_guest.matched == 0
-      tags: iso
-
     - name: Download the EPEL RPMs to /opt/autodeploy/resources/rpms when offline
       shell: repotrack $(cat {{ epel_rpm_file }}) -p {{ rpm_path }}
       when: offline
