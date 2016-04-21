@@ -1,5 +1,5 @@
 ---
-hanlon_base_url: http://{{ auto_deploy_node }}:8026/hanlon/api/v1/
+hanlon_base_url: http://{{ autodeploynode }}:8026/hanlon/api/v1/
 hnl_rhel_path: /home/hanlon/image/rhel-server-7.2-x86_64-dvd-hnl.iso
 hnl_rhel_name: RHEL_7_2
 hnl_rhel_version: 7.2

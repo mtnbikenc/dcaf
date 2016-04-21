@@ -10,11 +10,11 @@ configure_network_bond: true
 configure_vlan_interfaces: true
 
 # Usage:
-#   bare-metal-os/inventory/host_vars/auto-deploy-node
+#   bare-metal-os/inventory/host_vars/autodeploynode
 #   bare-metal-os/site_deploy (vars/hanlon.yml)
 #   bare-metal-os/site_reset (vars/hanlon.yml)
 #   slimer/roles/subscription-manager
-auto_deploy_node: x.x.x.x
+autodeploynode: x.x.x.x
 
 # Usage:
 #   bare-metal-os/site_deploy (ifcfg template)

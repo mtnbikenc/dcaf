@@ -141,8 +141,8 @@ the :code:`[deploy:children]` group is used.
     [tb]
     scaleio-3
 
-    [auto_deploy_node]
-    auto-deploy-node
+    [autodeploynode]
+    autodeploynode
 
     [mongodb:children]
     controller
@@ -218,7 +218,7 @@ following variables are all you may need to change.
 
     ---
     partition_additional_disks: false
-    auto_deploy_node: x.x.x.x
+    autodeploynode: x.x.x.x
     dns1: x.x.x.x
     inventory_path: ./inventory/
     inventory_csv_file: ./inventory/example_inventory.csv
