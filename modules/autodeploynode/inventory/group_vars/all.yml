@@ -1,7 +1,4 @@
 ---
-# Required User Variables
-rhn_user:
-rhn_pass:
 
 # Offline autodeploy vars
 offline: false
@@ -11,20 +8,14 @@ use_bare_metal_os: true
 autodeploy_base_path: /opt/autodeploy
 docker_api_version: "1.20"
 docker_path: "{{ resources_base_path }}/docker/"
-iso_path: "{{ resources_base_path }}/ISO/"
 projects_base_path: "{{ autodeploy_base_path }}/projects"
 resources_base_path: "{{ autodeploy_base_path }}/resources"
 
 # Autodeploy site_discovery vars:
 hnl_mk_image: hnl_mk_debug-image.2.0.1.iso
-hnl_rhel_min_image: rhel-server-7.2-x86_64-dvd-hnl.iso
 hnl_mk_source: https://github.com/csc/Hanlon-Microkernel/releases/download/v2.0.1/
 hnl_mk_local_path: /opt/hanlon/image/
 hnl_mk_path: /home/hanlon/image/{{ hnl_mk_image }}
-rhel_iso_image: rhel-server-7.2-x86_64-dvd.iso
-
-# Offline Staging vars
-rhel_download_url: https://access.redhat.com/downloads/content/69/ver=/rhel---7/7.2/x86_64/product-downloads
 
 git_repos:
   - { name: "slimer", repo: "https://github.com/csc/slimer.git" }

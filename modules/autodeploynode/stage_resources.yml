@@ -31,29 +31,3 @@
         state: directory
       with_items: "{{ resource_dirs }}"
       tags: paths
-
-    - name: Check if RHEL DVD ISO file exists in /opt/autodeploy/resources/ISO
-      stat:
-        path: "{{ iso_path }}/{{ rhel_iso_image }}"
-      register: rhel_iso
-      tags: iso
-
-# There two separate selenium downloads here because the authtoken on the link will time out
-    - name: Find the RHEL DVD ISO file url
-      selenium:
-        url: "{{ rhel_download_url }}"
-        username: "{{ rhn_user }}"
-        password: "{{ rhn_pass }}"
-        username_element_id: username
-        password_element_id: password
-        xpath: '//*[contains(@href,"{{ rhel_iso_image }}")]'
-      register: rhel_get_url
-      when: not (rhel_iso.stat.exists)
-      tags: iso
-
-    - name: Download the RHEL DVD ISO file to /opt/autodeploy/resources/ISO
-      get_url:
-        url: "{{ rhel_get_url.url }}"
-        dest: "{{ iso_path }}"
-      when: not (rhel_iso.stat.exists)
-      tags: iso

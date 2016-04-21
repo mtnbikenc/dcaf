@@ -1,7 +1,0 @@
----
-# The prep-projects role will prepare a particular project for use once the autodeploynode
-# has been deployed. It includes project based .yml files as needed based on a `use_project`
-# variable found in the /group_vars/all.yml.
-
-- include: bare_metal_os.yml
-  when: use_bare_metal_os

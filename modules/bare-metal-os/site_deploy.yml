@@ -6,6 +6,9 @@
   max_fail_percentage: 0
   gather_facts: False
 
+  roles:
+    - prepare
+
   tasks:
     - include_vars: vars/hanlon.yml
 

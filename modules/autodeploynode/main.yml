@@ -6,7 +6,6 @@
   gather_facts: true
   roles:
     - base
-    - prep-projects
 
 - include: site_docker.yml
 
