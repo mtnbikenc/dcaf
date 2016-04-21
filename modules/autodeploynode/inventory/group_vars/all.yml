@@ -14,9 +14,6 @@ docker_path: "{{ resources_base_path }}/docker/"
 iso_path: "{{ resources_base_path }}/ISO/"
 projects_base_path: "{{ autodeploy_base_path }}/projects"
 resources_base_path: "{{ autodeploy_base_path }}/resources"
-epel_rpm_file: "{{ projects_base_path }}/dcaf/modules/autodeploynode/files/epel_rpm_packages.txt"
-rhn_rpm_file: "{{ projects_base_path }}/dcaf/modules/autodeploynode/files/rhn_rpm_packages.txt"
-rpm_path: "{{ resources_base_path }}/rpms/"
 
 # Autodeploy site_discovery vars:
 hnl_mk_image: hnl_mk_debug-image.2.0.1.iso
@@ -34,7 +31,6 @@ git_repos:
   - { name: "ansible-scaleio", repo: "https://github.com/csc/ansible-scaleio.git" }
 
 autodeploy_support_pkgs:
-  - createrepo
   - dhcp
   - docker
   - firefox
@@ -62,5 +58,4 @@ source_projects:
 
 resource_dirs:
   - ISO
-  - rpms
   - scaleio
