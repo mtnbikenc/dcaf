@@ -156,34 +156,3 @@
       command: dir2pi "{{ packages_path }}"
       when: offline and not (simple.stat.isdir is defined and simple.stat.isdir)
       tags: docker
-
-    - name: Start and enable the docker service
-      service:
-        name: docker
-        enabled: yes
-        state: started
-      tags: docker
-
-    - name: Check if Docker image files exist in /opt/autodeploy/resources/docker
-      stat:
-        path: "{{ docker_path }}/{{ item.tar_file }}"
-      with_items: "{{ docker_images }}"
-      register: docker_img
-      tags: docker
-
-    - name: Pull the project docker images from the docker registry
-      docker:
-        docker_api_version: "{{ docker_api_version }}"
-        name: "{{ item.item.name }}"
-        image: "{{ item.item.image }}"
-        pull: always
-        state: present
-      with_items: "{{ docker_img.results }}"
-      when: not (item.stat.exists)
-      tags: docker
-
-    - name: Save docker container images to /opt/autodeploy/resources/docker (Offline)
-      shell: docker save docker.io/"{{ item.item.image }}" > "{{ docker_path }}/{{ item.item.tar_file }}"
-      with_items: "{{ docker_img.results }}"
-      when: offline and not (item.stat.exists)
-      tags: docker

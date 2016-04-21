@@ -19,11 +19,6 @@
         - { name: hanlon-server, image: "cscdock/hanlon:2.5.0" }
         - { name: hanlon-atftpd, image: cscdock/atftpd }
 
-    - name: Load Mongo, Hanlon and Atftpd Containers (Offline)
-      command: docker load --input "{{ docker_path }}/{{ item.tar_file }}"
-      with_items: "{{ docker_images }}"
-      when: offline
-
     - name: Start Mongo Container
       docker:
         docker_api_version: "{{ docker_api_version }}"
