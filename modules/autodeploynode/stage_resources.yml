@@ -45,19 +45,6 @@
         chdir: "{{ projects_base_path }}/{{ item.name }}"
       with_items: "{{ git_repos }}"
 
-    - name: Check if Hanlon Microkernel file exists in /opt/autodeploy/resources/ISO
-      stat:
-        path: "{{ iso_path }}/{{ hnl_mk_image }}"
-      register: hnl_mk
-      tags: iso
-
-    - name: Download the Hanlon microkernel image to /opt/autodeploy/resources/ISO
-      get_url:
-        url: "{{ hnl_mk_source }}{{ hnl_mk_image }}"
-        dest: "{{ iso_path }}"
-      when: not (hnl_mk.stat.exists)
-      tags: iso
-
     - name: Check if RHEL DVD ISO file exists in /opt/autodeploy/resources/ISO
       stat:
         path: "{{ iso_path }}/{{ rhel_iso_image }}"
