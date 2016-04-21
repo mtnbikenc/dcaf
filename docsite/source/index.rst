@@ -18,3 +18,4 @@ Contents:
     offline_autodeploy_node
     bare_metal_os
     known_issues
+    rhel_osp_module
