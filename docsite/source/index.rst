@@ -14,8 +14,7 @@ Contents:
     overview
     quickstart
     requirements
-    config_autodeploy_node
-    offline_autodeploy_node
+    autodeploynode_module
     bare_metal_os
     known_issues
     rhel_osp_module
