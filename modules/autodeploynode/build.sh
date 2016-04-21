@@ -33,5 +33,4 @@ wget https://raw.githubusercontent.com/csc/dcaf/master/modules/autodeploynode/in
 ansible-playbook initial_stage.yml
 cd /opt/autodeploy/projects/dcaf/modules/autodeploynode
 
-ansible-playbook stage_resources.yml --extra-vars "rhn_user=$RHN_USER rhn_pass=$RHN_PASS"
 ansible-playbook main.yml

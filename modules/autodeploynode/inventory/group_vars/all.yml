@@ -7,9 +7,7 @@ use_bare_metal_os: true
 # Autodeploy common vars
 autodeploy_base_path: /opt/autodeploy
 docker_api_version: "1.20"
-docker_path: "{{ resources_base_path }}/docker/"
 projects_base_path: "{{ autodeploy_base_path }}/projects"
-resources_base_path: "{{ autodeploy_base_path }}/resources"
 
 # Autodeploy site_discovery vars:
 hnl_mk_image: hnl_mk_debug-image.2.0.1.iso
@@ -46,7 +44,3 @@ autodeploy_support_pkgs:
 source_projects:
   - ansible-scaleio
   - slimer
-
-resource_dirs:
-  - ISO
-  - scaleio
