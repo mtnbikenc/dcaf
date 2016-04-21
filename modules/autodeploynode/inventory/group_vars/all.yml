@@ -5,7 +5,6 @@ rhn_pass:
 
 # Offline autodeploy vars
 offline: false
-usb_hdd: /mnt/sdb
 use_bare_metal_os: true
 
 # Autodeploy common vars
@@ -34,10 +33,6 @@ rhel_download_url: https://access.redhat.com/downloads/content/69/ver=/rhel---7/
 git_repos:
   - { name: "slimer", repo: "https://github.com/csc/slimer.git" }
   - { name: "ansible-scaleio", repo: "https://github.com/csc/ansible-scaleio.git" }
-
-# Offline usb staging vars
-usb_projects_path: "{{ usb_hdd }}/autodeploy/projects"
-usb_resources_path: "{{ usb_hdd }}/autodeploy/resources"
 
 autodeploy_support_pkgs:
   - createrepo

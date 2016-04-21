@@ -187,21 +187,3 @@
       with_items: "{{ docker_img.results }}"
       when: offline and not (item.stat.exists)
       tags: docker
-
-    - name: Copy the downloaded projects to the usb drive when offline
-      copy:
-        src: "{{ projects_base_path }}/{{ item }}"
-        dest: "{{ usb_projects_path }}"
-        force: no
-      with_items: "{{ source_projects }}"
-      when: offline
-      tags: copy
-
-    - name: Copy the downloaded resources to the usb drive when offline
-      copy:
-        src: "{{ resources_base_path }}/{{ item }}"
-        dest: "{{ usb_resources_path }}"
-        force: no
-      with_items: "{{ resource_dirs }}"
-      when: offline
-      tags: copy
