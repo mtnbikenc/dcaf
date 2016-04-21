@@ -1,9 +1,5 @@
 ---
 
-# Offline autodeploy vars
-offline: false
-use_bare_metal_os: true
-
 # Autodeploy common vars
 autodeploy_base_path: /opt/autodeploy
 docker_api_version: "1.20"
