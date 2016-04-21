@@ -1,13 +1,16 @@
 RHEL-OSP Module
 ===============
 
-The RHEL-OSP project is intended to be utilized on a CSC DCAF bare-metal deployment
-but can be used on an existing RHEL environment that meets module requirements. It
-will deploy a Red Hat Enterprise Linux OpenStack Platform with High Availability.
+The RHEL-OSP module uses Keepalived and HAProxy to provide a highly available (HA)
+OpenStack cluster. It is intended to be utilized on a CSC DCAF bare-metal RHEL deployment
+but can be used on an existing environment providing it meets module requirements.
 
-It uses Keepalived and HAProxy to provide a highly available (HA) OpenStack cluster
-that is based on the reference architecture provided by Red Hat and the RDO project.
-The deployment is broken down into five different node types.
+The RHOSP deployment is complex with numerous services and agents but can be simplified
+by grouping the nodes into five different types.
+
+At this point the RHEL OS has been successfully deployed on all hosts in the ``hosts.ini``
+file by the Bare-Metal-OS module. The CSC DCAF inventory needs to be modified before
+the module can be used.
 
 Before You Begin
 ----------------
@@ -40,113 +43,23 @@ The module treats each host as one of five types defined in the inventory.
 - **Swift** storage nodes that can be physical or virtual machines that run the
   Swift storage services.
 
-Create / Modify the Inventory
------------------------------
+Modify the Inventory
+--------------------
 
-The inventory is managed by the ``hosts.ini`` file. The inventory was created
-by the bare-metal-os module but must be modified to use with RHEL-OSP.
+To use the RHEL-OSP automation modify the inventory and variable files then run
+the playbook(s).
 
-Edit the inventory to reflect your environment.
-
-- **hosts.ini** - Modify the ``opt/autodeploy/projects/inventory/hosts.ini`` and
-  add the required :code:`[group]` sections and desired hosts. Use the
-  ``opt/autodeploy/projects/dcaf/rhel-osp/inventory/hosts.ini`` as a template and
-  change values as needed.
-
-.. note::
-
-  The :code:`hosts.ini` will contain :code:`[group]` headings that correspond to
-  RHOSP roles. Each :code:`[group]` heading will contain a host or a child
-  ``group`` of hosts. If editing this file append to it and ensure there is no
-  duplication. All hosts listed should be under a :code:`[group]` heading.
-
-.. code-block:: yaml
-
-  Example:
-  # Host(s) with the Controller role
-  [controller]
-  controller1
-  ...
-
-  # Host(s) with the Compute role
-  [compute]
-  compute1
-  ...
-
-Refer to the ``Configuration Reference`` section below for an example.
-
-Modify Host & Project Variables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This project uses multiple variables that are managed in various files. The
-``inventory/host_vars/host_name.yml`` file contains host specific variables and the
-``inventory/group_vars/group_name.yml`` files contain project specific variables.
-
-.. note::
-The RHEL-OSP module has multiple types of ``hosts`` based on the RHOSP role or
-  service. Copy, rename and modify the appropriate type of example_host.yml file
-  as needed.
-
-- **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
-  for each host, based on RHOSP role or service, in the hosts.ini file. Create or
-  modify these files by copying the contents of the appropriate
-  ``/opt/autodeploy/projects/dcaf/rhel-osp/inventory/host_vars/example_host.yml``
-  and changing values as needed.
-
-.. note::
-The RHEL-OSP module has multiple ``group_name`` variable files based on the RHOSP
-  role or service.
-
-- **group_name.yml** - Copy all of the ``/opt/autodeploy/projects/dcaf/rhel-osp/inventory/group_vars/group_name.yml``
-  files to the ``/opt/autodeploy/projects/inventory/group_vars/`` folder and modify
-  as needed per the environment.
-
-Refer to the ``Configuration Reference`` section below for an example.
-
-Deploy the Red Hat OpenStack Platform
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Next run the ``rhel-osp/site.yml`` playbook to deploy RHEL OSP to the hosts in inventory:
-
-.. code-block:: bash
-
-    cd /opt/autodeploy/projects/dcaf/rhel-osp
-    ansible-playbook site.yml -i ../../inventory/hosts.ini
-
-.. note::
-
-  The ``site.yml`` playbook will call the following playbooks.
-
-  The ``haproxy.yml`` playbook will create firewall rules, install and configure
-  Keepalived and HAProxy.
-
-  The ``control_plane.yml`` playbook will include a series of playbooks that will
-  install and configure the control plane services.
-
-  The ``neutron-network-node.yml`` playbook will install and configure the Neutron
-  networking on the grouped hosts. It will also set the required firewall rules
-  for Neutron.
-
-  The ``compute_node.yml`` playbook will install and configure the required Nova
-  Compute packages, Neutron agents and create Nova firewall rules.
-
-  The ``swift.yml`` playbook will install and configure Swift and other required
-  agents. It will also create required firewall rules for these services.
-
-  The ``prep-scaleio.yml`` playbook will create the required firewall rules for
-  use with EMC SCaleIO.
-
-
-At this point RHEL OSP has been installed and configured on all hosts listed
-in the ``/opt/autodeploy/projects/inventory/hosts.ini``.
-
-Configuration Reference
------------------------
+The CSC DCAF inventory is located in the ``/opt/autodeploy/projects/inventory``
+folder and is the central inventory for all modules. It is based on the Ansible
+inventory hierarchy. The inventory found within this module is only provided as an
+example.
 
 Inventory Directory/File Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is how the inventory directory structure is for the RHEL-OSP module.
+The module follows the default Ansible inventory hierarchy. It only contains the
+files necessary for it to run. Notice there is an ``example-host-type.yml`` file
+for each of the five node types.
 
 .. code-block:: bash
 
@@ -169,10 +82,20 @@ This is how the inventory directory structure is for the RHEL-OSP module.
 hosts.ini
 ~~~~~~~~~
 
-The ``rhel-osp/inventory/hosts.ini`` file only contains several :code:`[group]`
-sections with hosts as an example. When the inventory is modified copy the contents
-of this ``hosts.ini`` file to the ``projects/inventory/hosts.ini`` file and modify
-as needed.
+The inventory is managed by the ``hosts.ini`` file. The inventory was created
+by the Bare-Metal-OS module but must be modified to use with RHEL-OSP.
+
+Edit the inventory to reflect your environment.
+
+- **hosts.ini** - Copy and append the contents of this ``hosts.ini`` file to the
+  ``/opt/autodeploy/projects/inventory/hosts.ini`` file and modify as needed. Only
+  modify the :code:`[group]` of hosts as needed.
+
+.. note::
+
+  The ``rhel-osp/inventory/hosts.ini`` file contains many :code:`[group]` sections
+  with hosts and :code:`[group:children]` sections with groups as an example. Only
+  modify the :code:`[group]` of hosts as needed.
 
 .. code-block:: bash
 
@@ -271,23 +194,43 @@ as needed.
   by the module. Add the required hosts in the respective :code:`[group]` section
   as needed.
 
+
+Modify Host & Project Variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module uses multiple variables that are managed in various files. The
+``/opt/autodeploy/projects/inventory/host_vars/`` folder contains host specific
+variable files and the ``/opt/autodeploy/projects/inventory/group_vars/`` folder
+contains module specific variable files.
+
 host_vars
 ~~~~~~~~~
 
-The variables that will be applied to a specific host are stored in a ``rhel-osp/inventory/host_vars/host_name.yml`` files. There are several types of hosts examples so when
-the inventory is modified copy the contents of the appropriate ``host_name.yml`` example
-file to the desired ``host_name.yml`` file in the ``projects/inventory/host_vars`` folder,
-rename and modify it as needed for each host in the ``hosts.ini`` file.
+The variables that will be applied to a specific host are stored in a ``host_name.yml``
+file. There are two in the example inventory, one for the ``autodeploynode`` and
+one for ``hostname-1``.
 
-.. code-block:: yaml
+- **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml`` for each host in the hosts.ini file. Since these files were created
+  by a previous module they may need to be renamed. For example if the files are
+  named ``host_name-1, host_name-2, ...`` they may will need to be renamed for your deployment
+  ``controller-1,controller-2, ...``. Now copy and append the contents of the
+  appropriate ``example_host.yml`` and change values as needed.
 
-    /rhel-osp/inventory/
+.. code-block:: bash
+
+    /bare-metal-os/inventory/
     -- /host_vars
           example-compute-host.yml
           example-controller.yml
           example-haproxy.yml
           example-network-node.yml
           example-swift-storage.yml
+
+.. note::
+
+  The RHEL-OSP module has numerous types of ``hosts`` based on the RHOSP role or
+  service. Copy, rename and modify the appropriate type of example_host.yml file
+  as needed.
 
 Below is the ``example-compute-host.yml``
 
@@ -329,11 +272,14 @@ group_vars
 
 As mentioned above Ansible allows you to group hosts and assign variables to a
 :code:`[group]`. This allows you to run plays against multiple hosts without
-having to specify them individually. The group_vars variables are in the
-``rhel-osp/inventory/group_vars/`` folder.
+having to specify them individually. The variables that will be applied to a
+specific group, or group of groups, are stored in a ``group_name.yml`` file. The
+name of this file must match the name of the corresponding :code:`[group]` in the
+``hosts.ini`` file.
 
-Edit these files as needed for your environment. Review all the variables but it
-is recommended to only change what is required.
+This module uses several group_vars files located in the ``/rhel-osp/inventory/group_vars``
+folder. Notice their names match a :code:`[group]` or :code:`[group:children]` so
+all hosts in these groups will have access to the respective variables.
 
 .. code-block:: yaml
 
@@ -346,11 +292,61 @@ is recommended to only change what is required.
           openstack.yml
           swift.yml
 
+- **group_name.yml** - Copy all of the ``/rhel-osp/inventory/group_vars/group_name.yml``
+  files to the ``/opt/autodeploy/projects/inventory/group_vars/`` folder and modify
+  as needed per the environment.
+
 Variables in Roles
 ~~~~~~~~~~~~~~~~~~
 
 Ansible roles allow you to organize playbooks and reuse common configuration steps
 between different types of hosts. A role will allow you to define what a host is
 supposed to do, instead of having to specify the steps needed to get a server
-configured a certain way. Role specific variables are stored in the role/vars
-directory.
+configured a certain way. Role specific variables are stored in the ``/roles/some_role/defaults``
+and ``/roles/some_role/vars`` folders. Typically only the ``/roles/some_roles/defaults``
+would need to be modified. Always review both sets of variables for comtent.
+
+.. code-block:: bash
+
+    /bare-metal-os/roles/some_role
+    -- /defaults
+          main.yml
+    -- /vars
+          main.yml
+
+Deploy the Red Hat OpenStack Platform
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Next run the ``rhel-osp/site.yml`` playbook to deploy RHEL OSP to the hosts in inventory:
+
+.. code-block:: bash
+
+    cd /opt/autodeploy/projects/dcaf/rhel-osp
+    ansible-playbook site.yml -i ../../inventory/hosts.ini
+
+.. note::
+
+  The ``site.yml`` playbook will call the following playbooks.
+
+  The ``haproxy.yml`` playbook will create firewall rules, install and configure
+  Keepalived and HAProxy.
+
+  The ``control_plane.yml`` playbook will include a series of playbooks that will
+  install and configure the control plane services.
+
+  The ``neutron-network-node.yml`` playbook will install and configure the Neutron
+  networking on the grouped hosts. It will also set the required firewall rules
+  for Neutron.
+
+  The ``compute_node.yml`` playbook will install and configure the required Nova
+  Compute packages, Neutron agents and create Nova firewall rules.
+
+  The ``swift.yml`` playbook will install and configure Swift and other required
+  agents. It will also create required firewall rules for these services.
+
+  The ``prep-scaleio.yml`` playbook will create the required firewall rules for
+  use with EMC SCaleIO.
+
+
+At this point RHEL OSP has been installed and configured on all hosts listed
+in the ``/opt/autodeploy/projects/inventory/hosts.ini``.
