@@ -32,19 +32,6 @@
       with_items: "{{ resource_dirs }}"
       tags: paths
 
-    - name: Clone the project repos from Git
-      git:
-        repo: "{{ item.repo }}"
-        dest: "{{ projects_base_path }}/{{ item.name }}"
-      with_items: "{{ git_repos }}"
-      ignore_errors: true
-
-    - name: Checkout the latest tagged version
-      shell: "git checkout $(git describe --abbrev=0 --tags)"
-      args:
-        chdir: "{{ projects_base_path }}/{{ item.name }}"
-      with_items: "{{ git_repos }}"
-
     - name: Check if RHEL DVD ISO file exists in /opt/autodeploy/resources/ISO
       stat:
         path: "{{ iso_path }}/{{ rhel_iso_image }}"

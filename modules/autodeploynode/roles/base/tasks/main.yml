@@ -100,14 +100,12 @@
     dest: "{{ projects_base_path }}/{{ item.name }}"
   with_items: "{{ git_repos }}"
   ignore_errors: true
-  when: not offline
 
 - name: Checkout the latest tagged version
   shell: "git checkout $(git describe --abbrev=0 --tags)"
   args:
     chdir: "{{ projects_base_path }}/{{ item.name }}"
   with_items: "{{ git_repos }}"
-  when: not offline
 
 - name: Update default Ansible configuration
   lineinfile:
