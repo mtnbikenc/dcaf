@@ -1,0 +1,39 @@
+---
+#RHN credentials to register systems, Credentials can be added here or passed via the CLI
+rhn_user: 
+rhn_pass: 
+# Specify a subscription pool name to consume. Regular expressions accepted.
+pool: 'OpenStack'
+
+# base VM variables
+qcow_image_name: /root/rhel-guest-image-7.1.qcow2
+
+# The following are defaulted within the role, change as needed.
+vm_root_password: redhat
+vm_ram: 16384
+vm_vcpus: 8
+
+# ansible_host_pubkey is the public key to be inserted into the VMs for passwordless ssh from the autodeploynode
+# this is the key found at /root/.ssh/id_rsa.pub or whatever is being used by ansible for access to hosts.
+ansible_host_pubkey:
+
+basevm_mac: "52:54:00:FC:00:A0"
+basevm_static_ip: 172.17.16.30
+
+yum_repos:
+ - rhel-7-server-openstack-6.0-rpms
+ - rhel-7-server-rpms
+ - rhel-7-server-optional-rpms
+
+virt_rpms:
+  - qemu-kvm
+  - libvirt
+  - libguestfs
+  - libguestfs-tools
+  - libvirt-client
+  - libvirt-python
+  - openvswitch
+  - virt-install
+  - nmap
+  - rsync
+  - net-tools

@@ -6,7 +6,8 @@ deploys the base Operating System for other modules and projects to use. It curr
 supports Red Hat Enterprise Linux.
 
 At this point the Autodeploynode has been successfully created and is ready to
-use. The CSC DCAF inventory needs to be created before the module can be used.
+use. To use the Bare-Metal-OS automation create the CSC DCAF inventory and variable
+files then run the playbook(s).
 
 Before You Begin
 ----------------
@@ -47,9 +48,6 @@ There are several network requirements for the deployment.
 
 Create the Inventory
 --------------------
-
-To use the Bare-Metal-OS automation create the inventory and variable files then
-run the playbook(s).
 
 The CSC DCAF inventory is located in the ``/opt/autodeploy/projects/inventory``
 folder and is the central inventory for all modules. It is based on the Ansible
@@ -97,7 +95,11 @@ The ``bare-metal-os/inventory/hosts.ini`` file contains the following:
 
 .. code-block:: bash
 
-    # This entry should always be present
+    # ------------------------------------------------------------------
+    # Do not modify a [group:children] section, they are module specific
+    # ------------------------------------------------------------------
+
+    # This entry should always be present - do not modify
     [autodeploynode]
     localhost ansible_connection=local
 
@@ -110,6 +112,12 @@ The ``bare-metal-os/inventory/hosts.ini`` file contains the following:
     [deploy]
     hostname-1
     ...
+
+.. note::
+
+  Do not modify a group of groups :code:`[group:children]`. These groups are defined
+  by the module. Add the required hosts in the respective :code:`[group]` section
+  as needed.
 
 Modify Host & Module Variables
 ------------------------------

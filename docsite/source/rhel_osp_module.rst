@@ -9,8 +9,8 @@ The RHOSP deployment is complex with numerous services and agents but can be sim
 by grouping the nodes into five different types.
 
 At this point the RHEL OS has been successfully deployed on all hosts in the ``hosts.ini``
-file by the Bare-Metal-OS module. The CSC DCAF inventory needs to be modified before
-the module can be used.
+file by the Bare-Metal-OS module. To use the RHEL-OSP automation modify the CSC
+DCAF inventory and variable files then run the playbook(s).
 
 Before You Begin
 ----------------
@@ -45,9 +45,6 @@ The module treats each host as one of five types defined in the inventory.
 
 Modify the Inventory
 --------------------
-
-To use the RHEL-OSP automation modify the inventory and variable files then run
-the playbook(s).
 
 The CSC DCAF inventory is located in the ``/opt/autodeploy/projects/inventory``
 folder and is the central inventory for all modules. It is based on the Ansible
@@ -87,9 +84,10 @@ by the Bare-Metal-OS module but must be modified to use with RHEL-OSP.
 
 Edit the inventory to reflect your environment.
 
-- **hosts.ini** - Copy and append the contents of this ``hosts.ini`` file to the
-  ``/opt/autodeploy/projects/inventory/hosts.ini`` file and modify as needed. Only
-  modify the :code:`[group]` of hosts as needed.
+- **hosts.ini** - Copy and append the contents of the ``/rhel-osp/inventory/hosts.ini``
+  file to the ``/opt/autodeploy/projects/inventory/hosts.ini`` file and modify as
+  needed. If appending to this file ensure there is no duplication. All hosts listed
+  should be under a :code:`[group]` heading.
 
 .. note::
 
@@ -99,6 +97,32 @@ Edit the inventory to reflect your environment.
 
 .. code-block:: bash
 
+    # ------------------------------------------------------------------
+    # Do not modify a [group:children] section, they are module specific
+    # ------------------------------------------------------------------
+
+    # Host(s) with Compute role - modify as needed
+    [compute]
+    compute-1
+    compute-2
+    compute-3
+    compute-4
+    compute-5
+    compute-6
+    compute-7
+
+    # Host(s) with Controller role - modify as needed
+    [controller]
+    controller-1
+    controller-2
+    controller-3
+
+    # Host(s) with HAProxy role - modify as needed
+    [haproxy]
+    haproxy-1
+    haproxy-2
+
+    # Host(s) that get OpenStack deployed
     [openstack:children]
     controller
     compute
@@ -107,17 +131,7 @@ Edit the inventory to reflect your environment.
     neutron-network-node
     scaleio
 
-    # Host(s) with HAProxy role - modify as needed
-    [haproxy]
-    haproxy-1
-    haproxy-2
-
-    # Host(s) with Controller role - modify as needed
-    [controller]
-    controller-1
-    controller-2
-    controller-3
-
+    # Host(s) with Swift role(s)
     [swift:children]
     swift-proxy
     swift-storage
@@ -125,24 +139,28 @@ Edit the inventory to reflect your environment.
     [swift-proxy:children]
     controller
 
-    # Host(s) with Swift storage role - modify as needed
     [swift-storage]
     swift-1
     swift-2
     swift-3
 
+    # Host(s) with SQL role
     [sql:children]
     controller
 
+    # Host(s) with Keystone role
     [keystone:children]
     controller
 
+    # Host(s) with RabbitMQ role
     [rabbitmq_cluster:children]
     controller
 
+    # Host(s) with Glance role
     [glance:children]
     controller
 
+    # Host(s) with Cinder role(s)
     [cinder:children]
     cinder-server
     cinder-volume
@@ -153,12 +171,15 @@ Edit the inventory to reflect your environment.
     [cinder-volume: children]
     compute
 
+    # Host(s) with Controller-Nova role
     [controller-nova:children]
     controller
 
+    # Host(s) with Heat role
     [heat:children]
     controller
 
+    # Host(s) with Ceilometer role(s)
     [ceilometer-control:children]
     controller
 
@@ -166,9 +187,11 @@ Edit the inventory to reflect your environment.
     ceilometer-control
     compute
 
+    # Host(s) with Horizon role
     [horizon:children]
     controller
 
+    # Host(s) with Neutron role(s)
     [neutron:children]
     neutron-network-node
     neutron-server
@@ -179,14 +202,9 @@ Edit the inventory to reflect your environment.
     [neutron-server:children]
     controller
 
+    # Host(s) with MongoDB role
     [mongodb:children]
     controller
-
-    # Host(s) with Compute role - modify as needed
-    [compute]
-    compute-1
-    compute-2
-    compute-3
 
 .. note::
 
@@ -199,8 +217,8 @@ Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module uses multiple variables that are managed in various files. The
-``/opt/autodeploy/projects/inventory/host_vars/`` folder contains host specific
-variable files and the ``/opt/autodeploy/projects/inventory/group_vars/`` folder
+``/rhel-osp/inventory/host_vars/`` folder contains host specific
+variable files and the ``/rhel-osp/inventory/group_vars/`` folder
 contains module specific variable files.
 
 host_vars
@@ -210,15 +228,16 @@ The variables that will be applied to a specific host are stored in a ``host_nam
 file. There are two in the example inventory, one for the ``autodeploynode`` and
 one for ``hostname-1``.
 
-- **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml`` for each host in the hosts.ini file. Since these files were created
-  by a previous module they may need to be renamed. For example if the files are
-  named ``host_name-1, host_name-2, ...`` they may will need to be renamed for your deployment
-  ``controller-1,controller-2, ...``. Now copy and append the contents of the
-  appropriate ``example_host.yml`` and change values as needed.
+- **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
+  for each host in the hosts.ini file. Since these files were created by a previous
+  module they may need to be renamed. For example if the files are named ``host_name-1, host_name-2, ...``
+  they may will need to be renamed for your deployment ``controller-1,controller-2, ...``.
+  Now copy and append the contents of the appropriate ``example_host.yml`` and change
+  values as needed.
 
 .. code-block:: bash
 
-    /bare-metal-os/inventory/
+    /rhel-osp/inventory/
     -- /host_vars
           example-compute-host.yml
           example-controller.yml
@@ -308,7 +327,7 @@ would need to be modified. Always review both sets of variables for comtent.
 
 .. code-block:: bash
 
-    /bare-metal-os/roles/some_role
+    /rhel-osp/roles/some_role
     -- /defaults
           main.yml
     -- /vars
