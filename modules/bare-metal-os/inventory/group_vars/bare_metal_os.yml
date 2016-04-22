@@ -13,7 +13,6 @@ configure_vlan_interfaces: true
 #   bare-metal-os/inventory/host_vars/autodeploynode
 #   bare-metal-os/site_deploy (vars/hanlon.yml)
 #   bare-metal-os/site_reset (vars/hanlon.yml)
-#   slimer/roles/subscription-manager
 autodeploynode: x.x.x.x
 
 # Usage:
@@ -30,126 +29,14 @@ inventory_csv_file: ./inventory/example_inventory.csv
 site_password: localpassword
 
 # Usage:
+#   bare-metal-os/roles/prepare
+rhn_user: 'rhn-user-name'
+rhn_pass: 'rhn-password'
+
+# Usage:
 #   bare-metal-os/roles/idrac
 #   bare-metal-os/site_deploy
 #   bare-metal-os/site_inventory
 #   bare-metal-os/site_reset
-#   slimer/roles/pacemaker (controllers)
 ipmi_username: root
 ipmi_password: localpassword
-
-#Slimer Variables
-mtu: 8964
-# subscription manager vars:
-rhn_pass: 'rhn-password'
-rhn_user: 'rhn-user-name'
-pool: 'Red Hat Enterprise Linux OpenStack Platform Developer Supported Business Partner NFR'
-#offline var, if true then installation will use an local repo for rpms
-offline: false
-
-### OpenStack VLANs
-management_vlan: xxxx
-tenant_vlan: xxxx
-storage_public_vlan: xxxx
-storage_cluster_vlan: xxxx
-external_vlan: xxxx
-
-### OpenStack control plane configuration
-admin_tenant: admin
-admin_user: admin
-openstack_release: juno
-use_swift: true
-use_ceph: false
-use_stonith: false
-keystone_auth_port: 35357
-keystone_auth_protocol: http
-keystone_adminurl: "{{ keystone_auth_protocol }}://{{ keystone_vip }}:{{ keystone_auth_port }}/v2.0"
-
-search_domain: ".localdomain"
-nameservers:
- - x.x.x.x
-
-### Network interface assignment
-# any deviations for individual hosts should be specified in the host_vars or inventory files
-primary_if: "bond0.{{ external_vlan }}"
-private_if: "bond0.{{ management_vlan }}"
-tunnel_if: "bond0.{{ tenant_vlan }}"
-
-### NTP servers
-ntp:
-  - 0.rhel.pool.ntp.org
-  - 1.rhel.pool.ntp.org
-  - 2.rhel.pool.ntp.org
-
-neutron_ovs_bridges:
-  - bridge: br-ex
-    port: "bond0.{{ external_vlan }}"
-
-default_store: swift
-temporary_dir: /var/lib/ansible
-credentials_dir: /var/lib/ansible
-pcs_cluster_name: automation_cluster
-pcs_cluster_pass: "{{ lookup('password', credentials_dir + '/credentials/pcs_cluster_pass chars=ascii_letters,digits') }}"
-rabbit_hosts: "{% for node in groups['controller'] %}{{ hostvars[node]['ansible_'+private_if]['ipv4']['address'] }}:5672{% if not loop.last %},{% endif %}{% endfor %}"
-memcache_servers: "{% for node in groups['controller'] %}{{ hostvars[node]['ansible_'+private_if]['ipv4']['address'] }}:11211{% if not loop.last %},{% endif %}{% endfor %}"
-
-#database user passwords
-clustercheck_db_pass: "{{ lookup('password', credentials_dir + '/credentials/clustercheck_db_pass chars=ascii_letters,digits') }}"
-db_root_password: "{{ lookup('password', credentials_dir + '/credentials/db_root_password chars=ascii_letters,digits') }}"
-keystone_db_pass: "{{ lookup('password', credentials_dir + '/credentials/keystone_db_pass chars=ascii_letters,digits') }}"
-glance_db_pass: "{{ lookup('password', credentials_dir + '/credentials/glance_db_pass chars=ascii_letters,digits') }}"
-cinder_db_pass: "{{ lookup('password', credentials_dir + '/credentials/cinder_db_pass chars=ascii_letters,digits') }}"
-nova_db_pass: "{{ lookup('password', credentials_dir + '/credentials/nova_db_pass chars=ascii_letters,digits') }}"
-neutron_db_pass: "{{ lookup('password', credentials_dir + '/credentials/neutron_db_pass chars=ascii_letters,digits') }}"
-heat_db_pass: "{{ lookup('password', credentials_dir + '/credentials/heat_db_pass chars=ascii_letters,digits') }}"
-swift_db_pass: "{{ lookup('password', credentials_dir + '/credentials/swift_db_pass chars=ascii_letters,digits') }}"
-
-#openstack service user passwords
-admin_pass: "{{ lookup('password', credentials_dir + '/credentials/admin_pass chars=ascii_letters,digits') }}"
-glance_pass: "{{ lookup('password', credentials_dir + '/credentials/glance_pass chars=ascii_letters,digits') }}"
-cinder_pass: "{{ lookup('password', credentials_dir + '/credentials/cinder_pass chars=ascii_letters,digits') }}"
-swift_pass: "{{ lookup('password', credentials_dir + '/credentials/swift_pass chars=ascii_letters,digits') }}"
-neutron_pass: "{{ lookup('password', credentials_dir + '/credentials/neutron_pass chars=ascii_letters,digits') }}"
-nova_pass: "{{ lookup('password', credentials_dir + '/credentials/nova_pass chars=ascii_letters,digits') }}"
-heat_pass: "{{ lookup('password', credentials_dir + '/credentials/heat_pass chars=ascii_letters,digits') }}"
-ceilometer_pass: "{{ lookup('password', credentials_dir + '/credentials/ceilometer_pass chars=ascii_letters,digits') }}"
-keystone_admin_token: "{{ lookup('password', credentials_dir + '/credentials/keystone_admin_token chars=hexdigits') }}"
-swift_pathprefix: "{{ lookup('password', credentials_dir + '/credentials/swift_prefix chars=ascii_letters,digits') }}"
-swift_pathsuffix: "{{ lookup('password', credentials_dir + '/credentials/swift_suffix chars=ascii_letters,digits') }}"
-demo_pass: "{{ lookup('password', credentials_dir + '/credentials/admin_pass chars=ascii_letters,digits') }}"
-neutron_metadata_proxy_shared_secret: "{{ lookup('password', credentials_dir + '/credentials/neutron_metadata_proxy_shared_secret chars=hexdigits') }}"
-
-#Internal VIPs
-rabbit_vip: x.x.x.x
-lb_db_vip: x.x.x.x
-keystone_vip: x.x.x.x
-glance_vip: x.x.x.x
-cinder_vip: x.x.x.x
-nova_vip: x.x.x.x
-neutron_vip: x.x.x.x
-horizon_vip: x.x.x.x
-heat_vip: x.x.x.x
-ceilometer_vip: x.x.x.x
-swift_vip: x.x.x.x
-scaleio_vip: x.x.x.x
-vip_keystone_pub: x.x.x.x
-vip_glance_pub: x.x.x.x
-vip_cinder_pub: x.x.x.x
-vip_nova_pub: x.x.x.x
-vip_neutron_pub: x.x.x.x
-vip_horizon_pub: x.x.x.x
-vip_heat_pub: x.x.x.x
-vip_ceilometer_pub: x.x.x.x
-
-### Horizon
-# Generally set to horizon_vip as above
-horizon_internal_servername: x.x.x.x
-# Generally set to vip_horizon_pub as above
-horizon_public_servername: x.x.x.x
-
-### Slimer Demo Role
-# Toggle to run the role
-run_demo: true
-# Generally set to the ext_if network
-demo_ext_network: "x.x.x.x/xx"
-demo_int_network: "192.168.101.0/24"

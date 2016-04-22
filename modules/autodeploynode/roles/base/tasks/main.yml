@@ -14,6 +14,12 @@
     extra_args: "--upgrade"
   with_fileglob: "*pip-requirements*"
 
+- name: Create the resource sub-directories
+  file:
+    path: "{{ resources_base_path }}/{{ item }}"
+    state: directory
+  with_items: "{{ resource_dirs }}"
+
 - name: Create the inventory directories
   file:
     path: "{{ projects_base_path }}/{{ item }}"

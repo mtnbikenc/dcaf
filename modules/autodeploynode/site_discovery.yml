@@ -6,6 +6,10 @@
 
   vars:
     hanlon_base_url: http://{{ ansible_default_ipv4.address }}:8026/hanlon/api/v1/
+    hnl_mk_image: hnl_mk_debug-image.2.0.1.iso
+    hnl_mk_source: https://github.com/csc/Hanlon-Microkernel/releases/download/v2.0.1/
+    hnl_mk_local_path: /opt/hanlon/image/
+    hnl_mk_path: /home/hanlon/image/{{ hnl_mk_image }}
 
   roles:
     - dhcp-server
@@ -15,6 +19,8 @@
     - name: Check for local copy of Hanlon Microkernel
       stat:
         path: "{{ hnl_mk_local_path }}{{ hnl_mk_image }}"
+        get_checksum: false
+        get_md5: false
       register: hnl_mk
 
     - name: Download Hanlon Microkernel
