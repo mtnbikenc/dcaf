@@ -26,29 +26,3 @@ used to stand up the Hanlon instance and it's requirements, MongoDB and a TFTP
 server. In order to automatically discover and provision physical hardware, a DHCP
 server is configured to provide addresses on the local subnet. Ansible is used as
 the automation tool to deploy and configure systems and applications.
-
-## CSC DCAF Modes
-
-Since CSC DCAF is a framework, it is designed to be used in two different
-operational modes. The two modes are online and offline and are detailed below.
-
-### Online Mode
-
-When CSC DCAF is used in online mode the AutoDeployNode is connected to an external
-network with direct access to automation resources. The CSC Decaf projects are
-stored in source controlled repositories on Github and other resources such as
-RPMs and ISOs are downloaded directly from the Internet.
-
-### Offline Mode
-
-When CSC DCAF is used in offline mode the AutoDeployNode does not have external
-network access and cannot get to the automation resources. For this reason
-additional resources are needed and steps must be taken to prepare for an offline
-AutoDeployNode installation.
-
-In offline mode all automation resources will be retrieved from the Internet by
-a `staging node` that has Internet access. They will be saved to a USB hard
-drive connected to this node and will later be moved to the offline AutoDeployNode
-and used for deployment. Once this is done all projects can be used as documented.
-Keep in mind that the method of retrieving the automation resources will have to
-be repeated in order to obtain any updates. 

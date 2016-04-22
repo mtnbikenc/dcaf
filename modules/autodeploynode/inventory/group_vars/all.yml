@@ -1,46 +1,21 @@
 ---
-# Required User Variables
-rhn_user:
-rhn_pass:
-
-# Offline autodeploy vars
-offline: false
-usb_hdd: /mnt/sdb
-use_bare_metal_os: true
 
 # Autodeploy common vars
 autodeploy_base_path: /opt/autodeploy
 docker_api_version: "1.20"
-docker_path: "{{ resources_base_path }}/docker/"
-iso_path: "{{ resources_base_path }}/ISO/"
-packages_path: "{{ resources_base_path }}/packages/"
 projects_base_path: "{{ autodeploy_base_path }}/projects"
-resources_base_path: "{{ autodeploy_base_path }}/resources"
-epel_rpm_file: "{{ projects_base_path }}/dcaf/modules/autodeploynode/files/epel_rpm_packages.txt"
-rhn_rpm_file: "{{ projects_base_path }}/dcaf/modules/autodeploynode/files/rhn_rpm_packages.txt"
-rpm_path: "{{ resources_base_path }}/rpms/"
 
 # Autodeploy site_discovery vars:
 hnl_mk_image: hnl_mk_debug-image.2.0.1.iso
-hnl_rhel_min_image: rhel-server-7.2-x86_64-dvd-hnl.iso
 hnl_mk_source: https://github.com/csc/Hanlon-Microkernel/releases/download/v2.0.1/
 hnl_mk_local_path: /opt/hanlon/image/
 hnl_mk_path: /home/hanlon/image/{{ hnl_mk_image }}
-rhel_iso_image: rhel-server-7.2-x86_64-dvd.iso
-
-# Offline Staging vars
-rhel_download_url: https://access.redhat.com/downloads/content/69/ver=/rhel---7/7.2/x86_64/product-downloads
 
 git_repos:
   - { name: "slimer", repo: "https://github.com/csc/slimer.git" }
   - { name: "ansible-scaleio", repo: "https://github.com/csc/ansible-scaleio.git" }
 
-# Offline usb staging vars
-usb_projects_path: "{{ usb_hdd }}/autodeploy/projects"
-usb_resources_path: "{{ usb_hdd }}/autodeploy/resources"
-
 autodeploy_support_pkgs:
-  - createrepo
   - dhcp
   - docker
   - firefox
@@ -65,15 +40,3 @@ autodeploy_support_pkgs:
 source_projects:
   - ansible-scaleio
   - slimer
-
-docker_images:
-  - { name: hanlon-mongo, image: mongo, tar_file: mongo.tar }
-  - { name: hanlon-server, image: "cscdock/hanlon:2.5.0", tar_file: cscdock_hanlon.tar }
-  - { name: hanlon-atftpd, image: cscdock/atftpd, tar_file: cscdock_atftpd.tar }
-
-resource_dirs:
-  - docker
-  - ISO
-  - packages
-  - rpms
-  - scaleio

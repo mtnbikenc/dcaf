@@ -6,8 +6,6 @@
   gather_facts: true
   roles:
     - base
-    - { role: createrepo, when: offline }
-    - prep-projects
 
 - include: site_docker.yml
 

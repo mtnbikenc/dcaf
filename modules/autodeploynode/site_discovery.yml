@@ -17,17 +17,11 @@
         path: "{{ hnl_mk_local_path }}{{ hnl_mk_image }}"
       register: hnl_mk
 
-    - name: Download Hanlon Microkernel (Online)
+    - name: Download Hanlon Microkernel
       get_url:
         url: "{{ hnl_mk_source }}{{ hnl_mk_image }}"
         dest: "{{ hnl_mk_local_path }}"
-      when: not hnl_mk.stat.exists and not offline
-
-    - name: Copy Hanlon Microkernel to /opt/hanlon/image (Offline)
-      copy:
-        src: "{{ iso_path }}{{ hnl_mk_image }}"
-        dest: "{{ hnl_mk_local_path }}"
-      when: offline
+      when: not hnl_mk.stat.exists
 
     - name: Add a Microkernel Image to Hanlon
       hanlon_image:

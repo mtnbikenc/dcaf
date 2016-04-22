@@ -36,17 +36,6 @@ There are several network requirements for the deployment.
 - Out-of-band Network IP address for each node
 - Management IP address for each node
 
-Offline Staging Node (to stage offline AutoDeployNode)
-------------------------------------------------------
-
-For an offline mode deployment a Linux machine with Internet access is required
-to download the automation resources and prepare the USB drive.
-
-- Staging node (existing or new laptop/server)
-- Red Hat Enterprise Linux workstation or server instance
-- A user with sudo access
-- At least a 250GB USB Hard Drive (as a repository)
-
 AutoDeployNode
 --------------
 

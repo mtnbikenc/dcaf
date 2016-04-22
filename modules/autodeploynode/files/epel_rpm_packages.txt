@@ -1,4 +1,0 @@
-ansible
-python-pip
-python-xvfbwrapper
-sshpass

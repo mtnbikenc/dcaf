@@ -7,21 +7,12 @@
     state: present
   with_items: "{{ autodeploy_support_pkgs }}"
 
-- name: Install required pip-based support packages (Online)
+- name: Install required pip-based support packages
   pip:
     requirements: "{{ item }}"
     state: present
     extra_args: "--upgrade"
-  when: not offline
-  with_fileglob: "../../files/*pip-requirements*"
-
-- name: Install required pip-based support packages (Offline)
-  pip:
-    requirements: "{{ item }}"
-    state: present
-    extra_args: "--index-url=file://{{ packages_path }}simple/"
-  when: offline
-  with_fileglob: "../../files/*pip-requirements*"
+  with_fileglob: "*pip-requirements*"
 
 - name: Create the inventory directories
   file:
@@ -109,14 +100,12 @@
     dest: "{{ projects_base_path }}/{{ item.name }}"
   with_items: "{{ git_repos }}"
   ignore_errors: true
-  when: not offline
 
 - name: Checkout the latest tagged version
   shell: "git checkout $(git describe --abbrev=0 --tags)"
   args:
     chdir: "{{ projects_base_path }}/{{ item.name }}"
   with_items: "{{ git_repos }}"
-  when: not offline
 
 - name: Update default Ansible configuration
   lineinfile:
