@@ -129,7 +129,7 @@ neutron_enable_security_group: true
 # specifying physical_network names usable for VLAN provider and
 # tenant networks, as well as ranges of VLAN tags on each
 # physical_network available for allocation as tenant networks.
-neutron_network_vlan_ranges: "physnet1"
+#neutron_network_vlan_ranges: "physnet1"
 
 # ====== flat =====
 # (ListOpt) List of physical_network names with which flat networks

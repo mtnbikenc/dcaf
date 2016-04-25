@@ -1,4 +1,5 @@
 # CSC Data Center Automation Framework (DCAF)
+[![Build Status](https://travis-ci.org/csc/dcaf.svg?branch=master)](https://travis-ci.org/csc/dcaf)
 
 The CSC Data Center Automation Framework (DCAF) is a collection of resources
 designed to automate various platforms and deployments within the data center.

@@ -8,7 +8,7 @@
 
 - name: create heat template
   template:
-    src: heat_template.yml
+    src: heat_template.j2
     dest: "{{temp_dir}}/heat_template.yml"
     force: yes
 
