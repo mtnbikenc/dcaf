@@ -1,29 +1,99 @@
 Overview
 ========
 
-The CSC Data Center Automation Framework (DCAF) is a collection of resources
-designed to automate various platforms and deployments within the data center.
-It is comprised of CSC public open source projects, and various community based
-open source projects.
+The CSC Data Center Automation Framework `(DCAF) <https://github.com/csc/dcaf>`_
+is a collection of resources designed to automate various platforms and deployments
+within the data center. It is based on `Ansible <http://docs.ansible.com/ansible/index.html>`_
+automation. Ansible in short is an automation platform that can configure, deploy
+and orchestrate IT tasks.
 
-Project Sources
----------------
+CSC DCAF is comprised of CSC public open source projects, and various community
+based open source projects.
 
-`CSC DCAF <https://github.com/csc/dcaf>`_ is a collection of resources designed
-to automate various platforms and deployments within the data center. It is kept
-under source control in a GitHub repository and includes the following CSC modules:
+CSC DCAF and Ansible Automation
+-------------------------------
+
+As previously mentioned the CSC DCAF project is based on Ansible automation. It
+follows the Ansible hierarchy, best practices and uses their pre-written modules.
+
+The key things to note about Ansible are:
+
+- `Inventory <http://docs.ansible.com/ansible/intro_inventory.html>`_ contains
+  the hosts that Ansible will execute against and the configuration variable
+  files. The inventory is configurable and can customized to your environment.
+
+- `Playbooks <http://docs.ansible.com/ansible/playbooks.html>`_ are Ansible's
+  configuration, deployment and orchestration language. They are used to manage
+  configurations of and deployments to remote machines. They are written in YAML
+  syntax.
+
+Ansible Inventory
+~~~~~~~~~~~~~~~~~
+
+The inventory for CSC DCAF is located in the ``/opt/autodeploy/projects/inventory``
+folder. It follows the Ansible inventory hierarchy:
+
+.. code-block:: yaml
+
+  /inventory
+  -- /group_vars
+        all.yml
+        group_name.yml
+  -- hosts.ini
+  -- /host_vars
+        host_name.yml
+
+- **hosts.ini** - The inventory file that contains the names of the hosts Ansible
+  will execute against. Hosts can be grouped by adding a :code:`[group]` section
+  heading and placing desired hosts under it. Groups can also be grouped the same
+  way.
+
+ **Example:**
+
+.. code-block:: yaml
+
+  [groups:children]
+  group1
+  group2
+
+  [group1]
+  host1
+  host2
+
+  [group2]
+  host3
+
+  - **host_name.yml** - There should be a ``host_name.yml`` file for each host in the
+  ``hosts.ini`` file. This file will contain variables that will be assigned to the
+  host when the playbook runs.
+
+- **all.yml** - This file contains variables that apply to all hosts in the
+  ``hosts.ini``. These are referred to as global variables.
+
+- **group_name.yml** - This file can be used to specify variables that only get
+  to the ``group`` in the ``hosts.ini`` file. The name of this file must match the
+  name of the :code:`[group]` in the ``hosts.ini`` file.
+
+Refer to the Ansible `Inventory <http://docs.ansible.com/ansible/intro_inventory.html>`_
+for additional information.
+
+CSC DCAF Projects & Modules
+---------------------------
+
+The CSC DCAF project is kept under source control in a GitHub repository and includes
+the following CSC modules:
 
 - `Autodeploynode <https://github.com/csc/dcaf/autodeploynode>`_ - Provisions and
   and configures the CSC DCAF Autodeploynode.
 
-- `Bare-metal-OS <https://github.com/csc/dcaf/bare-metal-os>`_ - An automated
+- `Bare-Metal-OS <https://github.com/csc/dcaf/bare-metal-os>`_ - An automated
   deployment of an operating system to bare-metal hardware using Hanlon, currently
   the Red Hat Enterprise Linux OS.
 
-- `Kvm-host <https://github.com/csc/dcaf/kvm-host>`_ - An automated deployment and
+- `KVM-Host <https://github.com/csc/dcaf/kvm-host>`_ - An automated deployment and
   configuration of virtual machines on RHEL KVM hosts.
 
-- `Rhel-osp <https://github.com/csc/dcaf/rhel-osp>`_ - An automated deployment of
+- `RHEL-OSP <https://github.com/csc/dcaf/rhel-osp>`_ - An automated deployment of
   a Red Hat OpenStack Cluster with high availability.
 
 - `Vmware <https://github.com/csc/dcaf/vmware>`_ - An automated deployment of
