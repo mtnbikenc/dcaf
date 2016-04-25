@@ -211,15 +211,15 @@ the following variables in the ``inventory/group_vars/all.yml`` file.
 
 .. code-block:: yaml
 
-   # Required User Variables
-   rhn_user:
-   rhn_pass:
+    # Required User Variables
+    rhn_user:
+    rhn_pass:
 
 Run the stage_resources.yml playbook:
 
 .. code-block:: bash
 
-   ansible-playbook stage_resources.yml
+    ansible-playbook stage_resources.yml
 
 Configure DCAF Base variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -236,20 +236,19 @@ By default, the DHCP server will be installed with the following configuration:
 
 .. code-block:: yaml
 
-   dns1: 8.8.8.8
-   dhcp_start: 20
-   dhcp_end: 60
+    dns1: 8.8.8.8
+    dhcp_start: 20
+    dhcp_end: 60
 
 .. note::
 
-  The DHCP start and end values above are the last octet of the subnet the server
-  is installed in. For example,
+    The DHCP start and end values above are the last octet of the subnet the server
+    is installed in. For example,
+    172.17.16.20 would be ``dhcp_start: 20``
+    172.17.16.60 would be ``dhcp_end: 60``
 
-  172.17.16.20 would be ``dhcp_start: 20``
-  172.17.16.60 would be ``dhcp_end: 60``
-
-  To use alternate values, edit the ``dcaf/modules/autodeploynode/roles/dhcp-server/defaults.yml``
-  file with your own values.
+To use alternate values, edit the ``dcaf/modules/autodeploynode/roles/dhcp-server/defaults.yml``
+file with your own values.
 
 Running the Autodeploynode Playbook
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -262,15 +261,15 @@ Now that the variables have been configured, run the following playbooks to fini
 
 .. note::
 
-  The ``main.yml`` playbook will also run the ``site_docker.yml`` and ``site_discovery.yml``
-  playbooks.
+    The ``main.yml`` playbook will also run the ``site_docker.yml`` and ``site_discovery.yml``
+    playbooks.
 
-  The ``site_docker.yml`` playbook will start the Hanlon Docker environment. First
-  it will clean up any existing containers. Then it will start the Mongo, Hanlon
-  Server and TFTP Server containers.
+    The ``site_docker.yml`` playbook will start the Hanlon Docker environment. First
+    it will clean up any existing containers. Then it will start the Mongo, Hanlon
+    Server and TFTP Server containers.
 
-  The ``site_discovery.yml`` playbook will configure the DHCP service and prepare
-  the Hanlon Server for the bare metal OS deployment.
+    The ``site_discovery.yml`` playbook will configure the DHCP service and prepare
+    the Hanlon Server for the bare metal OS deployment.
 
 At this point the AutoDeployNode has been configured and is ready to start using
 for automation.

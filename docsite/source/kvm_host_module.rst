@@ -71,13 +71,13 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  The ``kvm-host/inventory/hosts.ini`` file contains many :code:`[group]` sections
-  with hosts and :code:`[group:children]` sections with groups as an example. Only
-  modify the :code:`[group]` of hosts as needed.
+    The ``kvm-host/inventory/hosts.ini`` file contains many :code:`[group]` sections
+    with hosts and :code:`[group:children]` sections with groups as an example. Only
+    modify the :code:`[group]` of hosts as needed.
 
 .. code-block:: yaml
 
-  Example:
+    Example:
     # ------------------------------------------------------------------
     # Do not modify a [group:children] section, they are module specific
     # ------------------------------------------------------------------
@@ -108,9 +108,9 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  Do not modify a group of groups :code:`[group:children]`. These groups are defined
-  by the module. Add the required hosts in the respective :code:`[group]` section
-  as needed.
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,9 +143,10 @@ one for ``hostname-1``.
           example_vm.yml
 
 .. note::
-The KVM-Host module has two types of `hosts`, one is the physical host (kvm-host)
-  and the virtual host (vm). Copy, rename and modify the appropriate type of example
-  host file as needed.
+
+    The KVM-Host module has two types of `hosts`, one is the physical host (kvm-host)
+    and the virtual host (vm). Copy, rename and modify the appropriate type of example
+    host file as needed.
 
 Below is the ``example_kvmhost.yml``
 
@@ -220,7 +221,7 @@ configured a certain way. Role specific variables are stored in the ``/roles/som
 and ``/roles/some_role/vars`` folders. Typically only the ``/roles/some_roles/defaults``
 would need to be modified. Always review both sets of variables for comtent.
 
-.. code-block:: bash
+.. code-block:: none
 
     /kvm-host/roles/some_role
     -- /defaults

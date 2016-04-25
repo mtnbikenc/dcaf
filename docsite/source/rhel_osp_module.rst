@@ -91,9 +91,9 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  The ``rhel-osp/inventory/hosts.ini`` file contains many :code:`[group]` sections
-  with hosts and :code:`[group:children]` sections with groups as an example. Only
-  modify the :code:`[group]` of hosts as needed.
+    The ``rhel-osp/inventory/hosts.ini`` file contains many :code:`[group]` sections
+    with hosts and :code:`[group:children]` sections with groups as an example. Only
+    modify the :code:`[group]` of hosts as needed.
 
 .. code-block:: bash
 
@@ -208,9 +208,9 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  Do not modify a group of groups :code:`[group:children]`. These groups are defined
-  by the module. Add the required hosts in the respective :code:`[group]` section
-  as needed.
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
 
 
 Modify Host & Project Variables
@@ -247,9 +247,9 @@ one for ``hostname-1``.
 
 .. note::
 
-  The RHEL-OSP module has numerous types of ``hosts`` based on the RHOSP role or
-  service. Copy, rename and modify the appropriate type of example_host.yml file
-  as needed.
+    The RHEL-OSP module has numerous types of ``hosts`` based on the RHOSP role or
+    service. Copy, rename and modify the appropriate type of example_host.yml file
+    as needed.
 
 Below is the ``example-compute-host.yml``
 
@@ -284,7 +284,7 @@ Below is the ``example-compute-host.yml``
 
 .. note::
 
-  The ``host_name.yml`` file is being appended to. Check it for duplicate variables.
+    The ``host_name.yml`` file is being appended to. Check it for duplicate variables.
 
 group_vars
 ~~~~~~~~~~
@@ -345,26 +345,26 @@ Next run the ``rhel-osp/site.yml`` playbook to deploy RHEL OSP to the hosts in i
 
 .. note::
 
-  The ``site.yml`` playbook will call the following playbooks.
+    The ``site.yml`` playbook will call the following playbooks.
 
-  The ``haproxy.yml`` playbook will create firewall rules, install and configure
-  Keepalived and HAProxy.
+    The ``haproxy.yml`` playbook will create firewall rules, install and configure
+    Keepalived and HAProxy.
 
-  The ``control_plane.yml`` playbook will include a series of playbooks that will
-  install and configure the control plane services.
+    The ``control_plane.yml`` playbook will include a series of playbooks that will
+    install and configure the control plane services.
 
-  The ``neutron-network-node.yml`` playbook will install and configure the Neutron
-  networking on the grouped hosts. It will also set the required firewall rules
-  for Neutron.
+    The ``neutron-network-node.yml`` playbook will install and configure the Neutron
+    networking on the grouped hosts. It will also set the required firewall rules
+    for Neutron.
 
-  The ``compute_node.yml`` playbook will install and configure the required Nova
-  Compute packages, Neutron agents and create Nova firewall rules.
+    The ``compute_node.yml`` playbook will install and configure the required Nova
+    Compute packages, Neutron agents and create Nova firewall rules.
 
-  The ``swift.yml`` playbook will install and configure Swift and other required
-  agents. It will also create required firewall rules for these services.
+    The ``swift.yml`` playbook will install and configure Swift and other required
+    agents. It will also create required firewall rules for these services.
 
-  The ``prep-scaleio.yml`` playbook will create the required firewall rules for
-  use with EMC SCaleIO.
+    The ``prep-scaleio.yml`` playbook will create the required firewall rules for
+    use with EMC SCaleIO.
 
 
 At this point RHEL OSP has been installed and configured on all hosts listed
