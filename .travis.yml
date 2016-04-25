@@ -1,0 +1,10 @@
+---
+language: python
+python: "2.7"
+sudo: false
+
+install:
+  - pip install Sphinx sphinx_rtd_theme
+
+script:
+  - sphinx-build -nW -b html -d build/doctrees ./docsite/source build/html
