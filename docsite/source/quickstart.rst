@@ -17,6 +17,5 @@ have the correct setup to perform the steps as they’re provided.
     quickstart_bare_metal_os
     quickstart_rhel_osp
     quickstart_kvm_host
-    quickstart_vmware
     quickstart_slimer
     quickstart_ansible_scaleio
