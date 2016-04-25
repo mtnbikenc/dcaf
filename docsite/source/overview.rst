@@ -33,15 +33,15 @@ Ansible Inventory
 The inventory for CSC DCAF is located in the ``/opt/autodeploy/projects/inventory``
 folder. It follows the Ansible inventory hierarchy:
 
-.. code-block:: yaml
+.. code-block:: none
 
-  /inventory
-  -- /group_vars
-        all.yml
-        group_name.yml
-  -- hosts.ini
-  -- /host_vars
-        host_name.yml
+    /inventory
+    -- /group_vars
+          all.yml
+          group_name.yml
+    -- hosts.ini
+    -- /host_vars
+          host_name.yml
 
 - **hosts.ini** - The inventory file that contains the names of the hosts Ansible
   will execute against. Hosts can be grouped by adding a :code:`[group]` section
@@ -52,16 +52,16 @@ folder. It follows the Ansible inventory hierarchy:
 
 .. code-block:: yaml
 
-  [groups:children]
-  group1
-  group2
+    [groups:children]
+    group1
+    group2
 
-  [group1]
-  host1
-  host2
+    [group1]
+    host1
+    host2
 
-  [group2]
-  host3
+    [group2]
+    host3
 
   - **host_name.yml** - There should be a ``host_name.yml`` file for each host in the
   ``hosts.ini`` file. This file will contain variables that will be assigned to the

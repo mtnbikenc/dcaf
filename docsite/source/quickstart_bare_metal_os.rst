@@ -69,11 +69,11 @@ and examples of this file refer to the CSC DCAF project documentation.
 
 .. note::
 
-  The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
-  a module or the role the host will have within the module. Each :code:`[group]` name
-  should match the corresponding ``inventory/group_vars/group_name.yml`` group variable
-  file. If editing this file append to it and ensure there is no duplication. All
-  hosts listed should be under a :code:`group` heading.
+    The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
+    a module or the role the host will have within the module. Each :code:`[group]` name
+    should match the corresponding ``inventory/group_vars/group_name.yml`` group variable
+    file. If editing this file append to it and ensure there is no duplication. All
+    hosts listed should be under a :code:`group` heading.
 
 .. code-block:: yaml
 
@@ -101,9 +101,9 @@ This module uses multiple variables that are managed in various files. The
 
 .. note::
 
-  Each ``host_name.yml`` file must include the host hardware :code:`smbios-uuid`.
-  This can be found using the hosts vendor management tools. Refer to the vendor
-  documentation for more information.
+    Each ``host_name.yml`` file must include the host hardware :code:`smbios-uuid`.
+    This can be found using the hosts vendor management tools. Refer to the vendor
+    documentation for more information.
 
 - **bare_metal_os.yml** - Copy the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/group_vars/bare_metal_os.yml``
   file to the ``/opt/autodeploy/projects/inventory/group_vars/`` folder and modify

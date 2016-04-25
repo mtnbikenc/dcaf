@@ -41,23 +41,23 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
-  RHOSP roles. Each :code:`[group]` heading will contain a host or a child
-  ``group`` of hosts. If editing this file append to it and ensure there is no
-  duplication. All hosts listed should be under a :code:`[group]` heading.
+    The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
+    RHOSP roles. Each :code:`[group]` heading will contain a host or a child
+    ``group`` of hosts. If editing this file append to it and ensure there is no
+    duplication. All hosts listed should be under a :code:`[group]` heading.
 
 .. code-block:: yaml
 
-  Example:
-  # Host(s) with the Controller role
-  [controller]
-  controller1
-  ...
+    Example:
+    # Host(s) with the Controller role
+    [controller]
+    controller1
+    ...
 
-  # Host(s) with the Compute role
-  [compute]
-  compute1
-  ...
+    # Host(s) with the Compute role
+    [compute]
+    compute1
+    ...
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,9 +68,9 @@ This project uses multiple variables that are managed in various files. The
 
 .. note::
 
-  The RHEL-OSP module has multiple types of `hosts` based on the RHOSP role or
-  service. Copy, rename and modify the appropriate type of example host file as
-  needed.
+    The RHEL-OSP module has multiple types of `hosts` based on the RHOSP role or
+    service. Copy, rename and modify the appropriate type of example host file as
+    needed.
 
 - **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
   for each host, based on RHOSP role or service, in the hosts.ini file. Create or
@@ -79,8 +79,8 @@ This project uses multiple variables that are managed in various files. The
 
 .. note::
 
-  The RHEL-OSP module has multiple `group_name` variable files based on the RHOSP
-  role or service.
+    The RHEL-OSP module has multiple `group_name` variable files based on the RHOSP
+    role or service.
 
 - **group_name.yml** - Copy all of the ``/opt/autodeploy/projects/dcaf/rhel-osp/inventory/group_vars/group_name.yml``
   files to the ``/opt/autodeploy/projects/inventory/group_vars/`` folder and modify

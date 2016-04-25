@@ -52,23 +52,23 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
-  EMC ScaleIO roles. Each :code:`[group]` heading will contain a host or a child
-  ``group`` of hosts. If editing this file append to it and ensure there is no
-  duplication. All hosts listed should be under a :code:`[group]` heading.
+    The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
+    EMC ScaleIO roles. Each :code:`[group]` heading will contain a host or a child
+    ``group`` of hosts. If editing this file append to it and ensure there is no
+    duplication. All hosts listed should be under a :code:`[group]` heading.
 
 .. code-block:: yaml
 
-  Example:
-  # Host(s) with the MDM role
-  [mdm]
-  host-1
-  ...
+    Example:
+    # Host(s) with the MDM role
+    [mdm]
+    host-1
+    ...
 
-  # Host(s) with the TB role
-  [tb]
-  host-2
-  ...
+    # Host(s) with the TB role
+    [tb]
+    host-2
+    ...
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -71,11 +71,11 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
-  a module or the role the host will have within the module. Each :code:`[group]`
-  name should match the corresponding ``inventory/group_vars/group_name.yml`` group
-  variable file. If editing this file append to it and ensure there is no duplication.
-  All hosts listed should be under a :code:`group` heading.
+    The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
+    a module or the role the host will have within the module. Each :code:`[group]`
+    name should match the corresponding ``inventory/group_vars/group_name.yml`` group
+    variable file. If editing this file append to it and ensure there is no duplication.
+    All hosts listed should be under a :code:`group` heading.
 
 .. code-block:: yaml
 

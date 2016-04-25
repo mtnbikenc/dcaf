@@ -82,10 +82,10 @@ this file will vary depending on the what automation is being used.
 
 .. note::
 
-  The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
-  a module or the role the host will have within the module. Each :code:`[group]` name
-  should match the corresponding ``inventory/group_vars/group_name.yml`` group variable
-  file if it has one. All hosts listed should be under a :code:`[group]` heading.
+    The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
+    a module or the role the host will have within the module. Each :code:`[group]` name
+    should match the corresponding ``inventory/group_vars/group_name.yml`` group variable
+    file if it has one. All hosts listed should be under a :code:`[group]` heading.
 
 - **hosts.ini** - Copy the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/host.ini`` file to the ``/opt/autodeploy/projects/inventory/`` folder. Edit it to
   reflect the number of hosts and correct host names for the  deployment. This file
@@ -115,9 +115,9 @@ The ``bare-metal-os/inventory/hosts.ini`` file contains the following:
 
 .. note::
 
-  Do not modify a group of groups :code:`[group:children]`. These groups are defined
-  by the module. Add the required hosts in the respective :code:`[group]` section
-  as needed.
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
 
 Modify Host & Module Variables
 ------------------------------
@@ -159,12 +159,12 @@ Below is the example ``host_name.yml``
 
 .. note::
 
-  Each ``host_name.yml`` file must include the host hardware :code:`smbios-uuid`.
-  This can be found using the hosts vendor management tools. Refer to the vendor
-  documentation for more information.
+    Each ``host_name.yml`` file must include the host hardware :code:`smbios-uuid`.
+    This can be found using the hosts vendor management tools. Refer to the vendor
+    documentation for more information.
 
-  The ``smbios-uuid`` is unique and specific to the hardware so it must be different
-  in each ``host_name.yml`` file.
+    The ``smbios-uuid`` is unique and specific to the hardware so it must be different
+    in each ``host_name.yml`` file.
 
 group_vars
 ~~~~~~~~~~

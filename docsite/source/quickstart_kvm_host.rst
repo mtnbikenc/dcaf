@@ -37,24 +37,24 @@ Edit the inventory to reflect your environment.
 
 .. note::
 
-  The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
-  RHOSP and module roles. Each :code:`[group]` heading will contain a host or a child
-  ``group`` of hosts. If editing this file append to it and ensure there is no
-  duplication. All hosts listed should be under a :code:`[group]` heading.
+    The ``hosts.ini`` will contain :code:`[group]` headings that correspond to
+    RHOSP and module roles. Each :code:`[group]` heading will contain a host or a child
+    ``group`` of hosts. If editing this file append to it and ensure there is no
+    duplication. All hosts listed should be under a :code:`[group]` heading.
 
 .. code-block:: yaml
 
-  Example:
-  # KVM host machine(s)
-  [kvmhosts]
-  kvm-controller-1
-  ...
+    Example:
+    # KVM host machine(s)
+    [kvmhosts]
+    kvm-controller-1
+    ...
 
-  # VM(s) to be created
-  [nodes]
-  controller-1
-  compute-1
-  ...
+    # VM(s) to be created
+    [nodes]
+    controller-1
+    compute-1
+    ...
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,9 +65,9 @@ This module uses multiple variables that are managed in various files. The
 
 .. note::
 
-  The KVM-Host module has two types of ``hosts``, one is the physical host ``(kvm-host)``
-  and the virtual host ``(vm)``. Copy, rename and modify the appropriate type of example
-  host file as needed.
+    The KVM-Host module has two types of ``hosts``, one is the physical host ``(kvm-host)``
+    and the virtual host ``(vm)``. Copy, rename and modify the appropriate type of example
+    host file as needed.
 
 - **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
   for each host, physical and virtual, in the hosts.ini file. Create or modify these
