@@ -2,7 +2,7 @@
 
 - name: Check if RHEL DVD ISO file exists in the Hanlon image directory
   stat:
-    path: "{{ hnl_image_path }}/{{ rhel_iso_image }}"
+    path: "{{ iso_path }}/{{ rhel_iso_image }}"
     get_checksum: false
     get_md5: false
   register: rhel_iso
@@ -23,7 +23,7 @@
 - name: Download the RHEL DVD ISO file to /opt/autodeploy/resources/ISO
   get_url:
     url: "{{ rhel_get_url.url }}"
-    dest: "{{ hnl_image_path }}"
+    dest: "{{ iso_path }}"
   when: not (rhel_iso.stat.exists)
   tags: iso
 
@@ -35,5 +35,5 @@
   register: image_resource
 
 - name: Create the Hanlon RHEL minimized ISO file if missing
-  shell: "/opt/autodeploy/projects/dcaf/modules/bare-metal-os/roles/prepare/files/minimize-rhel-iso.sh -i {{ hnl_image_path }}/{{ rhel_iso_image }} -o {{ hnl_image_path }}/{{ hnl_rhel_min_image }}"
+  shell: "/opt/autodeploy/projects/dcaf/modules/bare-metal-os/roles/prepare/files/minimize-rhel-iso.sh -i {{ iso_path }}/{{ rhel_iso_image }} -o {{ hnl_image_path }}/{{ hnl_rhel_min_image }}"
   when: not (image_resource.stat.exists)

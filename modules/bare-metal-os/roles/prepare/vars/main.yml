@@ -1,5 +1,6 @@
 ---
 
+iso_path: /opt/autodeploy/resources/ISO
 hnl_image_path: /opt/hanlon/image/
 hnl_rhel_min_image: rhel-server-7.2-x86_64-dvd-hnl.iso
 rhel_iso_image: rhel-server-7.2-x86_64-dvd.iso
