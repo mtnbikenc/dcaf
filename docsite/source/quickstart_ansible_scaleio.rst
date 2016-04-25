@@ -5,12 +5,12 @@ This Quick Start Guide describes how to use CSC DCAF Automation to deploy the EM
 ScaleIO storage solution on Red Hat OpenStack Platform. It uses the following resources:
 
 - `Ansible-ScaleIO <https://github.com/csc/ansible-scaleio>`_ - The CSC Ansible-ScaleIO
-project, a fork of `sperreault/ansible-scaleio <https://github.com/sperreault/ansible-scaleio>`_,
-is used to install, configure and manage EMC ScaleIO. When used with CSC DCAF, this
-project adds EMC ScaleIO storage capabilities to the Red Hat OpenStack Platform.
+  project, a fork of `sperreault/ansible-scaleio <https://github.com/sperreault/ansible-scaleio>`_,
+  is used to install, configure and manage EMC ScaleIO. When used with CSC DCAF, this
+  project adds EMC ScaleIO storage capabilities to the Red Hat OpenStack Platform.
 
 The Ansible-ScaleIO project is intended to be utilized on a CSC DCAF deployment of
-the Red Hat OpenSatck Platform.
+the Red Hat OpenStack Platform.
 
 Before You Begin
 ----------------
