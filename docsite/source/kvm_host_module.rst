@@ -19,6 +19,9 @@ Before You Begin
 
 Ensure that the following requirements are met:
 
+The module does not have any specific requirements as it uses the Bare-Metal-OS module
+deployment.
+
 Two Host Types
 --------------
 
@@ -219,7 +222,7 @@ between different types of hosts. A role will allow you to define what a host is
 supposed to do, instead of having to specify the steps needed to get a server
 configured a certain way. Role specific variables are stored in the ``/roles/some_role/defaults``
 and ``/roles/some_role/vars`` folders. Typically only the ``/roles/some_roles/defaults``
-would need to be modified. Always review both sets of variables for comtent.
+would need to be modified. Always review both sets of variables for content.
 
 .. code-block:: none
 

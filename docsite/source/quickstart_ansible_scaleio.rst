@@ -45,9 +45,9 @@ For more information and examples of this file refer to the CSC DCAF project doc
 
 Edit the inventory to reflect your environment.
 
-- **hosts.ini** - Modify the ``opt/autodeploy/projects/inventory/hosts.ini`` and
+- **hosts.ini** - Modify the ``/opt/autodeploy/projects/inventory/hosts.ini`` and
   add the required :code:`[group]` sections and desired hosts. Use the
-  ``opt/autodeploy/projects/ansible-scaleio/inventory/hosts.ini`` as a template
+  ``/opt/autodeploy/projects/ansible-scaleio/inventory/hosts.ini`` as a template
   and change values as needed.
 
 .. note::
@@ -69,6 +69,12 @@ Edit the inventory to reflect your environment.
     [tb]
     host-2
     ...
+
+.. note::
+
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

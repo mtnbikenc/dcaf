@@ -64,8 +64,8 @@ with Slimer.
 
 Edit the inventory to reflect your environment.
 
-- **hosts.ini** - Modify the ``opt/autodeploy/projects/inventory/hosts.ini`` and
-  group the hosts by role. Use the ``opt/autodeploy/projects/slimer/inventory/hosts.ini``
+- **hosts.ini** - Modify the ``/opt/autodeploy/projects/inventory/hosts.ini`` and
+  group the hosts by role. Use the ``/opt/autodeploy/projects/slimer/inventory/hosts.ini``
   as a template and change values as needed. This file should contain the DNS
   resolvable names of the hosts being deployed to.
 
@@ -88,6 +88,12 @@ Edit the inventory to reflect your environment.
     [compute]
     compute-1
     ...
+
+.. note::
+
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

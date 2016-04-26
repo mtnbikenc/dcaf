@@ -1,5 +1,5 @@
-Bare-metal-OS Quick Start Guide
-===============================
+Bare-metal-OS Module Quick Start Guide
+======================================
 
 This Quick Start Guide describes how to use CSC DCAF Automation to provision an
 OS on bare-metal hardware, currently Red Hat Enterprise Linux. It uses the following
@@ -63,7 +63,7 @@ file will vary depending on the what automation is being used. For more informat
 and examples of this file refer to the CSC DCAF project documentation.
 
 - **hosts.ini** - Create the ``/opt/autodeploy/projects/inventory/hosts.ini`` file
-  by copying the ``opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/hosts.ini``,
+  by copying the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/hosts.ini``,
   and modify as needed. This file should contain the DNS resolvable names of the
   hosts being deployed to.
 
@@ -77,6 +77,7 @@ and examples of this file refer to the CSC DCAF project documentation.
 
 .. code-block:: yaml
 
+    Example snippet from the hosts.ini file
     # This entry should always be present
     [autodeploynode]
     localhost ansible_connection=local
@@ -87,6 +88,12 @@ and examples of this file refer to the CSC DCAF project documentation.
     hostname2
     ...
 
+.. note::
+
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
+
 Modify Host & Module Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -96,7 +103,7 @@ This module uses multiple variables that are managed in various files. The
 
 - **host_name.yml** - There should be a ``/opt/autodeploy/projects/inventory/host_vars/host_name.yml``
   for each host in the hosts.ini file. Create these files by copying the
-  ``opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_host.ini``,
+  ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/example_hosts.ini``,
   rename it to it host_name.yml and modify as needed.
 
 .. note::
