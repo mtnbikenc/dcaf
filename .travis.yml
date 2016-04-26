@@ -4,7 +4,17 @@ python: "2.7"
 sudo: false
 
 install:
-  - pip install Sphinx sphinx_rtd_theme
+  - pip install Sphinx sphinx_rtd_theme ansible PyYAML
+
+env:
+  - ANSIBLE_INVENTORY=./modules/autodeploynode/inventory/hosts.ini
 
 script:
   - sphinx-build -nW -b html -d build/doctrees ./docsite/source build/html
+  - python travis_parse_yaml.py
+      modules/autodeploynode/initial_stage.yml
+      modules/autodeploynode/main.yml
+      modules/bare-metal-os/site_deploy.yml
+      modules/kvm-host/site.yml
+      modules/rhel-osp/site.yml
+      modules/vmware/site_deploy.yml

@@ -1,9 +1,0 @@
-parameters:
-  key_name:
-  flavor: m2.medium
-  image: rhel-guest-image-7.1-20150224.0.x86_64.qcow2
-  root_password:
-  image_id: c93bf418-a3b9-4aca-be20-3a128d62d673
-  public1_net:
-  ansible_net:
-  router1:

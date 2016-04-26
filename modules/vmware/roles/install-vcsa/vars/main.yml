@@ -9,5 +9,5 @@ vcsa_gateway: 172.30.0.1
 vcsa_ip: 172.30.0.248
 vcsa_netmask: 255.255.255.0
 vcsa_ova: /opt/webscale/VMware-vCenter-Server-Appliance-5.5.0.20400-2442330_OVF10.ova
-esxi_password: {{ site_passwd }}
+esxi_password: "{{ site_passwd }}"
 esxi_host: 172.30.0.19
