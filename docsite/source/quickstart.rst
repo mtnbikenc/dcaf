@@ -19,3 +19,4 @@ have the correct setup to perform the steps as they’re provided.
     quickstart_kvm_host
     quickstart_slimer
     quickstart_ansible_scaleio
+    quickstart_vmware

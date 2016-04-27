@@ -18,4 +18,5 @@ Contents:
     bare_metal_os_module
     kvm_host_module
     rhel_osp_module
+    vmware_module
     known_issues
