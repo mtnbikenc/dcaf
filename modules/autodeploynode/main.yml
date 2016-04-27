@@ -1,12 +1,16 @@
 ---
 # This playbook will prepare the autodeploynode for use with the DCAF projects.
 
-- name: Stage DCAF automation resources on autodeploynode
+- name: Configure autodeploynode base requirements
   hosts: localhost
-  gather_facts: true
   roles:
-    - base
+    - { role: base, tags: base }
 
-- include: site_docker.yml
-
-- include: site_discovery.yml
+# This play is run separately so that facts can be gathered for the services
+# installed during the previous play
+- name: Configure autodeploynode services
+  hosts: localhost
+  roles:
+    - { role: dhcp-server, tags: dhcp-server }
+    - { role: hanlon-docker, tags: hanlon-docker }
+    - { role: hanlon-discover, tags: hanlon-discover }
