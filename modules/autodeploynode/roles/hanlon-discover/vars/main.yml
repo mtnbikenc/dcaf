@@ -1,0 +1,7 @@
+---
+
+hanlon_base_url: http://{{ ansible_default_ipv4.address }}:8026/hanlon/api/v1/
+hnl_mk_image: hnl_mk_debug-image.2.0.1.iso
+hnl_mk_source: https://github.com/csc/Hanlon-Microkernel/releases/download/v2.0.1/
+hnl_mk_local_path: /opt/hanlon/image/
+hnl_mk_path: /home/hanlon/image/{{ hnl_mk_image }}

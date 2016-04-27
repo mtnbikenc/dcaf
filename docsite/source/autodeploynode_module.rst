@@ -264,23 +264,28 @@ file with your own values.
 Running the Autodeploynode Playbook
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now that the variables have been configured, run the following playbooks to finish the AutoDeployNode deployment.
+Now that the variables have been configured, run the following playbooks to
+finish the AutoDeployNode deployment.
 
 .. code-block:: bash
 
     ansible-playbook main.yml
 
+The ``main.yml`` playbook will run the following roles:
+
+    - **base** - Configures the base system requirements
+    - **dhcp-server** - Configures the system to run a DHCP server and sets up
+      requirements for using Hanlon for discover and provisioning
+    - **hanlon-docker** - Configures the Hanlon Server Docker environment
+    - **hanlon-discover** - Configures the Hanlon Server to support discovery of
+      nodes booted on the PXE network
+
 .. note::
 
-    The ``main.yml`` playbook will also run the ``site_docker.yml`` and ``site_discovery.yml``
-    playbooks.
+    To re-run role(s) again without running the entire ``main.yml``, tags can be
+    used at the command line to run certain roles.
 
-    The ``site_docker.yml`` playbook will start the Hanlon Docker environment. First
-    it will clean up any existing containers. Then it will start the Mongo, Hanlon
-    Server and TFTP Server containers.
-
-    The ``site_discovery.yml`` playbook will configure the DHCP service and prepare
-    the Hanlon Server for the bare metal OS deployment.
+    ``ansible-playbook main.yml --tags=hanlon-docker,hanlon-discover``
 
 At this point the AutoDeployNode has been configured and is ready to start using
 for automation.

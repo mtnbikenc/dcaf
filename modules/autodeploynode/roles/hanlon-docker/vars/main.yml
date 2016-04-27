@@ -1,0 +1,7 @@
+---
+
+hanlon_resource: "/opt/hanlon"
+docker_network: "{{ ansible_docker0.ipv4.network }}"
+local_network: "{{ ansible_default_ipv4.network }}"
+hanlon_subnets: "{{ local_network }}/24,{{ docker_network }}/16"
+docker_api_version: "1.20"

@@ -1,0 +1,61 @@
+---
+
+- name: Clean up existing containers
+  docker:
+    docker_api_version: "{{ docker_api_version }}"
+    name: "{{ item.name }}"
+    image: "{{ item.image }}"
+    state: absent
+  with_items:
+    - { name: hanlon-mongo, image: mongo }
+    - { name: hanlon-server, image: "cscdock/hanlon:2.5.0" }
+    - { name: hanlon-atftpd, image: cscdock/atftpd }
+
+- name: Start Mongo Container
+  docker:
+    docker_api_version: "{{ docker_api_version }}"
+    name: hanlon-mongo
+    image: mongo
+    pull: missing
+    state: started
+    command: mongod --smallfiles
+    volumes: "{{ hanlon_resource }}/data/db:/data/db"
+
+- name: Remove hanlon client config file
+  file:
+    path: "{{ hanlon_resource }}/cli/config/hanlon_client.conf"
+    state: absent
+
+- name: Start Hanlon Server Container
+  docker:
+    docker_api_version: "{{ docker_api_version }}"
+    name: hanlon-server
+    image: "cscdock/hanlon:2.5.0"
+    pull: missing
+    state: started
+    ports: 8026:8026
+    links: hanlon-mongo:mongo
+    privileged: true
+    volumes:
+      - "{{ hanlon_resource }}/image:/home/hanlon/image"
+      - "{{ hanlon_resource }}/cli/config:/home/hanlon/cli/config"
+    env:
+      DOCKER_HOST: "{{ ansible_default_ipv4.address }}"
+      HANLON_SUBNETS: "{{ hanlon_subnets }}"
+
+- name: Wait for Hanlon Server to start
+  uri:
+    url: "http://{{ ansible_default_ipv4.address }}:8026/hanlon/api/v1/config/ipxe"
+    return_content: yes
+  register: return
+  until: (return.content.find("#!ipxe") != -1) and (return.content is defined)
+
+- name: Start TFTP Server Container
+  docker:
+    docker_api_version: "{{ docker_api_version }}"
+    name: hanlon-atftpd
+    image: cscdock/atftpd
+    pull: missing
+    state: started
+    ports: 69:69/udp
+    links: hanlon-server:hanlon
