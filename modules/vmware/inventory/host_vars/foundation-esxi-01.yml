@@ -1,8 +1,13 @@
 ---
+# The smbios-uuid is an identifier used for bare metal deployments.
+smbios_uuid: { retrieve for each host using hardware vendor management tools }
+
+# IPMI and PXE IP address
+ipmi_ip_address: x.x.x.x
+pxe_ip_address: x.x.x.x
+
+# Host name and IP addresses
 hostname: cscesxtmp001
-mgmt_ip_address: 172.17.17.15
-vmotion_ip_address: 172.17.18.15
-vsan_ip_address: 172.17.19.15
-pxe_ip_address: 172.17.16.15
-oob_ip_address: 172.30.0.77
-smbios_uuid: 4C4C4544-005A-5210-8043-B8C04F443432
+mgmt_ip_address: x.x.x.x
+vmotion_ip_address: x.x.x.x
+vsan_ip_address: x.x.x.x
