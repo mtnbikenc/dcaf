@@ -7,14 +7,25 @@ connected to an external network with direct access to automation resources. Sin
 our projects have multiple dependencies we have automated the process to install
 and configure the Autodeploynode as much as possible.
 
+Before You Begin
+----------------
+
+Ensure that the following requirements are met:
+
+    - It can be deployed on a physical or virtual machine
+    - It has an IP address on the PXE & IPMI Network
+    - At least 50GB of available disk space
+    - Red Hat user account with a valid subscription (to download the ISO)
+
 Install the RHEL OS
 -------------------
 
 The first step is to install RHEL. This can be a physical or virtual machine as
 long as all the requirements are met.
 
-Using the media that is appropriate for your hardware boot into the RHEL
-installation.
+Download the appropriate version of the RHEL ISO file and save it somewhere that
+can be accessed by the Autodeploynode. Use the vendor management tools to attach
+the ISO file and boot to it.
 
 On the installation summary page, you may see different selections with yellow
 exclamation or warning marks. These are areas that require some setup:

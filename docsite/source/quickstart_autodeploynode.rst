@@ -1,5 +1,5 @@
-Autodeploynode Quick Start Guide
-================================
+Autodeploynode Module Quick Start Guide
+=======================================
 
 This Quick Start Guide describes how to use CSC DCAF Automation to provision and
 configure the Autodeploynode. It uses the following resources:

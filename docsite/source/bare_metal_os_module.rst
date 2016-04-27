@@ -87,7 +87,7 @@ this file will vary depending on the what automation is being used.
     should match the corresponding ``inventory/group_vars/group_name.yml`` group variable
     file if it has one. All hosts listed should be under a :code:`[group]` heading.
 
-- **hosts.ini** - Copy the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/host.ini`` file to the ``/opt/autodeploy/projects/inventory/`` folder. Edit it to
+- **hosts.ini** - Copy the ``/opt/autodeploy/projects/dcaf/modules/bare-metal-os/inventory/host_vars/hosts.ini`` file to the ``/opt/autodeploy/projects/inventory/`` folder. Edit it to
   reflect the number of hosts and correct host names for the  deployment. This file
   should contain the DNS resolvable names of the hosts being deployed.
 
@@ -108,7 +108,7 @@ The ``bare-metal-os/inventory/hosts.ini`` file contains the following:
     autodeploynode
     deploy
 
-    # Host(s) to be deployed - modified as needed
+    # Host(s) to be deployed - modify as needed
     [deploy]
     hostname-1
     ...
@@ -214,7 +214,7 @@ between different types of hosts. A role will allow you to define what a host is
 supposed to do, instead of having to specify the steps needed to get a server
 configured a certain way. Role specific variables are stored in the ``/roles/some_role/defaults``
 and ``/roles/some_role/vars`` folders. Typically only the ``/roles/some_roles/defaults``
-would need to be modified. Always review both sets of variables for comtent.
+would need to be modified. Always review both sets of variables for content.
 
 .. code-block:: bash
 

@@ -1,5 +1,5 @@
-RHEL-OSP Quick Start Guide
-==========================
+RHEL-OSP Module Quick Start Guide
+=================================
 
 This Quick Start Guide describes how to use CSC DCAF Automation to deploy the Red
 Hat OpenStack Platform with high availability on base RHEL installations. It uses
@@ -34,9 +34,9 @@ information and examples of this file refer to the CSC DCAF project documentatio
 
 Edit the inventory to reflect your environment.
 
-- **hosts.ini** - Modify the ``opt/autodeploy/projects/inventory/hosts.ini`` and
+- **hosts.ini** - Modify the ``/opt/autodeploy/projects/inventory/hosts.ini`` and
   add the required :code:`[group]` sections and desired hosts. Use the
-  ``opt/autodeploy/projects/dcaf/rhel-osp/inventory/hosts.ini`` as a template and
+  ``/opt/autodeploy/projects/dcaf/rhel-osp/inventory/hosts.ini`` as a template and
   change values as needed.
 
 .. note::
@@ -58,6 +58,12 @@ Edit the inventory to reflect your environment.
     [compute]
     compute1
     ...
+
+.. note::
+
+    Do not modify a group of groups :code:`[group:children]`. These groups are defined
+    by the module. Add the required hosts in the respective :code:`[group]` section
+    as needed.
 
 Modify Host & Project Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
