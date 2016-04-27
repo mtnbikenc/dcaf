@@ -1,8 +1,18 @@
 ---
+# -----------------------------------------------------------------------
+# Do not modify a "{{ variable }}" in this file, find where it is defined
+# and change there if needed.
+# -----------------------------------------------------------------------
+
+# Ansible system variables
 ansible_ssh_user: root
 ansible_ssh_pass: "{{ site_passwd }}"
+
+# VLAN IDs for module
 mgmt_vlan_id: 1801
 vmotion_vlan_id: 1802
 vsan_vlan_id: 1803
-ipmi_username: root
-ipmi_password: calvin
+
+# Vendor management utility credentials
+ipmi_username:
+ipmi_password:

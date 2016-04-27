@@ -1,7 +1,7 @@
 ---
 
 - name: Hanlon Setup
-  hosts: deploy_node
+  hosts: autodeploynode
   gather_facts: False
   tags:
     - hanlon_setup
@@ -95,7 +95,7 @@
     - include: tasks/deploy/esxi_network.yml
 
 - name: Configure VMware VSAN Cluster
-  hosts: deploy_node
+  hosts: autodeploynode
   gather_facts: False
   tags:
     - vsan

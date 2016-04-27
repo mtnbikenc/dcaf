@@ -3,9 +3,9 @@ ansible_ssh_user: root
 ansible_ssh_pass: vmware
 ansible_ssh_host: "{{ mgmt_ip_address }}"
 hostname: cscvcatmp001
-mgmt_ip_address: 172.17.17.18
+mgmt_ip_address: x.x.x.x
 mgmt_subnet_mask: 255.255.255.0
-mgmt_gateway: 172.17.17.1
-vcsa_ova: /opt/deploy/VMware-vCenter-Server-Appliance-5.5.0.20000-2063318_OVF10.ova
+mgmt_gateway: x.x.x.x
+vcsa_ova: /opt/autodeploy/resources/ISO/VMware-vCenter-Server-Appliance-5.5.0.20000-2063318_OVF10.ova
 vcsa_user: root
 vcsa_pass: vmware

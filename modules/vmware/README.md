@@ -42,20 +42,22 @@ Do not modify the hanlon_base_url unless you know what you are doing.
 ```yaml
 ---
 # These are development IP addresses and need to be changed
-auto_deploy_node: 172.17.16.10
-domain_name: lordbusiness.local
+autodeploynode: 172.17.16.10
+domain_name: your_domain
 dns_servers: 192.168.70.3,192.168.70.4
 dns_server: 192.168.70.3
 ntp_servers: 172.17.16.10
 pxe_subnet_mask: 255.255.255.0
+site_password: your_password
+
 # Hanlon vars
-hanlon_base_url: http://{{ auto_deploy_node }}:8026/hanlon/api/v1/
+hanlon_base_url: http://{{ autodeploynode }}:8026/hanlon/api/v1/
 esxi_iso_path: /home/hanlon/image/VMware-VMvisor-Installer-201501001-2403361.x86_64.iso
 esxi_image_name: VMware_ESXi
 esxi_version: 5.5
+
 # ESXi license must be valid or deployment will fail
-# esx_license was moved into all/secrets.yml (expires 9/14/2015)
-#esx_license:
+esx_license:
 esxi_username: root
 mgmt_vdc: Test-Lab
 mgmt_cluster: Foundation
@@ -68,12 +70,6 @@ vsan_subnet_mask: 255.255.255.0
 dvs_vmnic: vmnic5
 vss_vmnic: vmnic4
 ```
-
-#### all secrets.yml
-
-We currently store variables `site_passwd` and `esx_license` in `secrets.yml`.
-Information regarding Ansible Vault is available here:
-http://docs.ansible.com/ansible/playbooks_vault.html
 
 ### host_vars
 
@@ -94,7 +90,6 @@ pxe_ip_address: 172.17.16.15
 oob_ip_address: 172.30.0.77
 smbios_uuid: 4C4C4544-005A-5210-8043-B8C04F443432
 ```
-
 #### foundation-vcsa.yml
 
 The final inventory file that needs to be modified is for the vCenter Appliance.
