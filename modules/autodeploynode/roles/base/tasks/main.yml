@@ -59,6 +59,7 @@
     name: firewalld
     state: stopped
     enabled: no
+  when: ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Create directories for hanlon
   file:
