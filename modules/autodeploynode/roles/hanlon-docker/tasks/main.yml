@@ -1,4 +1,5 @@
 ---
+# This role will prepare and start the Docker containers used by the module.
 
 - name: Clean up existing containers
   docker:

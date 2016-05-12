@@ -1,4 +1,5 @@
 ---
+# These variables are used by the role and should not be changed unless required.
 
 hanlon_resource: "/opt/hanlon"
 docker_network: "{{ ansible_docker0.ipv4.network }}"

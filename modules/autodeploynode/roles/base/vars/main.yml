@@ -1,4 +1,5 @@
 ---
+# These variables are used by the role and should not be changed unless required.
 
 autodeploy_base_path: /opt/autodeploy
 projects_base_path: "{{ autodeploy_base_path }}/projects"

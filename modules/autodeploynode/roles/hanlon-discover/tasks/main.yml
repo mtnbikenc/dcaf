@@ -1,4 +1,5 @@
 ---
+# This role will prepare Hanlon for use by the module.
 
 - name: Check for local copy of Hanlon Microkernel
   stat:

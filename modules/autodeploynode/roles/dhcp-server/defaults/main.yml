@@ -1,4 +1,6 @@
 ---
+# These variables are user defined and can be changed as needed.
+
 domain_name: "{{ ansible_domain }}"
 dns1: 8.8.8.8
 

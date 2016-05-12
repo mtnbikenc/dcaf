@@ -1,2 +1,4 @@
 ---
+# These variables are user defined and can be changed as needed.
+
 ntp_timezone: America/New_York

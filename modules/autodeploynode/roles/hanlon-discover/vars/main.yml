@@ -1,4 +1,5 @@
 ---
+# These variables are used by the role and should not be changed unless required.
 
 hanlon_base_url: http://{{ ansible_default_ipv4.address }}:8026/hanlon/api/v1/
 hnl_mk_image: hnl_mk_debug-image.2.0.1.iso

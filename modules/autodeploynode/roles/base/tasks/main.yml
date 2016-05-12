@@ -1,5 +1,5 @@
 ---
-# The base role will do the initial preparation of the AutoDeployNode.
+# The base role will do the initial preparation of the Autodeploynode.
 
 - name: Install required support packages
   yum:

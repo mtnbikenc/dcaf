@@ -8,6 +8,7 @@
   hosts: localhost
   gather_facts: false
 
+# The variables are in the playbook as it is run before the inventory was created.
   vars:
     autodeploy_base_path: /opt/autodeploy
     projects_base_path: "{{ autodeploy_base_path }}/projects"
