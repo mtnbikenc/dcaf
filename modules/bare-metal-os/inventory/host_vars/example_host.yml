@@ -1,57 +1,70 @@
 ---
-# The ip and pxe ip address of the host
-ansible_ssh_host: 192.168.0.249
-pxe_ip_address: 192.17.16.249
+# The pxe ip address of the host.
+pxe_ip_address: x.x.x.x
 
-# The smbios-uuid is an identifier used for bare metal deployments.
-smbios_uuid: 564DF657-3737-EF45-3AF1-E26FB3CE307F
+# The smbios-uuid is an identifier used for bare metal deployments. Retrieve for
+# each host using hardware vendor management tools. This is an example one from
+# DELL - smbios_uuid: 564DF657-3737-EF45-3AF1-E26FB3CE307F.
+smbios_uuid:
 
-# Disk partitioning variables controlled by the partition_additional_disks variable in /inventory/group_vars/all.yml.
+# Disk partitioning variables controlled by the 'partition_additional_disks' variable
+# in the '/inventory/group_vars/all.yml' file. Change as needed per host.
 disk: sdb
 fstype: xfs
 mount: /data
 mount_opts: defaults
 
-# The network bond(s) controlled by the configure_network_bond variable in /inventory/group_vars/all.yml. The bond configuration
-# variables are found in the /roles/bonds/defaults/main.yml.
+# The network bond(s) controlled by the configure_network_bond variable in the
+# /inventory/group_vars/all.yml. The bond configuration variables are found in the
+# /roles/bonds/defaults/main.yml. Add additional bonds as needed.
 network_bond:
   - bond0
-  - bond1
 
-# The bond interfaces to be used for each bond. Note that the actual bonds (bond0 & bond1) do not need a 'master' value
-# as they are the bond master. Change these variables per network requirements.
+# The bond interfaces to be used for each bond. Note that the actual bonds (bond0 & bond1)
+# do not need a 'master' value as they are the bond master. Change the 'eno...'
+# values to match your interfaces.
 bond_device:
   - { interface: bond0 }
-  - { interface: bond1 }
   - { interface: eno33554992, master: bond0 }
-  - { interface: eno50332216, master: bond1 }
+  - { interface: eno50332216, master: bond0 }
 
-# The vlan interfaces to be added to the network bond. The default variables common to all of these interfaces are found in the
-# /roles/iface/defaults/main.yml. The variables located here are specific to the vlan interface. Change these variables as needed
-# per network requirements.
+# The vlan interfaces to be added to the network bond. The default variables common
+# to all of these interfaces are found in the /roles/iface/defaults/main.yml.
+#      common_cfg:
+#        type: Ethernet
+#        bootproto: none
+#        vlan: "yes"
+#        onboot: "yes"
+#        peerdns: "no"
+#        nozeroconf: "yes"
+
+# The variables located here are specific to the vlan interface. The 'vlan_if1'
+# name can be changed. The 'bond' and 'vlan' keys must be present for each interface.
+# Add or change any other variables needed per interface that are not in the defaults
+# listed above.
 vlan_interface:
   vlan_if1:
     bond: "bond0"
-    vlan: "1801"
-    ipaddr: "192.17.17.138"
-    netmask: "255.255.255.0"
-    gateway: "192.17.17.2"
+    vlan: " "
+    ipaddr: x.x.x.x
+    netmask: 255.255.255.0
+    gateway: x.x.x.x
     defroute: "yes"
 
   vlan_if2:
     bond: "bond0"
-    vlan: 1802
-    ipaddr: "192.17.17.139"
-    netmask: "255.255.255.0"
+    vlan: " "
+    ipaddr: x.x.x.x
+    netmask: 255.255.255.0
 
   vlan_if3:
-    bond: "bond1"
-    vlan: 1803
-    ipaddr: "192.17.17.140"
-    netmask: "255.255.255.0"
+    bond: "bond0"
+    vlan: " "
+    ipaddr: x.x.x.x
+    netmask: 255.255.255.0
 
   vlan_if4:
-    bond: "bond1"
-    vlan: 1804
-    ipaddr: "192.17.17.141"
-    netmask: "255.255.255.0"
+    bond: "bond0"
+    vlan: " "
+    ipaddr: x.x.x.x
+    netmask: 255.255.255.0

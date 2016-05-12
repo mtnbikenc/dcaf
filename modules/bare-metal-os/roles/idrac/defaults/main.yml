@@ -1,3 +1,5 @@
 ---
+# These variables are user defined and can be changed as needed.
+
 create_storage_disks: false
 initialize_disks: false

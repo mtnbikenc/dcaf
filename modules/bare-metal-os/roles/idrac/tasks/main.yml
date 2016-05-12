@@ -1,4 +1,6 @@
 ---
+# This role will configure host BIOS settings via IPMI.
+
 - name: Set facts for the next play
   set_fact:
     ansible_ssh_host: "{{ ipmi_ip_address }}"
