@@ -294,16 +294,34 @@ def hanlon_get_request(uri):
 
 
 def main():
-    if int(ANSIBLE_VERSION[0]) < 2:
-        module_args = MODULE_ARGS
-    else:
-        module_args = MODULE_COMPLEX_ARGS
 
-    (base_url, model_template) = peek_params(module_args)
+    # If ANSIBLE_VERSION is not defined we know that
+    # we are using 2.1 and greater.  At least we hope so
+    if 'ANSIBLE_VERSION' in globals():
+        if int(ANSIBLE_VERSION[0]) < 2:
+            module_args = MODULE_ARGS
+        else:
+            module_args = MODULE_COMPLEX_ARGS
+
+        (base_url, model_template) = peek_params(module_args)
+    else:
+        module_args = _load_params()
+        base_url = module_args['base_url']
+        model_template = module_args['template']
+
     argument_spec, metadata_hash = create_argument_spec(base_url, model_template)
     module = AnsibleModule(argument_spec=argument_spec)
 
     HanlonModel(module, metadata_hash)
+
+# If you are using this module with Ansible 2.1 _load_params
+# also needs to be imported.  This function also does not 
+# exist in earlier versions on basic.py so if it fails
+# to load just ignore it.
+try:
+    from ansible.module_utils.basic import _load_params
+except ImportError:
+    pass
 
 from ansible.module_utils.basic import *
 
