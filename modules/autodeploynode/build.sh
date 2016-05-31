@@ -37,7 +37,7 @@ yum -y install git wget rpm-build make asciidoc python2-devel python-setuptools
 
 git clone git://github.com/ansible/ansible.git --recursive
 cd ansible/
-git checkout v2.0.1.0-1
+git checkout v2.1.0.0-1
 git submodule update --init --recursive
 make rpm
 yum -y --nogpgcheck localinstall ./rpm-build/ansible-*.noarch.rpm
