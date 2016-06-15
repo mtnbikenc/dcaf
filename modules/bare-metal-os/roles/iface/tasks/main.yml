@@ -1,6 +1,7 @@
 ---
-# This role will create the network bond on the specified hosts with the defined parameters found in both the
-# /inventory/host_vars/host.yml file and the /roles/iface/defaults/main.yml.
+# This role will create the network bond on the specified hosts with the defined
+# parameters found in both the '/inventory/host_vars/host_name.yml' and '/roles/iface/defaults/main.yml'
+# files.
 
 - name: Deploy the network vlan interface config file
   template:

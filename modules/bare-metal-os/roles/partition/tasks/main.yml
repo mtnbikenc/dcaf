@@ -1,7 +1,8 @@
 ---
-# This role will partition any additional disks that were not partitioned by the kickstart that are specified in the
-# host_vars/host.yml. The role is invoked by setting the partition_additional_disks variable to 'true' in the
-# group_vars/all.yml.
+# This role will partition any additional disks that were not partitioned during
+# installation that are specified in the 'host_name.yml' file. The role is called
+# by setting the 'partition_additional_disks' variable to 'true' in the
+# 'group_vars/all.yml' file.
 
 - name: Label disks prior to creating partition
   command: parted -s /dev/{{ disk }} mklabel gpt

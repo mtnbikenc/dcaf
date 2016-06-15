@@ -1,5 +1,6 @@
 ---
-# vdisk setup
+# This play will setup the vdisks on the host and initalize as needed.
+
 - name: check bootseq
   raw: racadm get BIOS.BiosBootSettings.bootseq
   register: seq

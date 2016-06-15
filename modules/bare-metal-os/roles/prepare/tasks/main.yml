@@ -1,4 +1,6 @@
 ---
+# This role will check to see if the RHEL minimized image is in the Hanlon image
+# directory and put it there if it is not.
 
 - name: Check if RHEL DVD ISO file exists in the Hanlon image directory
   stat:

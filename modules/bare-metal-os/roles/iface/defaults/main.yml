@@ -1,10 +1,12 @@
 ---
-# These variables are user-defined and should be changed based on your network requirements.
-# The default location of the network interface configuration files
+# These variables are user defined and can be changed as needed.
+
+# The default location of the network interface configuration files.
 default_ifcfg_dir: /etc/sysconfig/network-scripts
 
-# The following interface variables are being used as a dictionary by the interface role template ifcfg-dev.j2.
-# The common_cfg vars are common across all the vlan interfaces.
+# The following interface variables are being used as a dictionary by the 'iface'
+# role 'ifcfg-dev.j2' template. The common_cfg variables are common across all the
+# vlan interfaces.
 common_cfg:
   type: Ethernet
   bootproto: none
@@ -13,8 +15,9 @@ common_cfg:
   peerdns: "no"
   nozeroconf: "yes"
 
-# The vlan interface specific parameters should be defined in each hosts /inventory/host_vars/host.yml file. This would be any
-# value not listed above in the common_cfg variables. Below is an example of what would be in the /inventory/host_vars/host.yml.
+# The vlan interface specific parameters should be defined in each hosts 'host_name.yml'
+# file. This would be any value not listed above in the common_cfg variables. Below
+# is an example of what would be in the 'host_name.yml' file.
 #
 #      vlan_if1:
 #        bond: "bond0"
@@ -24,5 +27,6 @@ common_cfg:
 #        gateway: "192.17.17.2"
 #        defroute: "yes"
 #
-# Note the values here are specific to each interface. They may be on different bonds, vlans, ip information, routing etc. Simply add the
-# necessary parameter under the corresponding interface.
+# Note the values here are specific to each interface. They may be on different
+# bonds, vlans, ip information, routing etc. Simply add the necessary parameter
+# under the corresponding interface.

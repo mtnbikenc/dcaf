@@ -1,4 +1,4 @@
 ---
-# Required User Variables
-rhn_user:
-rhn_pass:
+# These variables are user defined and can be changed as needed.
+rhn_user: 'rhn_username'
+rhn_pass: 'rhn_password'

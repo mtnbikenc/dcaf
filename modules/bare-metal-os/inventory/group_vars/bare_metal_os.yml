@@ -1,42 +1,28 @@
 ---
-# Usage:
-#  bare-metal-os/site_deploy
-# edit the inventory.csv file and specify the disk vars
+# This variable will call the 'partition' role to partition additional disks on the
+# host when set to 'true'. Edit the appropriate 'host_name.yml' file with the required
+# disk information.
 partition_additional_disks: false
 
-# Usage:
-#  bare-metal-os/site_deploy (conditional vars to invoke bare-metal-os/roles/bonds & bare-metal-os/roles/iface)
+# These variables will call the respective 'bonds' & 'iface' role when set to 'true'.
+# Edit the appropriate 'host_name.yml' file with the bond and interface information.
 configure_network_bond: true
 configure_vlan_interfaces: true
 
-# Usage:
-#   bare-metal-os/inventory/host_vars/autodeploynode
-#   bare-metal-os/site_deploy (vars/hanlon.yml)
-#   bare-metal-os/site_reset (vars/hanlon.yml)
+# The IP address of the Autodeploynode.
 autodeploynode: x.x.x.x
 
-# Usage:
-#   bare-metal-os/site_deploy (ifcfg template)
+# The IP address of the DNS server, used in the 'dhcp-server' role 'ifcfg' template.
 dns1: x.x.x.x
 
-# Usage:
-#   bare-metal-os/site_inventory
-inventory_path: ./inventory/
-inventory_csv_file: ./inventory/example_inventory.csv
-
-# Usage:
-#   bare-metal-os/site_deploy
+# The password for SSH host access. Change to your site password.
 site_password: localpassword
 
-# Usage:
-#   bare-metal-os/roles/prepare
-rhn_user: 'rhn-user-name'
-rhn_pass: 'rhn-password'
+# The Red Hat Subscription Manager credentials. Change to an account that has a
+# valid Red Hat subscription associated with it.
+rhn_user: 'rhn_username'
+rhn_pass:  'rhn_password'
 
-# Usage:
-#   bare-metal-os/roles/idrac
-#   bare-metal-os/site_deploy
-#   bare-metal-os/site_inventory
-#   bare-metal-os/site_reset
+# The IPMI host management credentials. Change to match your IPMI credentials.
 ipmi_username: root
 ipmi_password: localpassword
