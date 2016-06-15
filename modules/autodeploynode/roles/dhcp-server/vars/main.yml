@@ -1,4 +1,6 @@
 ---
+# These variables are used by the role and should not be changed unless required.
+
 pxe_dhcp_range_start: "{{ [ansible_default_ipv4.network, ansible_default_ipv4.netmask] | join('/') | ipaddr('net') | ipaddr(dhcp_start) | ipaddr('address') }}"
 pxe_dhcp_range_end: "{{ [ansible_default_ipv4.network, ansible_default_ipv4.netmask] | join('/') | ipaddr('net') | ipaddr(dhcp_end) | ipaddr('address') }}"
 

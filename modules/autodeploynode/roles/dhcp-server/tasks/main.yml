@@ -1,4 +1,6 @@
 ---
+# This role will install and configure the DHCP and IPXE servcies.
+
 - name: install dhcp server package
   yum:
     name: dhcp
