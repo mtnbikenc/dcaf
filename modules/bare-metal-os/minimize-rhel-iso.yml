@@ -1,0 +1,75 @@
+---
+- name: Minimize RHEL ISO
+  gather_facts: false
+  hosts: localhost
+  vars:
+    extract_dvd_path: /opt/autodeploy/resources/ISO/rhel/
+    packages_path: /opt/autodeploy/resources/ISO/rhel/Packages
+    temp_path: /opt/autodeploy/resources/ISO/rhel/minpkg/
+    label: "RHEL-7.2 Server.x86_64"
+    hanlon_image_path: /opt/hanlon/image
+    hanlon_iso_path: "{{ hanlon_image_path }}/rhel-server-7.2-x86_64-dvd-hnl.iso"
+  tasks:
+    - name: Copy repo template
+      template:
+        src: rhel-dvd.repo.j2
+        dest: /etc/yum.repos.d/rhel-dvd.repo  
+    - name: Create hanlon dir
+      file:
+        path: "{{ hanlon_image_path }}"
+        state: directory
+ 
+    - name: Create Temp Directory for ISO extraction
+      file:
+        path: "{{ extract_dvd_path  }}"
+        state: directory
+
+    - name: Extract ISO
+      command: "7z x /opt/autodeploy/resources/ISO/rhel-server-7.2-x86_64-dvd.iso -o{{ extract_dvd_path }}"
+
+    - name: Get all package names 
+      command: repoquery --enablerepo=dvd --nevr -g --list --grouppkgs=all anaconda-tools core base ruby-runtime
+      register: repoquery
+      tags: repo
+
+    - name: repotrack
+      command: "repotrack --repoid=dvd -a x86_64 -u {{ repoquery.stdout }}"
+      register: repotrack
+      ignore_errors: yes
+      tags: repo
+
+    # Yeah probably could use stat here then mess
+    # with an array of dictionaries, no thanks.
+    - name: get current packages
+      shell: "cd {{ packages_path }} ; ls -1d $PWD/*" 
+      register: packages    
+
+    - name: Remove file:// from repotrack list
+      set_fact:
+        min_pkg_list: > 
+                "{% set min_pkg_temp = [] %} 
+                 {% for file in repotrack.stdout_lines%}
+                        {{ min_pkg_temp.append(file[7:])}}
+                 {%endfor%}
+                 {{ min_pkg_temp }}"
+
+    # Typically I would use the file module instead of command.  
+    # This command completes 1000s times faster than file absent, yes I am serious.
+    - name: remove
+      command: 'rm {{ packages.stdout_lines | difference(min_pkg_list) | join(" ") }}'
+     
+    - name: build iso
+      command: 'mkisofs -o {{ hanlon_iso_path }} -b isolinux/isolinux.bin -c isolinux/boot.cat --no-emul-boot --boot-load-size 4 --boot-info-table -J -R -V "{{ label }}" .'
+      args:
+        chdir: "{{ extract_dvd_path }}"
+
+    - name: Clean Up Extract DVD Path
+      file:
+        path: "{{ extract_dvd_path }}"
+        state: absent
+
+    - name: Clean Up RHEL ISO
+      file:
+        path: "/opt/autodeploy/resources/ISO/rhel-server-7.2-x86_64-dvd.iso"
+        state: absent
+
